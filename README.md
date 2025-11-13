@@ -1,3 +1,28 @@
+# 🌟 Distinguished Scholars Academy Website  
+
+A modern website for **Distinguished Scholars Academy**, built with **Next.js**, **TypeScript**, **Framer Motion**, and **Shadcn UI**.  
+Designed for excellence, interactivity, and responsiveness.
+
+## 🚀 Current Features  
+✅ Responsive Navbar  
+✅ Hero Section with clean layout  
+✅ Light & Dark Mode Toggle  
+✅ Built using modern web technologies  
+
+## 🧠 Tech Stack  
+- **Next.js** – React framework for fast and scalable web apps  
+- **TypeScript** – Type-safe JavaScript for clean, maintainable code  
+- **Tailwind CSS** – Utility-first CSS framework for styling  
+- **Framer Motion** – For smooth animations  
+- **Shadcn UI** – Reusable and accessible UI components  
+
+## 🧑🏽‍💻 Contributors  
+- **Hilosthone** – Developer  
+- **@kvoidkato** – Developer  
+- **@Bee-code-tech** – Project Lead  
+
+## 🧱 Project Setup  
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
@@ -34,3 +59,12 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+Clone the repository:  
+```bash
+git clone https://github.com/Hilosthone/distinguished-scholars-academy.git
+cd distinguished-scholars-academy
+
+
+
+
