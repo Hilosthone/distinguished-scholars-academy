@@ -19,7 +19,7 @@ export default function Hero() {
         >
           <h1 className='text-5xl md:text-6xl font-bold text-black leading-tight'>
             Distinguished <br />
-            <span className='text-[#002EFF]'>Scholars</span>
+            <span className='text-[#002EFF]'>Scholars Academy</span>
           </h1>
           <p className='text-lg text-black/70 mt-4 max-w-md'>
             “The more that you learn, the more things you will know. The deeper
