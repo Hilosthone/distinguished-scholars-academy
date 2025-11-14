@@ -19,11 +19,11 @@ export default function Header() {
       <div className='container mx-auto flex justify-between items-center px-6 py-4'>
         {/* Logo */}
         <Link href='/' className='text-2xl font-bold text-[#002EFF]'>
-          Distinguished <span className='text-[#FCB900]'>Scholars</span> Academy
+          Distinguished <span className='text-[#FCB900]'>Scholars</span>
         </Link>
 
         {/* Desktop Navigation */}
-        <nav className='hidden md:flex space-x-8 text-black font-medium'>
+        <nav className='hidden md:flex space-x-8 text-black font-semibold'>
           {navLinks.map((link) => (
             <Link
               key={link.href}

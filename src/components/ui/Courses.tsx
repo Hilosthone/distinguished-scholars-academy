@@ -1,6 +1,6 @@
-"use client";
-import { motion } from "framer-motion";
-import Image from "next/image";
+'use client'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
 import WAEC from '../../imges/waec.jpeg'
 import NECO from '../../imges/neco.jpeg'
 import JAMB from '../../imges/jamb.jpeg'
@@ -8,38 +8,13 @@ import SEC from '../../imges/secondary-school.jpeg'
 import JUPEB from '../../imges/jupeb.jpeg'
 import BECE from '../../imges/bece.jpeg'
 
-
 const courses = [
-  {
-    name: 'WAEC Tutorial Classes',
-    price: '₦25,000',
-    img: WAEC,
-  },
-  {
-    name: 'NECO Tutorial Program',
-    price: '₦22,000',
-    img: NECO,
-  },
-  {
-    name: 'JAMB (UTME) Intensive Class',
-    price: '₦30,000',
-    img: JAMB,
-  },
-  {
-    name: 'JUPEB Foundation Programme',
-    price: '₦150,000',
-    img: JUPEB,
-  },
-  {
-    name: 'SS1–SS3 School Tutorial',
-    price: '₦18,000',
-    img: SEC,
-  },
-  {
-    name: 'BECE / Junior WAEC Coaching',
-    price: '₦15,000',
-    img: BECE,
-  },
+  { name: 'WAEC Tutorial Classes', price: '₦25,000', img: WAEC },
+  { name: 'NECO Tutorial Program', price: '₦22,000', img: NECO },
+  { name: 'JAMB (UTME) Intensive Class', price: '₦30,000', img: JAMB },
+  { name: 'JUPEB Foundation Programme', price: '₦150,000', img: JUPEB },
+  { name: 'SS1–SS3 School Tutorial', price: '₦18,000', img: SEC },
+  { name: 'BECE / Junior WAEC Coaching', price: '₦15,000', img: BECE },
 ]
 
 export default function Courses() {
@@ -66,17 +41,22 @@ export default function Courses() {
                 alt={course.name}
                 className='w-full h-48 object-cover'
               />
+
               <div className='p-6'>
                 <h3 className='text-lg font-semibold text-[#002EFF]'>
                   {course.name}
                 </h3>
                 <p className='text-black mt-2 font-medium'>{course.price}</p>
-                <button className='mt-4 px-4 py-2 bg-[#FCB900] text-white rounded-lg hover:bg-[#e6ac00]'>
-                  Enroll Now
-                </button>
               </div>
             </motion.div>
           ))}
+        </div>
+
+        {/* View More Button */}
+        <div className='flex justify-center mt-10'>
+          <button className='text-white font-semibold bg-[#FCB900] px-6 py-2 rounded-lg hover:bg-[#e6ac00]'>
+            View More Courses
+          </button>
         </div>
       </div>
     </section>
