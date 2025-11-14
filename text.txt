@@ -1,0 +1,10 @@
+src/
+ └── components/
+      ├── Hero.tsx
+      ├── Features.tsx
+      ├── Courses.tsx
+      ├── Testimonial.tsx
+      ├── CTA.tsx
+      └── Footer.tsx
+ └── app/
+      └── page.tsx

@@ -1,25 +1,26 @@
 // src/components/ui/ThemeProvider.tsx
 'use client'
 
-import { ReactNode, useEffect, useState } from 'react'
+import { ReactNode } from 'react'
 import Header from './Header'
 import Hero from './Hero'
+import Features from './Features'
+import Courses from "@/components/ui/Courses"
+import Testimonial from "@/components/ui/Testimonial";
+import CTA from "@/components/ui/CTA";
+import Footer from "@/components/ui/Footer";
 
 export default function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<'light' | 'dark'>('light')
-
-  useEffect(() => {
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark')
-    } else {
-      document.documentElement.classList.remove('dark')
-    }
-  }, [theme])
-
+  
   return (
     <>
-      <Header theme={theme} setTheme={setTheme} />
+      <Header />
       <Hero />
+      <Features />
+      <Courses />
+      <Testimonial />
+      <CTA />
+      <Footer />
       {children}
     </>
   )

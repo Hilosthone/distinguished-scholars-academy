@@ -1,56 +1,101 @@
-// 'use client'
+'use client'
 
-// import { motion } from 'framer-motion'
-// import Link from 'next/link'
-// import { Button } from '@/components/ui/button'
+import { motion } from 'framer-motion'
+import Image from 'next/image'
+import Hero01 from '../../imges/hero-1.jpg'
+import Hero02 from '../../imges/hero-2.jpg'
+import Hero03 from '../../imges/hero-3.jpg'
 
-// export default function Hero() {
-//   return (
-//     <section className='relative flex items-center justify-center min-h-screen bg-linear-to-tr from-gray-900 via-gray-800 to-blue-900 text-white px-6'>
-//       {/* Overlay for dark transparent effect */}
-//       <div className='absolute inset-0 bg-black/50'></div>
+export default function Hero() {
+  return (
+    <section className='w-full py-24 bg-dsaWhite'>
+      <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center px-6'>
+        {/* LEFT TEXT */}
+        <motion.div
+          initial={{ opacity: 0, x: -40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          <h1 className='text-5xl md:text-6xl font-bold text-black leading-tight'>
+            Distinguished <br />
+            <span className='text-[#002EFF]'>Scholars Academy</span>
+          </h1>
 
-//       {/* Hero Content */}
-//       <motion.div
-//         className='relative z-10 text-center max-w-3xl mx-auto'
-//         initial={{ opacity: 0, y: 40 }}
-//         animate={{ opacity: 1, y: 0 }}
-//         transition={{ duration: 1 }}
-//       >
-//         <h1 className='text-4xl md:text-6xl font-extrabold leading-tight mb-6'>
-//           Empowering the Next Generation of{' '}
-//           <span className='text-blue-400'>Scholars</span>
-//         </h1>
+          <p className='text-lg text-black/70 mt-4 max-w-md'>
+            “The more that you learn, the more things you will know. The deeper
+            you grow, the farther you go — and we help you do that.”
+          </p>
 
-//         <p className='text-lg md:text-xl text-gray-200 mb-8'>
-//           At Distinguished Scholars Academy, we cultivate brilliance through
-//           mentorship, academic excellence, and innovation.
-//         </p>
+          <div className='flex items-center gap-4 mt-6'>
+            {/* Primary Button */}
+            <button className='px-6 py-3 bg-[#002EFF] text-black rounded-lg font-semibold transition hover:bg-blue-800 hover:text-white hover:border hover:border-yellow-500'>
+              Get Started
+            </button>
 
-//         <div className='flex flex-col sm:flex-row items-center justify-center gap-4'>
-//           <Link href='#programs'>
-//             <Button className='bg-blue-600 hover:bg-blue-700 text-white px-8 py-6 text-lg'>
-//               Explore Programs
-//             </Button>
-//           </Link>
-//           <Link href='#about'>
-//             <Button
-//               variant='outline'
-//               className='border-white text-gray-500 hover:bg-white hover:text-gray-900 px-8 py-6 text-lg'
-//             >
-//               Learn More
-//             </Button>
-//           </Link>
-//         </div>
-//       </motion.div>
-//     </section>
-//   )
-// }
+            {/* Outline Button with Yellow Hover */}
+            <button className='flex items-center gap-2 px-6 py-3 border border-[#002EFF] text-[#002EFF] rounded-lg font-semibold transition hover:bg-[#FCB900] hover:text-black hover:border hover:border-black'>
+              Watch Video
+            </button>
+          </div>
+        </motion.div>
 
+        {/* RIGHT IMAGE SECTION */}
+        <motion.div
+          initial={{ opacity: 0, x: 40 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.7 }}
+          className='relative flex justify-center'
+        >
+          {/* MAIN YELLOW CIRCLE */}
+          <div className='w-72 h-72 md:w-80 md:h-80 bg-dsaYellow rounded-full flex items-center justify-center shadow-xl relative'>
+            <Image
+              src={Hero01}
+              width={260}
+              height={260}
+              className='rounded-full object-cover'
+              alt='Main Students'
+            />
+          </div>
+
+          {/* FLOATING SMALL IMAGES */}
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.4, duration: 0.6 }}
+            className='absolute left-0 top-6'
+          >
+            <Image
+              src={Hero02}
+              width={85}
+              height={85}
+              className='rounded-full border-4 border-white shadow-md'
+              alt='Student 1'
+            />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.6, duration: 0.6 }}
+            className='absolute right-0 bottom-6'
+          >
+            <Image
+              src={Hero03}
+              width={85}
+              height={85}
+              className='rounded-full border-4 border-white shadow-md'
+              alt='Student 2'
+            />
+          </motion.div>
+        </motion.div>
+      </div>
+    </section>
+  )
+}
 
 
 // // src/components/ui/Hero.tsx
-// 'use client'
+// ;('use client')
 
 // import { motion } from 'framer-motion'
 // import { Button } from './button'
@@ -62,178 +107,99 @@
 //   }
 
 //   return (
-//     <section className="h-screen flex flex-col justify-center items-center text-center bg-white dark:bg-black px-4 pt-24 md:px-0">
-      
-//       {/* Main Title */}
-//       <motion.h1
-//         className="text-4xl md:text-6xl font-extrabold pt-24 md:pt-8 text-black dark:text-white leading-tight"
-//         initial={{ opacity: 0, y: -50 }}
-//         whileInView={{ opacity: 1, y: 0 }}
-//         viewport={{ once: true }}
-//         transition={{ duration: 0.8 }}
-//       >
-//         Unlock Your Potential at{' '}
-//         <span className="text-orange-500">Distinguished Scholars Academy</span>
-//       </motion.h1>
+//     <section className='relative flex flex-col justify-center items-center text-center min-h-screen bg-linear-to-tr from-white via-orange-50 to-orange-100 dark:from-black dark:via-gray-900 dark:to-gray-800 text-black dark:text-white px-4 pt-[6rem] md:pt-[7rem]'>
+//       {/* Overlay for subtle dark effect */}
+//       <div className='absolute inset-0 bg-black/20 dark:bg-black/50 z-0'></div>
 
-//       {/* Subheading / Tagline */}
-//       <motion.p
-//         className="mt-4 text-gray-700 dark:text-gray-300 text-lg md:text-2xl max-w-3xl"
-//         initial={{ opacity: 0, y: 20 }}
-//         whileInView={{ opacity: 1, y: 0 }}
-//         viewport={{ once: true }}
-//         transition={{ delay: 0.2, duration: 0.8 }}
-//       >
-//         Where excellence meets opportunity. Join a community of innovators, leaders, and changemakers ready to make a difference in the world.
-//       </motion.p>
-
-//       {/* Key Benefits */}
+//       {/* Hero Content */}
 //       <motion.div
-//         className="mt-8 flex flex-col md:flex-row gap-4 text-left max-w-4xl"
-//         initial="hidden"
-//         whileInView="visible"
-//         viewport={{ once: true }}
-//         transition={{ staggerChildren: 0.2 }}
+//         className='relative z-10 max-w-3xl mx-auto'
+//         initial={{ opacity: 0, y: 40 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         transition={{ duration: 1 }}
 //       >
-//         {[
-//           {
-//             title: 'Expert Faculty',
-//             desc: 'Learn from experienced educators and industry leaders guiding you every step.',
-//           },
-//           {
-//             title: 'Innovative Programs',
-//             desc: 'Cutting-edge courses designed to equip you with skills for tomorrow’s world.',
-//           },
-//           {
-//             title: 'Vibrant Community',
-//             desc: 'Connect, collaborate, and grow with like-minded peers and mentors.',
-//           },
-//         ].map((item, i) => (
+//         {/* Main Heading */}
+//         <h1 className='text-4xl md:text-6xl font-extrabold leading-tight mb-6'>
+//           Unlock Your Potential at{' '}
+//           <span className='text-orange-500'>
+//             Distinguished Scholars Academy
+//           </span>
+//         </h1>
+
+//         {/* Subheading */}
+//         <p className='text-lg md:text-2xl text-gray-700 dark:text-gray-300 mb-8'>
+//           Where excellence meets opportunity. Join a community of innovators,
+//           leaders, and changemakers ready to make a difference in the world.
+//         </p>
+
+//         {/* Buttons */}
+//         <div className='flex flex-col sm:flex-row justify-center items-center gap-4'>
 //           <motion.div
-//             key={i}
-//             className="bg-orange-50 dark:bg-orange-900 rounded-lg p-4 flex-1 shadow hover:shadow-lg transition"
-//             variants={cardVariants}
 //             whileHover={{ scale: 1.05 }}
+//             transition={{ duration: 0.3 }}
 //           >
-//             <h3 className="font-semibold text-orange-600 dark:text-orange-400">{item.title}</h3>
-//             <p className="mt-1 text-gray-700 dark:text-gray-300">{item.desc}</p>
+//             <Button className='bg-orange-500 text-white px-8 py-4 text-lg font-semibold'>
+//               Explore Programs
+//             </Button>
 //           </motion.div>
-//         ))}
-//       </motion.div>
+//           <motion.div
+//             whileHover={{ scale: 1.05 }}
+//             transition={{ duration: 0.3 }}
+//           >
+//             <Button className='border border-orange-200 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-4 text-lg font-semibold'>
+//               Learn More
+//             </Button>
+//           </motion.div>
+//         </div>
 
-//       {/* Call-to-Action */}
-//       <motion.div
-//         initial={{ opacity: 0, scale: 0.8 }}
-//         whileInView={{ opacity: 1, scale: 1 }}
-//         viewport={{ once: true }}
-//         transition={{ delay: 0.6, duration: 0.8 }}
-//       >
-//         <Button className="mt-10 bg-orange-500 text-white px-8 py-4 rounded-md text-lg font-semibold hover:scale-105 transition-transform">
-//           Enroll Today
-//         </Button>
+//         {/* Key Benefits Cards */}
+//         <motion.div
+//           className='mt-10 flex flex-col md:flex-row gap-4 text-left max-w-4xl mx-auto'
+//           initial='hidden'
+//           whileInView='visible'
+//           viewport={{ once: true }}
+//           transition={{ staggerChildren: 0.2 }}
+//         >
+//           {[
+//             {
+//               title: 'Expert Faculty',
+//               desc: 'Learn from experienced educators and industry leaders guiding you every step.',
+//             },
+//             {
+//               title: 'Innovative Programs',
+//               desc: 'Cutting-edge courses designed to equip you with skills for tomorrow’s world.',
+//             },
+//             {
+//               title: 'Vibrant Community',
+//               desc: 'Connect, collaborate, and grow with like-minded peers and mentors.',
+//             },
+//           ].map((item, i) => (
+//             <motion.div
+//               key={i}
+//               className='bg-white/30 dark:bg-black/40 rounded-lg p-6 flex-1 shadow hover:shadow-lg transition'
+//               variants={cardVariants}
+//               whileHover={{ scale: 1.05 }}
+//             >
+//               <h3 className='font-semibold text-orange-500'>{item.title}</h3>
+//               <p className='mt-2 text-gray-800 dark:text-gray-300'>
+//                 {item.desc}
+//               </p>
+//             </motion.div>
+//           ))}
+//         </motion.div>
+
+//         {/* Call-to-Action */}
+//         <motion.div
+//           initial={{ opacity: 0, scale: 0.8 }}
+//           whileInView={{ opacity: 1, scale: 1 }}
+//           viewport={{ once: true }}
+//           transition={{ delay: 0.6, duration: 0.8 }}
+//         >
+//           <Button className='mt-10 bg-orange-500 text-white px-8 py-4 rounded-md text-lg font-semibold hover:scale-105 transition-transform'>
+//             Enroll Today
+//           </Button>
+//         </motion.div>
 //       </motion.div>
 //     </section>
 //   )
 // }
-
-
-
-// src/components/ui/Hero.tsx
-'use client'
-
-import { motion } from 'framer-motion'
-import { Button } from './button'
-
-export default function Hero() {
-  const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
-    visible: { opacity: 1, y: 0 },
-  }
-
-  return (
-    <section className="relative flex flex-col justify-center items-center text-center min-h-screen bg-linear-to-tr from-white via-orange-50 to-orange-100 dark:from-black dark:via-gray-900 dark:to-gray-800 text-black dark:text-white px-4 pt-[6rem] md:pt-[7rem]">
-
-      {/* Overlay for subtle dark effect */}
-      <div className="absolute inset-0 bg-black/20 dark:bg-black/50 z-0"></div>
-
-      {/* Hero Content */}
-      <motion.div
-        className="relative z-10 max-w-3xl mx-auto"
-        initial={{ opacity: 0, y: 40 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 1 }}
-      >
-        {/* Main Heading */}
-        <h1 className="text-4xl md:text-6xl font-extrabold leading-tight mb-6">
-          Unlock Your Potential at{' '}
-          <span className="text-orange-500">Distinguished Scholars Academy</span>
-        </h1>
-
-        {/* Subheading */}
-        <p className="text-lg md:text-2xl text-gray-700 dark:text-gray-300 mb-8">
-          Where excellence meets opportunity. Join a community of innovators, leaders, and changemakers ready to make a difference in the world.
-        </p>
-
-        {/* Buttons */}
-        <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
-          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-            <Button className="bg-orange-500 text-white px-8 py-4 text-lg font-semibold">
-              Explore Programs
-            </Button>
-          </motion.div>
-          <motion.div whileHover={{ scale: 1.05 }} transition={{ duration: 0.3 }}>
-            <Button className="border border-orange-200 text-orange-500 hover:bg-orange-500 hover:text-white px-8 py-4 text-lg font-semibold">
-              Learn More
-            </Button>
-          </motion.div>
-        </div>
-
-        {/* Key Benefits Cards */}
-        <motion.div
-          className="mt-10 flex flex-col md:flex-row gap-4 text-left max-w-4xl mx-auto"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          transition={{ staggerChildren: 0.2 }}
-        >
-          {[
-            {
-              title: 'Expert Faculty',
-              desc: 'Learn from experienced educators and industry leaders guiding you every step.',
-            },
-            {
-              title: 'Innovative Programs',
-              desc: 'Cutting-edge courses designed to equip you with skills for tomorrow’s world.',
-            },
-            {
-              title: 'Vibrant Community',
-              desc: 'Connect, collaborate, and grow with like-minded peers and mentors.',
-            },
-          ].map((item, i) => (
-            <motion.div
-              key={i}
-              className="bg-white/30 dark:bg-black/40 rounded-lg p-6 flex-1 shadow hover:shadow-lg transition"
-              variants={cardVariants}
-              whileHover={{ scale: 1.05 }}
-            >
-              <h3 className="font-semibold text-orange-500">{item.title}</h3>
-              <p className="mt-2 text-gray-800 dark:text-gray-300">{item.desc}</p>
-            </motion.div>
-          ))}
-        </motion.div>
-
-        {/* Call-to-Action */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 0.8 }}
-        >
-          <Button className="mt-10 bg-orange-500 text-white px-8 py-4 rounded-md text-lg font-semibold hover:scale-105 transition-transform">
-            Enroll Today
-          </Button>
-        </motion.div>
-      </motion.div>
-    </section>
-  )
-}
