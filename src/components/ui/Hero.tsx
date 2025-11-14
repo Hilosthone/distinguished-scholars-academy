@@ -19,7 +19,7 @@ export default function Hero() {
         >
           <h1 className='text-5xl md:text-6xl font-bold text-black leading-tight'>
             Distinguished <br />
-            <span className='text-[#002EFF]'>Scholars Academy</span>
+            <span className='text-[#002EFF]'>Scholars</span>
           </h1>
           <p className='text-lg text-black/70 mt-4 max-w-md'>
             “The more that you learn, the more things you will know. The deeper
@@ -27,7 +27,7 @@ export default function Hero() {
           </p>
           <div className='flex items-center gap-4 mt-6'>
             {/* Primary Button */}
-            <button className='flex items-center gap-2 px-6 py-3 bg-[#002EFF] text-black rounded-lg font-semibold transition hover:bg-blue-800 hover:text-white hover:border hover:border-yellow-500'>
+            <button className='flex items-center gap-2 px-6 py-3 bg-[#002EFF] text-white rounded-lg font-semibold transition hover:bg-blue-800 hover:text-white hover:border hover:border-yellow-500'>
               Get Started
               <ArrowRight size={20} />
             </button>
@@ -49,7 +49,7 @@ export default function Hero() {
           className='relative flex justify-center'
         >
           {/* MAIN YELLOW CIRCLE */}
-          <div className='w-72 h-72 md:w-80 md:h-80 bg-[#FCB900] rounded-full flex items-center justify-center shadow-xl relative'>
+          <div className='w-72 h-72 md:w-80 md:h-80 bg-[#FCB900] rounded-full flex items-center justify-center shadow-xl  sm:pt-6'>
             <Image
               src={Hero01}
               width={260}
