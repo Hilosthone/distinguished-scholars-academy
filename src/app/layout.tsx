@@ -14,9 +14,9 @@ export const metadata: Metadata = {
   description:
     'Official website of Distinguished Scholars Academy — nurturing excellence and leadership.',
   icons: {
-    icon: '/imges/DSA.jpg', // <-- use path from public folder
-    shortcut: '/imges/DSA.jpg', // optional
-    apple: '/imges/DSA.jpg', // optional
+    icon: '/imges/DSA.jpg', 
+    shortcut: '/imges/DSA.jpg',
+    apple: '/imges/DSA.jpg',
   },
 }
 
