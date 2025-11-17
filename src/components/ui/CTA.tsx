@@ -1,26 +1,54 @@
 'use client'
 import { motion } from 'framer-motion'
+import { ArrowRight } from 'lucide-react'
 
-export default function CTA() {
+export default function FinalCTA() {
   return (
-    <section className='w-full py-20 bg-dsaBlue'>
-      <motion.div
-        initial={{ opacity: 0, scale: 0.9 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.6 }}
-        className='max-w-4xl mx-auto text-center px-6'
-      >
-        <h2 className='text-2xl font-bold'>
-          Get ready to learn and grow your skill
-        </h2>
-        <p className='mt-3 text-lg text-black'>
-          Unlock your potential with our premium curated courses.
-        </p>
+    <section className='w-full py-24 bg-[#002EFF]'>
+      <div className='max-w-7xl mx-auto px-6 text-center'>
+        <motion.h2
+          className='text-3xl md:text-5xl font-bold text-white'
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7 }}
+        >
+          Ready to Achieve Academic Excellence?
+        </motion.h2>
 
-        <button className='mt-6 px-6 py-3 bg-[#FCB900] text-black font-bold rounded-lg shadow-lg hover:text-white hover:bg-[#002EFF] transition'>
-          Start Learning
-        </button>
-      </motion.div>
+        <motion.p
+          className='text-white/90 mt-4 text-lg md:text-xl max-w-2xl mx-auto'
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.2 }}
+        >
+          Join thousands of students improving their scores, building
+          confidence, and excelling in exams with DSA’s proven learning system.
+        </motion.p>
+
+        <motion.div
+          className='mt-8 flex flex-col sm:flex-row justify-center items-center gap-4'
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+        >
+          {/* Primary CTA */}
+          <a
+            href='/enrol'
+            className='px-8 py-4 bg-[#FCB900] text-black font-semibold rounded-lg flex items-center gap-2 hover:bg-[#e6ac00] transition'
+          >
+            Enrol Now
+            <ArrowRight size={20} />
+          </a>
+
+          {/* Secondary CTA */}
+          <a
+            href='/free-classes'
+            className='px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#002EFF] transition'
+          >
+            Join Free Classes
+          </a>
+        </motion.div>
+      </div>
     </section>
   )
 }

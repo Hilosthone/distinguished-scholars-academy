@@ -3,6 +3,11 @@
 
 @custom-variant dark (&:is(.dark *));
 
+@import "@fontsource/inter/400.css";
+@import "@fontsource/inter/600.css";
+@import "@fontsource/poppins/500.css";
+@import "@fontsource/poppins/700.css";
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

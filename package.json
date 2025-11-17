@@ -9,6 +9,8 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@fontsource/inter": "^5.2.8",
+    "@fontsource/poppins": "^5.2.7",
     "@radix-ui/react-slot": "^1.2.4",
     "aos": "^2.3.4",
     "class-variance-authority": "^0.7.1",
