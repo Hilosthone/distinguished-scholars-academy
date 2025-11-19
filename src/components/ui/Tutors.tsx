@@ -32,8 +32,7 @@ export default function Tutors() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className='text-center text-gray-600 mt-3'
         >
-          Our tutors are experts who simplify learning. Learn from highly
-          skilled tutors with years of teaching experience
+          Our tutors are experts who simplify learning.
         </motion.p>
 
         {/* GRID */}
