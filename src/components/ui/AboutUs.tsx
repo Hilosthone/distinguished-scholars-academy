@@ -5,7 +5,7 @@ import DSALogo from '../../imges/DSA.jpg'
 
 export default function AboutDSA() {
   return (
-    <section className='w-full py-12 bg-white'>
+    <section id='about' className='w-full py-12 bg-white'>
       <div className='max-w-7xl mx-auto px-6 grid md:grid-cols-2 gap-14 items-center'>
         {/* LEFT TEXT */}
         <motion.div

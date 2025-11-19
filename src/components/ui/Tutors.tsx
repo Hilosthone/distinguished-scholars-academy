@@ -12,9 +12,10 @@ const tutors = [
 
 export default function Tutors() {
   return (
-    <section className='w-full py-24 bg-white'>
+    <section
+    id='tutors'
+      className='w-full py-4 bg-white'>
       <div className='max-w-7xl mx-auto px-6'>
-        
         {/* TITLE */}
         <motion.h2
           initial={{ opacity: 0, y: 20 }}
@@ -31,7 +32,8 @@ export default function Tutors() {
           transition={{ duration: 0.7, delay: 0.1 }}
           className='text-center text-gray-600 mt-3'
         >
-          Our tutors are experts who simplify learning.
+          Our tutors are experts who simplify learning. Learn from highly
+          skilled tutors with years of teaching experience
         </motion.p>
 
         {/* GRID */}
@@ -46,8 +48,10 @@ export default function Tutors() {
               hover:-translate-y-2 transition-all duration-300'
             >
               {/* Circle Placeholder */}
-              <div className='w-20 h-20 mx-auto rounded-full bg-[#002EFF] text-white 
-              flex items-center justify-center text-3xl font-bold'>
+              <div
+                className='w-20 h-20 mx-auto rounded-full bg-[#002EFF] text-white 
+              flex items-center justify-center text-3xl font-bold'
+              >
                 {tutor.name.charAt(0)}
               </div>
 

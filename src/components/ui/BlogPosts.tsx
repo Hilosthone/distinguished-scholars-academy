@@ -25,7 +25,9 @@ const blogs = [
 
 export default function BlogPosts() {
   return (
-    <section className='w-full py-24 bg-[#f2f6ff]'>
+    <section
+    id='blog'
+      className='w-full py-24 bg-[#f2f6ff]'>
       <div className='max-w-7xl mx-auto px-6 text-center'>
         <motion.h2
           className='text-3xl md:text-4xl font-bold text-[#002EFF]'

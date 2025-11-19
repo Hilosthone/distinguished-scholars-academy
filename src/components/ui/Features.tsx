@@ -13,7 +13,7 @@ import { ArrowRight } from 'lucide-react'
 const features = [
   {
     title: 'Experienced Tutors',
-    desc: 'Learn from certified, highly skilled tutors with years of teaching experience.',
+    desc: 'Learn from highly skilled tutors with years of teaching experience.',
     icon: Users,
   },
   {
@@ -23,7 +23,7 @@ const features = [
   },
   {
     title: 'Weekly Tests & Assessments',
-    desc: 'Consistent tests help track progress and reinforce understanding.',
+    desc: 'Standard assessment test designed to track your progress and reinforce understanding.',
     icon: ClipboardList,
   },
   {
@@ -32,8 +32,8 @@ const features = [
     icon: Zap,
   },
   {
-    title: 'Daily Study Timetables',
-    desc: 'We provide structured daily and weekly study guides for effective learning.',
+    title: 'Daily Accountability',
+    desc: 'We monitor your daily studies for effective learning via our welfare arm.',
     icon: CalendarCheck,
   },
   {

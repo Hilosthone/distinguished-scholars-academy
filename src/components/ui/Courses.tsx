@@ -10,17 +10,41 @@ import SUMMER from '../../imges/SUMMER.jpeg'
 import Skills from '../../imges/Skills.png'
 
 const programs = [
-  { name: 'Full UTME Preparation', img: JAMB },
-  { name: 'Full WAEC Preparation', img: WAEC },
-  { name: 'Full NECO Preparation', img: NECO },
-  { name: 'Summer Coaching', img: SUMMER },
-  { name: 'Year 1 Tutorials', img: Year1 },
-  { name: 'Skills Acquisition', img: Skills },
+  {
+    name: 'Full UTME Preparation',
+    img: JAMB,
+    desc: 'Complete JAMB tutoring with weekly tests, past questions, and full exam simulations.',
+  },
+  {
+    name: 'Full WAEC Preparation',
+    img: WAEC,
+    desc: 'Master all WAEC subjects with detailed explanations, practice sessions, and revision plans.',
+  },
+  {
+    name: 'Full NECO Preparation',
+    img: NECO,
+    desc: 'Comprehensive NECO coaching covering theory, objectives, practicals, and exam drills.',
+  },
+  {
+    name: 'Summer Coaching',
+    img: SUMMER,
+    desc: 'Holiday lessons designed to strengthen weak areas and prepare students ahead.',
+  },
+  {
+    name: 'Year 1 Tutorials',
+    img: Year1,
+    desc: 'Support classes for 100-level courses to help students adapt and excel academically.',
+  },
+  {
+    name: 'Skills Acquisition',
+    img: Skills,
+    desc: 'Learn tech & creative skills including coding, graphics, video editing, and more.',
+  },
 ]
 
 export default function Programs() {
   return (
-    <section className='w-full py-24 bg-[#f2f6ff]'>
+    <section id='programs' className='w-full py-24 bg-[#f2f6ff]'>
       <div className='max-w-7xl mx-auto px-6'>
         {/* TITLE */}
         <motion.h2
@@ -32,7 +56,7 @@ export default function Programs() {
           Programs & Courses
         </motion.h2>
 
-        {/* GRID OF PROGRAM CARDS */}
+        {/* GRID */}
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-10 mt-14'>
           {programs.map((program, index) => (
             <motion.div
@@ -55,12 +79,16 @@ export default function Programs() {
                 <h3 className='text-lg font-semibold text-[#002EFF]'>
                   {program.name}
                 </h3>
+
+                <p className='text-gray-600 text-sm mt-2 leading-relaxed'>
+                  {program.desc}
+                </p>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* CTA BUTTON */}
+        {/* CTA */}
         <div className='flex justify-center mt-14'>
           <motion.button
             whileHover={{ scale: 1.05 }}

@@ -1,3 +1,5 @@
+//layout.tsx
+
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import './globals.css'
@@ -14,29 +16,28 @@ export const metadata: Metadata = {
   description:
     'Official website of Distinguished Scholars Academy — nurturing excellence and leadership.',
   icons: {
-    icon: '/imges/DSA.jpg', 
+    icon: '/imges/DSA.jpg',
     shortcut: '/imges/DSA.jpg',
     apple: '/imges/DSA.jpg',
   },
 }
 
-export default function RootLayout({
-  children,
-}: {
-  children: React.ReactNode
-}) {
+export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang='en'>
+    <html lang="en">
       <body
         className={`
-          ${geistSans.variable} ${geistMono.variable} 
-          antialiased 
-          bg-neutralWhite dark:bg-neutralBlack 
+          ${geistSans.variable} ${geistMono.variable}
+          antialiased
+          bg-neutralWhite dark:bg-neutralBlack
           text-neutralBlack dark:text-neutralWhite
         `}
       >
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
 }
+

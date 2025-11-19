@@ -4,68 +4,80 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import DSALogo from '../../imges/DSA.jpg' 
+import DSALogo from '../../imges/DSA.jpg'
 
 const navLinks = [
-  { name: 'Home', href: '/' },
-  { name: 'About', href: '/about' },
-  { name: 'Programs', href: '/programs' },
-  { name: 'Tutors', href: '/tutors' },
-  { name: 'Watch Us', href: '/watch-us' },
-  { name: 'Blog', href: '/blog' },
-  { name: 'Free Materials', href: '/materials' },
-  { name: 'Contact', href: '/contact' },
+  { id: 'home', name: 'Home', href: '#home' },
+  { id: 'about', name: 'About', href: '#about' },
+  { id: 'programs', name: 'Programs', href: '#programs' },
+  { id: 'tutors', name: 'Tutors', href: '#tutors' },
+  { id: 'watch', name: 'Watch Us', href: '#watch-us' },
+  { id: 'blog', name: 'Blog', href: '#blog' },
+  { id: 'materials', name: 'Free Materials', href: '#materials' },
+  { id: 'contact', name: 'Contact', href: '#contact' },
 ]
 
 export default function Header() {
   const [open, setOpen] = useState(false)
   const [shadow, setShadow] = useState(false)
 
-  // Sticky shadow on scroll
   useEffect(() => {
-    const onScroll = () => setShadow(window.scrollY > 10)
+    const onScroll = () => {
+      setShadow(window.scrollY > 10)
+
+      const pageContent = document.getElementById('page-content')
+      if (pageContent) {
+        if (window.scrollY > 10) {
+          pageContent.classList.add('blur-content')
+        } else {
+          pageContent.classList.remove('blur-content')
+        }
+      }
+    }
+
     window.addEventListener('scroll', onScroll)
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
   return (
     <header
-      className={`fixed top-0 left-0 w-full z-50 bg-neutralWhite transition-shadow ${
-        shadow ? 'shadow-md' : ''
-      }`}
+      className={`fixed top-0 left-0 w-full z-50 transition-shadow  duration-300
+    ${shadow ? 'backdrop-blur-md bg-white/30 shadow-md' : 'bg-white/80'}
+  `}
     >
-      <div className='max-w-7xl mx-auto px-5 py-4 flex items-center justify-between font-inter'>
+      <div className='max-w-7xl mx-auto px-5 py-4 flex items-center justify-between'>
         {/* Logo */}
         <Link
           href='/'
-          className='text-[#002EFF] flex items-center justify-center font-semibold text-xl tracking-wide'
+          className='text-[#002EFF] flex items-center gap-2 font-bold text-xl'
         >
-          <img src={DSALogo.src} alt="DSA Logo" className="h-10 w-auto"/>
-          Distinguished Scholars
+          <img src={DSALogo.src} alt='DSA Logo' className='h-15 w-auto' />
+          Distinguished <br />
+          Scholars Academy
         </Link>
 
-        {/* Desktop Navigation */}
-        <nav className='hidden md:flex items-center gap-8 font-semibold'>
+        {/* Desktop */}
+        <nav className='hidden md:flex items-center gap-7 font-semibold'>
           {navLinks.map((link) => (
-            <Link
-              key={link.name}
+            <a
+              key={link.id}
               href={link.href}
-              className='text-black hover:text-[#002EFF] transition'
+              className='hover:text-[#002EFF] transition'
             >
               {link.name}
-            </Link>
+            </a>
           ))}
 
           <Link
             href='/enrol'
-            className='px-5 py-2 bg-[#002EFF] text-white rounded-xl font-medium hover:bg-opacity-90 transition'
+            className='px-5 py-2 bg-[#002EFF] text-white rounded-xl hover:bg-opacity-90 transition'
           >
             Enrol Now
           </Link>
         </nav>
 
-        {/* Mobile Hamburger */}
-        <button onClick={() => setOpen(true)} className='md:hidden text-black'>
+        {/* Mobile menu button */}
+        <button onClick={() => setOpen(true)} className='md:hidden'>
           <Menu size={28} />
         </button>
       </div>
@@ -77,35 +89,29 @@ export default function Header() {
             initial={{ x: '100%' }}
             animate={{ x: 0 }}
             exit={{ x: '100%' }}
-            transition={{ type: 'tween', duration: 0.35 }}
-            className='fixed top-0 right-0 w-64 h-screen bg-white shadow-xl z-50 p-6'
+            transition={{ duration: 0.35 }}
+            className='fixed top-0 right-0 w-64 h-screen bg-white shadow-xl p-6 z-50'
           >
-            {/* Close Button */}
-            <button
-              className='mb-6 hover:text-[#002EFF] transition'
-              onClick={() => setOpen(false)}
-            >
+            <button onClick={() => setOpen(false)} className='mb-6'>
               <X size={28} />
             </button>
 
-            {/* Mobile Nav Items */}
-            <div className='flex flex-col gap-3 font-semibold font-poppins'>
+            <div className='flex flex-col gap-4 font-semibold'>
               {navLinks.map((link) => (
-                <Link
-                  key={link.name}
+                <a
+                  key={link.id}
                   href={link.href}
                   onClick={() => setOpen(false)}
-                  className='text-lg text-neutralBlack p-2 rounded hover:bg-[#002EFF] hover:text-white transition'
+                  className='text-lg p-2 rounded hover:bg-[#002EFF] hover:text-white transition'
                 >
                   {link.name}
-                </Link>
+                </a>
               ))}
 
-              {/* CTA */}
               <Link
                 href='/enrol'
                 onClick={() => setOpen(false)}
-                className='mt-1 px-5 py-2 bg-[#002EFF] text-white rounded-xl text-center font-medium hover:bg-blue-600 transition'
+                className='mt-4 px-5 py-2 bg-[#002EFF] text-white rounded-xl text-center'
               >
                 Enrol Now
               </Link>

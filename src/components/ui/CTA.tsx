@@ -4,7 +4,9 @@ import { ArrowRight } from 'lucide-react'
 
 export default function FinalCTA() {
   return (
-    <section className='w-full py-24 bg-[#002EFF]'>
+    <section
+    id='contact'
+      className='w-full py-24 bg-[#002EFF]'>
       <div className='max-w-7xl mx-auto px-6 text-center'>
         <motion.h2
           className='text-3xl md:text-5xl font-bold text-white'

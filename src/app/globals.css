@@ -8,6 +8,17 @@
 @import "@fontsource/poppins/500.css";
 @import "@fontsource/poppins/700.css";
 
+.blur-content {
+  filter: blur(6px);
+  transition: 0.3s ease-in-out;
+}
+
+/* globals.css */
+.bg-professional-gradient {
+  background: linear-gradient(90deg, #f2f6ff 0%, #e0e8ff 50%, #f2f6ff 100%);
+}
+
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
