@@ -27,7 +27,7 @@ const quizFeatures = [
 
 export default function RapidQuiz() {
   return (
-    <section className='w-full py-24 bg-white'>
+    <section id='RapidQuiz' className='w-full py-24 bg-white'>
       <div className='max-w-7xl mx-auto px-6 text-center'>
         <motion.h2
           className='text-3xl md:text-4xl font-bold text-[#002EFF]'

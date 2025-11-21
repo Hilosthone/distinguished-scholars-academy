@@ -1,20 +1,26 @@
 'use client'
 import { motion } from 'framer-motion'
+import Image from 'next/image'
+
+import Emmanuel from '../../imges/Mr. Emmanuel.jpg'
+import Hakeem from '../../imges/Mr. Hakeem.jpg'
+import MissBetty from '../../imges/Miss.jpg'
+import DrPhils from '../../imges/Dr. Phils.jpg'
+import DhocthorJay from '../../imges/Dhocthor Jay.jpg'
+import Timilehin from '../../imges/Mr. Timilehin.jpg'
 
 const tutors = [
-  { name: 'Mr. Timilehin', subject: 'Physics' },
-  { name: 'Mrs. Betty', subject: 'English' },
-  { name: 'Dr. Pius', subject: 'Mathematics' },
-  { name: 'Dr. Jay', subject: 'Chemistry' },
-  { name: 'Dr. Phils', subject: 'Biology' },
-  { name: 'Mr. Emmanuel', subject: 'Chemistry' },
+  { name: 'Mr. Timilehin', subject: 'Physics', img: Timilehin },
+  { name: 'Mrs. Betty', subject: 'English', img: MissBetty },
+  { name: 'Mr. Hakeem', subject: 'Mathematics', img: Hakeem },
+  { name: 'Dr. Jay', subject: 'Chemistry', img: DhocthorJay },
+  { name: 'Dr. Phils', subject: 'Biology', img: DrPhils },
+  { name: 'Mr. Emmanuel', subject: 'Chemistry', img: Emmanuel },
 ]
 
 export default function Tutors() {
   return (
-    <section
-    id='tutors'
-      className='w-full py-4 bg-white'>
+    <section id='tutors' className='w-full py-4 bg-white'>
       <div className='max-w-7xl mx-auto px-6'>
         {/* TITLE */}
         <motion.h2
@@ -30,7 +36,7 @@ export default function Tutors() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.1 }}
-          className='text-center text-gray-600 mt-3'
+          className='text-center text-gray-700 mt-3'
         >
           Our tutors are experts who simplify learning.
         </motion.p>
@@ -46,19 +52,22 @@ export default function Tutors() {
               className='p-6 bg-white border shadow-md rounded-xl text-center hover:shadow-xl 
               hover:-translate-y-2 transition-all duration-300'
             >
-              {/* Circle Placeholder */}
-              <div
-                className='w-20 h-20 mx-auto rounded-full bg-[#002EFF] text-white 
-              flex items-center justify-center text-3xl font-bold'
-              >
-                {tutor.name.charAt(0)}
+              {/* Tutor Image */}
+              <div className='w-28 h-28 mx-auto rounded-full overflow-hidden border-3 border-[#002EFF]'>
+                <Image
+                  src={tutor.img}
+                  alt={tutor.name}
+                  width={100}
+                  height={100}
+                  className='object-cover w-full h-full'
+                />
               </div>
 
               <h3 className='text-xl font-semibold text-[#002EFF] mt-4'>
                 {tutor.name}
               </h3>
 
-              <p className='text-gray-700 mt-1'>{tutor.subject}</p>
+              <p className='text-gray-800 mt-1'>{tutor.subject}</p>
             </motion.div>
           ))}
         </div>

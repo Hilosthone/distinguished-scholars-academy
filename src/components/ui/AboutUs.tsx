@@ -1,7 +1,7 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import DSALogo from '../../imges/DSA.jpg'
+import DSAStudent from '../../imges/AboutDSA.jpg'
 
 export default function AboutDSA() {
   return (
@@ -44,8 +44,8 @@ export default function AboutDSA() {
         >
           <div className='w-64 md:w-80 h-64 md:h-80 bg-[#002EFF] rounded-xl shadow-xl flex items-center justify-center p-6'>
             <Image
-              src={DSALogo}
-              alt='DSA Logo'
+              src={DSAStudent}
+              alt='DSA Students'
               className='w-full h-full object-contain rounded-xl'
             />
           </div>

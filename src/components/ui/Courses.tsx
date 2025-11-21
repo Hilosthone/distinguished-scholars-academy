@@ -5,8 +5,8 @@ import Image from 'next/image'
 import WAEC from '../../imges/waec.jpeg'
 import NECO from '../../imges/neco.jpeg'
 import JAMB from '../../imges/jamb.jpeg'
-import Year1 from '../../imges/Year1.jpeg'
-import SUMMER from '../../imges/SUMMER.jpeg'
+import Year1 from '../../imges/Year01.jpg'
+import SUMMER from '../../imges/Summer-Coaching.jpg'
 import Skills from '../../imges/Skills.png'
 
 const programs = [

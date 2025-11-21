@@ -9,9 +9,7 @@ import Hero03 from '../../imges/hero-03.jpg'
 
 export default function Hero() {
   return (
-    <section
-      id='home'
-      className='w-full py-28 bg-dsaWhite'>
+    <section id='home' className='w-full py-28 bg-dsaWhite'>
       <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10 items-center px-6'>
         {/* LEFT TEXT */}
         <motion.div
@@ -35,14 +33,28 @@ export default function Hero() {
           <div className='flex items-center gap-4 mt-6'>
             {/* Start Learning */}
             <button className='flex items-center gap-2 px-6 py-3 bg-[#002EFF] text-white rounded-lg font-semibold transition hover:bg-blue-800 hover:text-white'>
-              Start Learning
-              <ArrowRight size={20} />
+              <a
+                href='https://wa.link/7wim2w'
+                className='flex items-center gap-2 hover:underline'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                Start Learning
+                <ArrowRight size={20} />
+              </a>
             </button>
 
             {/* Join Free Classes */}
             <button className='flex items-center gap-2 px-6 py-3 border border-[#002EFF] text-[#002EFF] rounded-lg font-semibold transition hover:bg-[#FCB900] hover:text-black hover:border-black'>
-              <Play size={20} />
-              Join Free Classes
+              <a
+                href='https://wa.link/xtiui2'
+                className='flex items-center gap-2 hover:underline'
+                target='_blank'
+                rel='noopener noreferrer'
+              >
+                <Play size={20} />
+                Join Free Classes
+              </a>
             </button>
           </div>
         </motion.div>

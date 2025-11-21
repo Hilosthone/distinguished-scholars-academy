@@ -4,16 +4,15 @@ import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { Menu, X } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
-import DSALogo from '../../imges/DSA.jpg'
+import DSALogo from '../../imges/DSA_2026_WASSCE_WORKSHOP.png'
 
 const navLinks = [
   { id: 'home', name: 'Home', href: '#home' },
-  { id: 'about', name: 'About', href: '#about' },
+  { id: 'about', name: 'About', href: '#about' }, 
   { id: 'programs', name: 'Programs', href: '#programs' },
   { id: 'tutors', name: 'Tutors', href: '#tutors' },
-  { id: 'watch', name: 'Watch Us', href: '#watch-us' },
+  { id: 'RapidQuiz', name: 'Rapid Quiz', href: '#RapidQuiz' },
   { id: 'blog', name: 'Blog', href: '#blog' },
-  { id: 'materials', name: 'Free Materials', href: '#materials' },
   { id: 'contact', name: 'Contact', href: '#contact' },
 ]
 
@@ -47,13 +46,18 @@ export default function Header() {
     >
       <div className='max-w-7xl mx-auto px-5 py-4 flex items-center justify-between'>
         {/* Logo */}
-        <Link
-          href='/'
-          className='text-[#002EFF] flex items-center gap-2 font-bold text-xl'
-        >
-          <img src={DSALogo.src} alt='DSA Logo' className='h-15 w-auto' />
-          Distinguished <br />
-          Scholars Academy
+        <Link href='/' className='flex items-center gap-2'>
+          <img src={DSALogo.src} alt='DSA Logo' className='h-20 w-auto' />
+
+          <div className='flex flex-col leading-tight'>
+            <span className='text-[#002EFF] font-extrabold text-2xl'>
+              DINSTINGUISHED
+            </span>
+
+            <span className='text-[#002EFF] font-medium text-sm tracking-wide'>
+              SCHOLARS ACADEMY
+            </span>
+          </div>
         </Link>
 
         {/* Desktop */}
@@ -69,7 +73,9 @@ export default function Header() {
           ))}
 
           <Link
-            href='/enrol'
+            href='https://wa.link/7wim2w'
+            target='_blank'
+            rel='noopener noreferrer'
             className='px-5 py-2 bg-[#002EFF] text-white rounded-xl hover:bg-opacity-90 transition'
           >
             Enrol Now
@@ -109,7 +115,9 @@ export default function Header() {
               ))}
 
               <Link
-                href='/enrol'
+                href='https://wa.link/7wim2w'
+                target='_blank'
+                rel='noopener noreferrer'
                 onClick={() => setOpen(false)}
                 className='mt-4 px-5 py-2 bg-[#002EFF] text-white rounded-xl text-center'
               >

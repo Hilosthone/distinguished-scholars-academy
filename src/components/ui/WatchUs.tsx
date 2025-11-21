@@ -1,21 +1,31 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
-import Clip1 from '../../imges/clip1.jpeg'
-import Clip2 from '../../imges/clip2.jpeg'
-import Clip3 from '../../imges/clip3.jpeg'
+import Clip1 from '../../imges/JAMB-Students-Must-Know.jpg'
+import Clip2 from '../../imges/solubility.jpg'
+import Clip3 from '../../imges/5-COMMON-ENGLISH-MISTAKES.jpg'
 
 const clips = [
-  { title: 'Physics Class Example', img: Clip1 },
-  { title: 'Mathematics Tutorial', img: Clip2 },
-  { title: 'Success Story Highlight', img: Clip3 },
+  {
+    title:
+      '5 Things Every JAMB Student Must Know to Pass 2026 UTME | Score 300+',
+    img: Clip1,
+  },
+  {
+    title:
+      'Solubility Product (Ksp) Made Easy | Chemistry Tutorial for WAEC, JAMB, NECO, UTME & POST-UTME',
+    img: Clip2,
+  },
+  {
+    title:
+      '3 Common English Mistakes Students Make (and How to Fix Them!) | UTME 2026 English Tips',
+    img: Clip3,
+  },
 ]
 
 export default function WatchUs() {
   return (
-    <section
-      id='watch-us'
-      className='w-full py-24 bg-[#f2f6ff]'>
+    <section id='watch-us' className='w-full py-24 bg-[#f2f6ff]'>
       <div className='max-w-7xl mx-auto px-6 text-center'>
         <motion.h2
           className='text-3xl md:text-4xl font-bold text-[#002EFF]'
@@ -32,8 +42,9 @@ export default function WatchUs() {
           whileInView={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.7, delay: 0.2 }}
         >
-          Watch clips of real classes, tutorials, and success stories. 
-          Our lessons feature clear explanations, exam-based examples, and engaging delivery.
+          Watch clips of real classes, tutorials, and success stories. Our
+          lessons feature clear explanations, exam-based examples, and engaging
+          delivery.
         </motion.p>
 
         {/* Video Clips Grid */}
@@ -68,7 +79,7 @@ export default function WatchUs() {
           className='mt-10'
         >
           <a
-            href='https://www.youtube.com/c/YourChannel' // replace with DSA channel
+            href='https://www.youtube.com/@learnwithdsa?si=_wkT3SxlxmlrZxMs' // DSA channel
             target='_blank'
             rel='noopener noreferrer'
             className='px-6 py-3 bg-[#FCB900] text-black font-semibold rounded-lg hover:bg-[#e6ac00] transition'

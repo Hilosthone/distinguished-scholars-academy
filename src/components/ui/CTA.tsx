@@ -4,9 +4,7 @@ import { ArrowRight } from 'lucide-react'
 
 export default function FinalCTA() {
   return (
-    <section
-    id='contact'
-      className='w-full py-24 bg-[#002EFF]'>
+    <section id='contact' className='w-full py-24 bg-[#002EFF]'>
       <div className='max-w-7xl mx-auto px-6 text-center'>
         <motion.h2
           className='text-3xl md:text-5xl font-bold text-white'
@@ -35,8 +33,10 @@ export default function FinalCTA() {
         >
           {/* Primary CTA */}
           <a
-            href='/enrol'
-            className='px-8 py-4 bg-[#FCB900] text-black font-semibold rounded-lg flex items-center gap-2 hover:bg-[#e6ac00] transition'
+            className='px-8 py-4 bg-[#FCB900] text-black font-semibold rounded-lg flex items-center gap-2 hover:bg-[#e6ac00] hover:underline transition'
+            href='https://wa.link/7wim2w'
+            target='_blank'
+            rel='noopener noreferrer'
           >
             Enrol Now
             <ArrowRight size={20} />
@@ -44,8 +44,10 @@ export default function FinalCTA() {
 
           {/* Secondary CTA */}
           <a
-            href='/free-classes'
-            className='px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#002EFF] transition'
+            className='px-8 py-4 border-2 border-white text-white font-semibold rounded-lg hover:bg-white hover:text-[#002EFF] hover:underline transition'
+            href='https://wa.link/xtiui2'
+            target='_blank'
+            rel='noopener noreferrer'
           >
             Join Free Classes
           </a>
