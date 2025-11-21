@@ -1,4 +1,5 @@
 'use client'
+
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Clip1 from '../../imges/JAMB-Students-Must-Know.jpg'
@@ -10,16 +11,19 @@ const clips = [
     title:
       '5 Things Every JAMB Student Must Know to Pass 2026 UTME | Score 300+',
     img: Clip1,
+    link: 'https://youtu.be/UOcRJXGQ-6A?si=QuA5PO8-uXBdPyLH',
   },
   {
     title:
       'Solubility Product (Ksp) Made Easy | Chemistry Tutorial for WAEC, JAMB, NECO, UTME & POST-UTME',
     img: Clip2,
+    link: 'https://youtu.be/SxDwqL3GHy0?si=HBBeDwlP9l6cTwfU',
   },
   {
     title:
       '3 Common English Mistakes Students Make (and How to Fix Them!) | UTME 2026 English Tips',
     img: Clip3,
+    link: 'https://youtube.com/shorts/nxETM2TpuUg?si=fPmPaAHt5iFm5w7a',
   },
 ]
 
@@ -55,7 +59,7 @@ export default function WatchUs() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.6, delay: index * 0.2 }}
-              className='relative rounded-xl overflow-hidden shadow-lg cursor-pointer hover:scale-105 transition-transform'
+              className='relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-transform hover:scale-105'
             >
               <Image
                 src={clip.img}
@@ -64,8 +68,19 @@ export default function WatchUs() {
                 height={250}
                 className='w-full h-56 object-cover'
               />
-              <div className='absolute bottom-0 left-0 w-full bg-black/50 text-white p-3 text-sm font-semibold'>
-                {clip.title}
+
+              <div className='absolute bottom-0 left-0 w-full bg-black/70 text-white p-4 flex flex-col gap-2'>
+                <p className='text-sm font-semibold line-clamp-2'>
+                  {clip.title}
+                </p>
+                <a
+                  href={clip.link}
+                  target='_blank'
+                  rel='noopener noreferrer'
+                  className='mt-2 inline-block px-4 py-2 bg-[#FCB900] text-black font-semibold rounded-lg hover:bg-[#e6ac00] transition'
+                >
+                  Watch
+                </a>
               </div>
             </motion.div>
           ))}
@@ -79,7 +94,7 @@ export default function WatchUs() {
           className='mt-10'
         >
           <a
-            href='https://www.youtube.com/@learnwithdsa?si=_wkT3SxlxmlrZxMs' // DSA channel
+            href='https://www.youtube.com/@learnwithdsa?si=_wkT3SxlxmlrZxMs'
             target='_blank'
             rel='noopener noreferrer'
             className='px-6 py-3 bg-[#FCB900] text-black font-semibold rounded-lg hover:bg-[#e6ac00] transition'

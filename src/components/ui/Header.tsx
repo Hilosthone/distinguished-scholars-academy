@@ -61,7 +61,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop */}
-        <nav className='hidden md:flex items-center gap-7 font-semibold'>
+        <nav className='hidden md:flex items-center gap-5 font-semibold'>
           {navLinks.map((link) => (
             <a
               key={link.id}
