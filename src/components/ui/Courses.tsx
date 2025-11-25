@@ -64,7 +64,7 @@ export default function Programs() {
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='bg-white shadow-lg rounded-xl overflow-hidden border border-gray-200 
+              className='bg-white shadow-lg rounded-xl overflow-hidden border border-gray-300 
               hover:shadow-xl hover:-translate-y-2 transition-all duration-300'
             >
               <Image
@@ -72,7 +72,7 @@ export default function Programs() {
                 width={600}
                 height={350}
                 alt={program.name}
-                className='w-full h-48 object-cover'
+                className='w-full h-70 object-cover'
               />
 
               <div className='p-6'>
@@ -89,7 +89,7 @@ export default function Programs() {
         </div>
 
         {/* CTA */}
-        <div className='flex justify-center mt-14'>
+        <div className='flex justify-center mt-10'>
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
