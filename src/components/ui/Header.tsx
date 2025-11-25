@@ -51,7 +51,7 @@ export default function Header() {
 
           <div className='flex flex-col leading-tight'>
             <span className='text-[#002EFF] font-extrabold text-2xl'>
-              DINSTINGUISHED
+              DISTINGUISHED
             </span>
 
             <span className='text-[#002EFF] font-medium text-sm tracking-wide'>
@@ -61,7 +61,7 @@ export default function Header() {
         </Link>
 
         {/* Desktop */}
-        <nav className='hidden md:flex items-center gap-5 font-semibold'>
+        <nav className='hidden md:flex items-center gap-4 font-semibold'>
           {navLinks.map((link) => (
             <a
               key={link.id}
