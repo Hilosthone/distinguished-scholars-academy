@@ -1,5 +1,5 @@
 src/
- └── components/
+ └── components/ui
       ├── Hero.tsx
       ├── Features.tsx
       ├── Courses.tsx

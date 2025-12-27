@@ -25,19 +25,27 @@ const features = [
 export default function Features() {
   return (
     <section id='materials' className='w-full py-24 bg-white'>
-      <div className='max-w-7xl mx-auto px-6'>
+      {/* Increased padding to match About and Programs sections */}
+      <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE */}
-        <motion.h2
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className='text-3xl md:text-4xl font-bold text-[#002EFF] text-center'
+          className='text-center mb-16'
         >
-          What Students Get
-        </motion.h2>
+          <span className='text-[#002EFF] font-bold tracking-widest text-sm uppercase italic'>
+            Student Benefits
+          </span>
+          <h2 className='text-3xl md:text-4xl font-extrabold text-black mt-2 uppercase'>
+            What Students <span className='text-[#002EFF]'>Get</span>
+          </h2>
+          <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+        </motion.div>
 
         {/* FEATURES GRID */}
-        <div className='grid md:grid-cols-2 lg:grid-cols-4 gap-8 mt-14'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14'>
           {features.map((feat, index) => {
             const Icon = feat.icon
             return (
@@ -45,19 +53,21 @@ export default function Features() {
                 key={index}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-                className='p-6 rounded-xl bg-white shadow-md border border-gray-200 
-                hover:shadow-xl hover:-translate-y-2 transition-all duration-300'
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: index * 0.05 }}
+                className='group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm
+                hover:shadow-xl hover:border-[#002EFF]/20 hover:-translate-y-1 transition-all duration-300'
               >
-                <div className='flex items-center gap-3 mb-3'>
-                  <motion.div
-                    whileHover={{ scale: 1.15, rotate: 8 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
-                  >
-                    <Icon className='text-[#002EFF]' size={30} />
-                  </motion.div>
+                <div className='flex flex-col items-center text-center md:items-start md:text-left gap-4'>
+                  {/* Icon with a soft background circle */}
+                  <div className='w-12 h-12 rounded-xl bg-[#f0f4ff] flex items-center justify-center group-hover:bg-[#002EFF] transition-colors duration-300'>
+                    <Icon
+                      className='text-[#002EFF] group-hover:text-white transition-colors duration-300'
+                      size={24}
+                    />
+                  </div>
 
-                  <h3 className='text-lg font-semibold text-[#002EFF]'>
+                  <h3 className='text-base font-bold text-gray-800 leading-tight group-hover:text-[#002EFF] transition-colors'>
                     {feat.title}
                   </h3>
                 </div>

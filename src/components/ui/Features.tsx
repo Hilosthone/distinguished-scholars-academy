@@ -7,8 +7,9 @@ import {
   Zap,
   CalendarCheck,
   FileText,
+  ArrowRight,
 } from 'lucide-react'
-import { ArrowRight } from 'lucide-react'
+import Link from 'next/link'
 
 const features = [
   {
@@ -22,13 +23,13 @@ const features = [
     icon: BookOpen,
   },
   {
-    title: 'Weekly Tests & Assessments',
-    desc: 'Standard assessment test designed to track your progress and reinforce understanding.',
+    title: 'Weekly Assessments',
+    desc: 'Standard assessment tests designed to track your progress and reinforce understanding.',
     icon: ClipboardList,
   },
   {
-    title: 'Challenge Mode (Rapid Quiz)',
-    desc: 'Test your speed and accuracy with fast-paced quizzes.',
+    title: 'Challenge Mode',
+    desc: 'Test your speed and accuracy with fast-paced quizzes via Rapid Quiz.',
     icon: Zap,
   },
   {
@@ -37,61 +38,67 @@ const features = [
     icon: CalendarCheck,
   },
   {
-    title: 'Printed + Digital Notes',
-    desc: 'Get high-quality, exam-focused materials in both print and digital formats.',
+    title: 'Exam-Focused Material',
+    desc: 'Get high-quality materials in both print and digital formats.',
     icon: FileText,
   },
 ]
 
 export default function WhyChooseDSA() {
   return (
-    <section className='w-full py-24 bg-white'>
-      <div className='max-w-7xl mx-auto px-6'>
+    <section id='why-dsa' className='w-full py-24 bg-white'>
+      {/* Container with matching horizontal padding */}
+      <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* SECTION TITLE */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
           transition={{ duration: 0.6 }}
-          className='text-center max-w-3xl mx-auto'
+          className='text-center max-w-2xl mx-auto'
         >
-          <h2 className='text-3xl md:text-4xl font-bold text-[#002EFF]'>
-            WHY CHOOSE DSA?
+          <span className='text-[#002EFF] font-bold tracking-widest text-sm uppercase'>
+            Advantages
+          </span>
+          <h2 className='text-3xl md:text-4xl font-extrabold text-black mt-2 leading-tight uppercase'>
+            Why Choose <span className='text-[#002EFF]'>DSA?</span>
           </h2>
-          <p className='mt-3 text-gray-700 text-lg'>
+          <div className='w-20 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+          <p className='mt-6 text-gray-600 text-lg leading-relaxed'>
             We provide a structured, student-focused learning experience that
-            guarantees improvement.
+            guarantees academic improvement.
           </p>
         </motion.div>
 
         {/* FEATURES GRID */}
-        <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 mt-16'>
+        <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16'>
           {features.map((feature, index) => {
             const Icon = feature.icon
 
             return (
               <motion.div
                 key={index}
-                initial={{ opacity: 0, y: 40 }}
+                initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.6, delay: index * 0.1 }}
-                className='p-6 rounded-xl bg-white shadow-md border border-gray-200 
-                hover:shadow-xl hover:border-[#002EFF] hover:-translate-y-2
+                viewport={{ once: true }}
+                transition={{ duration: 0.5, delay: index * 0.1 }}
+                className='group p-8 rounded-2xl bg-[#f8f9ff] border border-transparent 
+                hover:border-[#002EFF]/30 hover:bg-white hover:shadow-2xl 
                 transition-all duration-300 ease-out'
               >
-                <div className='flex items-center gap-3'>
-                  <motion.div
-                    whileHover={{ rotate: 8, scale: 1.1 }}
-                    transition={{ type: 'spring', stiffness: 200 }}
-                  >
-                    <Icon className='text-[#002EFF]' size={32} />
-                  </motion.div>
-
-                  <h3 className='text-xl font-semibold text-[#002EFF]'>
-                    {feature.title}
-                  </h3>
+                {/* Icon Circle */}
+                <div className='w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:bg-[#002EFF] transition-colors duration-300'>
+                  <Icon
+                    className='text-[#002EFF] group-hover:text-white transition-colors duration-300'
+                    size={28}
+                  />
                 </div>
 
-                <p className='text-gray-700 mt-3 leading-relaxed'>
+                <h3 className='text-xl font-bold text-black mt-6 group-hover:text-[#002EFF] transition-colors'>
+                  {feature.title}
+                </h3>
+
+                <p className='text-gray-600 mt-3 leading-relaxed text-sm md:text-base'>
                   {feature.desc}
                 </p>
               </motion.div>
@@ -101,18 +108,20 @@ export default function WhyChooseDSA() {
 
         {/* CTA */}
         <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-          className='text-center mt-14'
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.5 }}
+          className='text-center mt-16'
         >
-          <button
-            className='px-8 py-3 rounded-lg font-semibold text-white bg-[#002EFF]
-            hover:bg-[#FCB900] transition-all duration-300 flex items-center gap-2 mx-auto'
+          <Link
+            href='#programs'
+            className='inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-white bg-[#002EFF]
+            hover:bg-[#FCB900] hover:text-black shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95'
           >
             Explore Programs
-            <ArrowRight size={24} />
-          </button>
+            <ArrowRight size={20} />
+          </Link>
         </motion.div>
       </div>
     </section>

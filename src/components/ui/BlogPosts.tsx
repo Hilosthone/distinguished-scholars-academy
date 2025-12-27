@@ -1,6 +1,8 @@
 'use client'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import Link from 'next/link'
+import { ArrowUpRight, Calendar } from 'lucide-react'
 import Blog1 from '../../imges/jamb.jpeg'
 import Blog2 from '../../imges/waec.jpeg'
 import Blog3 from '../../imges/Habits.png'
@@ -8,16 +10,22 @@ import Blog3 from '../../imges/Habits.png'
 const blogs = [
   {
     title: 'JAMB 2026: New Updates You Must Know',
+    category: 'Exam News',
+    date: 'Dec 15, 2025',
     img: Blog1,
     link: '/blog/jamb-2026-updates',
   },
   {
-    title: '10 Study Habits of High‑Scoring Students',
+    title: '10 Study Habits of High-Scoring Students',
+    category: 'Tips & Tricks',
+    date: 'Dec 10, 2025',
     img: Blog2,
     link: '/blog/study-habits',
   },
   {
     title: 'WAEC Biology: Diagrams You Must Master',
+    category: 'Academic',
+    date: 'Dec 05, 2025',
     img: Blog3,
     link: '/blog/waec-biology-diagrams',
   },
@@ -25,63 +33,83 @@ const blogs = [
 
 export default function BlogPosts() {
   return (
-    <section
-    id='blog'
-      className='w-full py-24 bg-[#f2f6ff]'>
-      <div className='max-w-7xl mx-auto px-6 text-center'>
-        <motion.h2
-          className='text-3xl md:text-4xl font-bold text-[#002EFF]'
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
-          Latest Blog Posts
-        </motion.h2>
+    <section id='blog' className='w-full py-24 bg-[#f8faff]'>
+      {/* Container aligned with About and Programs */}
+      <div className='max-w-7xl mx-auto px-10 md:px-20'>
+        {/* TITLE SECTION */}
+        <div className='text-center mb-16'>
+          <motion.h2
+            className='text-3xl md:text-4xl font-extrabold text-black uppercase'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Latest <span className='text-[#002EFF]'>Blog Posts</span>
+          </motion.h2>
+          <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+        </div>
 
-        <div className='grid md:grid-cols-3 gap-8 mt-10'>
+        {/* GRID */}
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {blogs.map((blog, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              className='bg-white shadow-lg rounded-xl overflow-hidden border hover:shadow-xl transition-all duration-300 cursor-pointer'
+              viewport={{ once: true }}
+              transition={{ duration: 0.5, delay: index * 0.1 }}
+              className='group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300'
             >
-              <Image
-                src={blog.img}
-                alt={blog.title}
-                width={500}
-                height={300}
-                className='w-full h-48 object-cover'
-              />
+              {/* Image Container */}
+              <div className='relative aspect-16/10 w-full overflow-hidden'>
+                <Image
+                  src={blog.img}
+                  alt={blog.title}
+                  fill
+                  className='object-cover transition-transform duration-500 group-hover:scale-110'
+                />
+                <div className='absolute top-4 left-4 bg-[#002EFF] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider'>
+                  {blog.category}
+                </div>
+              </div>
+
+              {/* Content */}
               <div className='p-6'>
-                <h3 className='text-lg font-semibold text-[#002EFF] mb-2'>
+                <div className='flex items-center gap-2 text-gray-400 text-xs mb-3'>
+                  <Calendar size={14} />
+                  <span>{blog.date}</span>
+                </div>
+
+                <h3 className='text-lg font-bold text-black group-hover:text-[#002EFF] transition-colors leading-snug min-h-14'>
                   {blog.title}
                 </h3>
-                <a
+
+                <Link
                   href={blog.link}
-                  className='text-[#FCB900] font-medium hover:underline flex items-center gap-1'
+                  className='mt-4 inline-flex items-center gap-1 text-[#FCB900] font-bold text-sm hover:gap-2 transition-all'
                 >
-                  Read More
-                </a>
+                  Read More <ArrowUpRight size={18} />
+                </Link>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* CTA Button */}
+        {/* CTA BUTTON */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className='mt-10'
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className='mt-16 text-center'
         >
-          <a
+          <Link
             href='/blog'
-            className='px-6 py-3 bg-[#002EFF] text-white font-semibold rounded-lg hover:bg-blue-800 transition'
+            className='inline-flex items-center gap-2 px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300'
           >
             View All Blog Posts
-          </a>
+          </Link>
         </motion.div>
       </div>
     </section>

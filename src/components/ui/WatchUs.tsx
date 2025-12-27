@@ -2,6 +2,7 @@
 
 import { motion } from 'framer-motion'
 import Image from 'next/image'
+import { Play, Youtube } from 'lucide-react'
 import Clip1 from '../../imges/JAMB-Students-Must-Know.jpg'
 import Clip2 from '../../imges/solubility.jpg'
 import Clip3 from '../../imges/5-COMMON-ENGLISH-MISTAKES.jpg'
@@ -15,13 +16,12 @@ const clips = [
   },
   {
     title:
-      'Solubility Product (Ksp) Made Easy | Chemistry Tutorial for WAEC, JAMB, NECO, UTME & POST-UTME',
+      'Solubility Product (Ksp) Made Easy | Chemistry Tutorial for WAEC, JAMB, NECO',
     img: Clip2,
     link: 'https://youtu.be/SxDwqL3GHy0?si=HBBeDwlP9l6cTwfU',
   },
   {
-    title:
-      '3 Common English Mistakes Students Make (and How to Fix Them!) | UTME 2026 English Tips',
+    title: '3 Common English Mistakes Students Make | UTME 2026 English Tips',
     img: Clip3,
     link: 'https://youtube.com/shorts/nxETM2TpuUg?si=fPmPaAHt5iFm5w7a',
   },
@@ -29,76 +29,96 @@ const clips = [
 
 export default function WatchUs() {
   return (
-    <section id='watch-us' className='w-full py-24 bg-[#f2f6ff]'>
-      <div className='max-w-7xl mx-auto px-6 text-center'>
-        <motion.h2
-          className='text-3xl md:text-4xl font-bold text-[#002EFF]'
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7 }}
-        >
-          Watch Us
-        </motion.h2>
+    <section id='watch-us' className='w-full py-24 bg-[#f8faff]'>
+      {/* Consistent padding to align with other sections */}
+      <div className='max-w-7xl mx-auto px-10 md:px-20'>
+        {/* TITLE SECTION */}
+        <div className='text-center mb-16'>
+          <motion.h2
+            className='text-3xl md:text-4xl font-extrabold text-black uppercase'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+          >
+            Watch <span className='text-[#002EFF]'>Us</span>
+          </motion.h2>
+          <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
 
-        <motion.p
-          className='mt-4 text-gray-700 max-w-2xl mx-auto'
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.2 }}
-        >
-          Watch clips of real classes, tutorials, and success stories. Our
-          lessons feature clear explanations, exam-based examples, and engaging
-          delivery.
-        </motion.p>
+          <motion.p
+            className='mt-6 text-gray-600 max-w-2xl mx-auto text-lg'
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.7, delay: 0.2 }}
+          >
+            Watch clips of real classes, tutorials, and success stories. Our
+            lessons feature clear explanations and exam-based examples.
+          </motion.p>
+        </div>
 
         {/* Video Clips Grid */}
-        <div className='grid md:grid-cols-3 gap-6 mt-10'>
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
           {clips.map((clip, index) => (
             <motion.div
               key={index}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              className='relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-transform hover:scale-105'
+              viewport={{ once: true }}
+              transition={{ duration: 0.6, delay: index * 0.1 }}
+              className='group relative rounded-2xl overflow-hidden shadow-sm bg-white border border-gray-100'
             >
-              <Image
-                src={clip.img}
-                alt={clip.title}
-                width={400}
-                height={250}
-                className='w-full h-56 object-cover'
-              />
+              {/* Image with Aspect Ratio and Play Overlay */}
+              <div className='relative aspect-video w-full overflow-hidden bg-black'>
+                <Image
+                  src={clip.img}
+                  alt={clip.title}
+                  fill
+                  className='object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500'
+                />
 
-              <div className='absolute bottom-0 left-0 w-full bg-black/70 text-white p-4 flex flex-col gap-2'>
-                <p className='text-sm font-semibold line-clamp-2'>
+                {/* Play Button Icon Overlay */}
+                <div className='absolute inset-0 flex items-center justify-center'>
+                  <div className='w-14 h-14 bg-[#002EFF]/90 rounded-full flex items-center justify-center text-white shadow-xl group-hover:bg-[#FCB900] group-hover:text-black transition-all duration-300 transform group-hover:scale-110'>
+                    <Play size={24} fill='currentColor' />
+                  </div>
+                </div>
+              </div>
+
+              {/* Content Area */}
+              <div className='p-6'>
+                <h3 className='text-sm md:text-base font-bold text-gray-800 line-clamp-2 min-h-12 group-hover:text-[#002EFF] transition-colors'>
                   {clip.title}
-                </p>
+                </h3>
+
                 <a
                   href={clip.link}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='mt-2 inline-block px-4 py-2 bg-[#FCB900] text-black font-semibold rounded-lg hover:bg-[#e6ac00] transition'
+                  className='mt-4 inline-flex items-center gap-2 text-[#002EFF] font-bold text-sm hover:underline'
                 >
-                  Watch
+                  Watch Video <Youtube size={18} className='text-red-600' />
                 </a>
               </div>
             </motion.div>
           ))}
         </div>
 
-        {/* CTA Button */}
+        {/* Bottom CTA */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.7, delay: 0.6 }}
-          className='mt-10'
+          viewport={{ once: true }}
+          transition={{ duration: 0.7, delay: 0.4 }}
+          className='mt-16 text-center'
         >
           <a
-            href='https://www.youtube.com/@learnwithdsa?si=_wkT3SxlxmlrZxMs'
+            href='https://www.youtube.com/@learnwithdsa'
             target='_blank'
             rel='noopener noreferrer'
-            className='px-6 py-3 bg-[#FCB900] text-black font-semibold rounded-lg hover:bg-[#e6ac00] transition'
+            className='inline-flex items-center gap-3 px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300 active:scale-95'
           >
+            <Youtube size={24} />
             Watch More on YouTube
           </a>
         </motion.div>

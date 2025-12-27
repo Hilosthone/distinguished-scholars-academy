@@ -141,4 +141,36 @@
 body {
   background: #f8f9ff;
   font-family: 'Inter', sans-serif;
+  scroll-behavior: smooth;
+}
+
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    /* Merged both definitions here */
+    @apply bg-background text-foreground;
+    background-color: #f8f9ff; /* This provides that soft off-white look */
+    font-family: 'Inter', var(--font-sans), sans-serif;
+    transition: background-color 0.3s ease;
+  }
+}
+
+/* Ensure the blur feels high-end and doesn't "snap" too hard */
+.blur-content {
+  filter: blur(8px); /* Increased slightly for a more "distinguished" look */
+  pointer-events: none; /* Optional: prevents clicking things while blurred */
+  user-select: none;
+  transition: filter 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+@keyframes bounce-slow {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+.animate-bounce-slow {
+  animation: bounce-slow 4s ease-in-out infinite;
 }
