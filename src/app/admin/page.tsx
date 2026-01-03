@@ -10,8 +10,6 @@ import {
   AlertTriangle,
 } from 'lucide-react'
 
-// Removed Supabase Import
-
 export default function AdminDashboard() {
   const [mounted, setMounted] = useState(false)
   const [tab, setTab] = useState<'students' | 'add-question'>('students')
