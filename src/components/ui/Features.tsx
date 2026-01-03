@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   Users,
@@ -45,9 +46,17 @@ const features = [
 ]
 
 export default function WhyChooseDSA() {
+  const [mounted, setMounted] = useState(false)
+
+  // Wait until the component is mounted to the DOM to prevent mismatches
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <section id='why-dsa' className='w-full py-24 bg-white'>
-      {/* Container with matching horizontal padding */}
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* SECTION TITLE */}
         <motion.div
@@ -74,30 +83,24 @@ export default function WhyChooseDSA() {
         <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16'>
           {features.map((feature, index) => {
             const Icon = feature.icon
-
             return (
               <motion.div
-                key={index}
+                key={`feature-${index}`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.5, delay: index * 0.1 }}
-                className='group p-8 rounded-2xl bg-[#f8f9ff] border border-transparent 
-                hover:border-[#002EFF]/30 hover:bg-white hover:shadow-2xl 
-                transition-all duration-300 ease-out'
+                className='group p-8 rounded-2xl bg-[#f8f9ff] border border-transparent hover:border-[#002EFF]/30 hover:bg-white hover:shadow-2xl transition-all duration-300 ease-out'
               >
-                {/* Icon Circle */}
                 <div className='w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:bg-[#002EFF] transition-colors duration-300'>
                   <Icon
                     className='text-[#002EFF] group-hover:text-white transition-colors duration-300'
                     size={28}
                   />
                 </div>
-
-                <h3 className='text-xl font-bold text-black mt-6 group-hover:text-[#002EFF] transition-colors'>
+                <h3 className='text-xl font-bold text-black mt-6 group-hover:text-[#002EFF] transition-colors uppercase'>
                   {feature.title}
                 </h3>
-
                 <p className='text-gray-600 mt-3 leading-relaxed text-sm md:text-base'>
                   {feature.desc}
                 </p>
@@ -116,8 +119,7 @@ export default function WhyChooseDSA() {
         >
           <Link
             href='#programs'
-            className='inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-white bg-[#002EFF]
-            hover:bg-[#FCB900] hover:text-black shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95'
+            className='inline-flex items-center gap-2 px-10 py-4 rounded-xl font-bold text-white bg-[#002EFF] hover:bg-[#FCB900] hover:text-black shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95'
           >
             Explore Programs
             <ArrowRight size={20} />

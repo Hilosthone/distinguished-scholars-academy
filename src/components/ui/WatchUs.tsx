@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Play, Youtube } from 'lucide-react'
@@ -28,9 +29,17 @@ const clips = [
 ]
 
 export default function WatchUs() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // Prevents the Hydration Mismatch error by waiting for the client
+  if (!mounted) return null
+
   return (
     <section id='watch-us' className='w-full py-24 bg-[#f8faff]'>
-      {/* Consistent padding to align with other sections */}
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
@@ -61,23 +70,22 @@ export default function WatchUs() {
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
           {clips.map((clip, index) => (
             <motion.div
-              key={index}
+              key={`video-clip-${index}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.6, delay: index * 0.1 }}
               className='group relative rounded-2xl overflow-hidden shadow-sm bg-white border border-gray-100'
             >
-              {/* Image with Aspect Ratio and Play Overlay */}
               <div className='relative aspect-video w-full overflow-hidden bg-black'>
                 <Image
                   src={clip.img}
                   alt={clip.title}
                   fill
+                  sizes='(max-width: 768px) 100vw, 33vw'
                   className='object-cover opacity-90 group-hover:opacity-100 group-hover:scale-105 transition-all duration-500'
                 />
 
-                {/* Play Button Icon Overlay */}
                 <div className='absolute inset-0 flex items-center justify-center'>
                   <div className='w-14 h-14 bg-[#002EFF]/90 rounded-full flex items-center justify-center text-white shadow-xl group-hover:bg-[#FCB900] group-hover:text-black transition-all duration-300 transform group-hover:scale-110'>
                     <Play size={24} fill='currentColor' />
@@ -85,7 +93,6 @@ export default function WatchUs() {
                 </div>
               </div>
 
-              {/* Content Area */}
               <div className='p-6'>
                 <h3 className='text-sm md:text-base font-bold text-gray-800 line-clamp-2 min-h-12 group-hover:text-[#002EFF] transition-colors'>
                   {clip.title}

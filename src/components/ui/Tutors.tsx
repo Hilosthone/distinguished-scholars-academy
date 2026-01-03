@@ -10,46 +10,89 @@ import DhocthorJay from '../../imges/Dhocthor Jay.jpg'
 import Timilehin from '../../imges/Mr. Timilehin.jpg'
 
 const tutors = [
-  { name: 'Mr. Timilehin', subject: 'Physics', img: Timilehin },
-  { name: 'Miss Betty', subject: 'English', img: MissBetty },
-  { name: 'Mr. Hakeem', subject: 'Mathematics', img: Hakeem },
-  { name: 'Dr. Jay', subject: 'Chemistry', img: DhocthorJay },
-  { name: 'Dr. Phils', subject: 'Biology', img: DrPhils },
-  { name: 'Mr. Emmanuel', subject: 'Chemistry', img: Emmanuel },
+  {
+    name: 'Mr. Timilehin',
+    subject: 'Physics',
+    img: Timilehin,
+    formula: 'g = 9.8m/s²',
+  },
+  {
+    name: 'Miss Betty',
+    subject: 'English',
+    img: MissBetty,
+    formula: 'Subject + Verb',
+  },
+  { name: 'Mr. Hakeem', subject: 'Mathematics', img: Hakeem, formula: 'Σx/n' },
+  {
+    name: 'Dr. Jay',
+    subject: 'Chemistry',
+    img: DhocthorJay,
+    formula: 'pH = -log[H+]',
+  },
+  { name: 'Dr. Phils', subject: 'Biology', img: DrPhils, formula: 'ATP → ADP' },
+  {
+    name: 'Mr. Emmanuel',
+    subject: 'Chemistry',
+    img: Emmanuel,
+    formula: 'PV = nRT',
+  },
 ]
 
 export default function Tutors() {
   return (
-    <section id='tutors' className='w-full py-24 bg-white'>
-      <div className='max-w-7xl mx-auto px-10 md:px-20'>
+    <section
+      id='tutors'
+      className='relative w-full py-24 bg-white overflow-hidden'
+    >
+      {/* --- BACKGROUND FLAIR --- */}
+      <div
+        className='absolute inset-0 pointer-events-none opacity-[0.03] select-none'
+        style={{
+          backgroundImage: `radial-gradient(#002EFF 1px, transparent 1px)`,
+          backgroundSize: '30px 30px',
+        }}
+      />
+
+      <div className='max-w-7xl mx-auto px-6 md:px-20 relative z-10'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className='inline-block px-4 py-1.5 bg-yellow-50 rounded-full mb-4 border border-yellow-100'
+          >
+            <span className='text-[#FCB900] text-[10px] font-black uppercase tracking-[0.2em]'>
+              World Class Educators
+            </span>
+          </motion.div>
+
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className='text-3xl md:text-4xl font-extrabold text-black uppercase'
+            className='text-4xl md:text-5xl font-black text-black uppercase tracking-tighter'
           >
             Meet Our <span className='text-[#002EFF]'>Expert Tutors</span>
           </motion.h2>
 
-          <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+          <div className='w-24 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
 
           <motion.p
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.7, delay: 0.1 }}
-            className='text-gray-600 mt-6 max-w-lg mx-auto text-lg'
+            className='text-gray-500 mt-6 max-w-xl mx-auto text-lg font-medium leading-relaxed'
           >
             Our educators are industry experts dedicated to simplifying complex
             topics and ensuring student success.
           </motion.p>
         </div>
 
-        {/* GRID */}
-        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10'>
+        {/* TUTORS GRID */}
+        <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12'>
           {tutors.map((tutor, index) => (
             <motion.div
               key={index}
@@ -57,30 +100,49 @@ export default function Tutors() {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
-              className='group p-8 bg-[#f8f9ff] border border-transparent rounded-2xl text-center 
-              hover:bg-white hover:shadow-2xl hover:border-[#002EFF]/20 
-              transition-all duration-300'
+              className='group relative p-1 bg-gray-50 rounded-[40px] hover:bg-white hover:shadow-[0_30px_60px_rgba(0,46,255,0.12)] transition-all duration-500 border border-transparent hover:border-blue-50'
             >
-              {/* Tutor Image Container */}
-              <div className='relative w-36 h-36 mx-auto rounded-full p-1.5 border-2 border-dashed border-[#002EFF]/30 group-hover:border-solid group-hover:border-[#002EFF] transition-all duration-500'>
-                <div className='w-full h-full rounded-full overflow-hidden'>
-                  <Image
-                    src={tutor.img}
-                    alt={tutor.name}
-                    width={150}
-                    height={150}
-                    className='object-cover object-top w-full h-full grayscale-30 group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110'
-                  />
+              <div className='p-8'>
+                {/* Image Container with Floating Formula */}
+                <div className='relative w-40 h-40 mx-auto'>
+                  <div className='absolute inset-0 rounded-full border-2 border-dashed border-[#002EFF]/20 group-hover:rotate-180 transition-all duration-1000' />
+
+                  <div className='absolute inset-2 rounded-full overflow-hidden border-4 border-white shadow-xl bg-white'>
+                    <Image
+                      src={tutor.img}
+                      alt={tutor.name}
+                      fill
+                      className='object-cover object-top grayscale-50 group-hover:grayscale-0 transition-all duration-500 group-hover:scale-110'
+                    />
+                  </div>
+
+                  {/* Subject Formula Bubble */}
+                  <motion.div
+                    animate={{ y: [0, -5, 0] }}
+                    transition={{
+                      repeat: Infinity,
+                      duration: 3,
+                      delay: index * 0.5,
+                    }}
+                    className='absolute -right-2 top-0 bg-white shadow-lg border border-gray-50 rounded-xl px-3 py-1 text-[10px] font-serif italic text-blue-600 font-bold'
+                  >
+                    {tutor.formula}
+                  </motion.div>
                 </div>
-              </div>
 
-              <h3 className='text-xl font-bold text-black mt-6 group-hover:text-[#002EFF] transition-colors'>
-                {tutor.name}
-              </h3>
+                <h3 className='text-2xl font-black text-black mt-8 group-hover:text-[#002EFF] transition-colors tracking-tight'>
+                  {tutor.name}
+                </h3>
 
-              {/* Subject Badge */}
-              <div className='inline-block mt-3 px-4 py-1 rounded-full bg-blue-50 text-[#002EFF] text-xs font-bold uppercase tracking-wider group-hover:bg-[#002EFF] group-hover:text-white transition-all duration-300'>
-                {tutor.subject}
+                {/* Subject Badge */}
+                <div className='inline-flex mt-4 px-6 py-2 rounded-2xl bg-white text-[#002EFF] text-[10px] font-black uppercase tracking-widest shadow-sm border border-gray-100 group-hover:bg-[#002EFF] group-hover:text-white group-hover:border-[#002EFF] transition-all duration-300'>
+                  {tutor.subject}
+                </div>
+
+                {/* Social/Bio Hint (Optional visual element) */}
+                <p className='mt-4 text-gray-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
+                  Ready to help you excel in {tutor.subject}
+                </p>
               </div>
             </motion.div>
           ))}

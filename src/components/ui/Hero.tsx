@@ -8,14 +8,45 @@ import Hero01 from '../../imges/hero-01.jpg'
 import Hero02 from '../../imges/hero-02.jpg'
 import Hero03 from '../../imges/hero-03.jpg'
 
+// Academic symbols to scatter in the background
+const formulas = [
+  { text: 'E = mc²', top: '10%', left: '5%', rotate: -15 },
+  { text: 'H₂O + CO₂', top: '15%', left: '85%', rotate: 10 },
+  { text: 'a² + b² = c²', top: '75%', left: '8%', rotate: 20 },
+  { text: 'F = ma', top: '85%', left: '80%', rotate: -10 },
+  { text: '∫(x) dx', top: '40%', left: '92%', rotate: 15 },
+  { text: 'PV = nRT', top: '50%', left: '4%', rotate: -5 },
+  { text: 'Δy/Δx', top: '25%', left: '45%', rotate: 12 },
+  { text: 'λ = h/p', top: '70%', left: '40%', rotate: -8 },
+]
+
 export default function Hero() {
   return (
-    // Added pt-28 to clear the fixed navbar height
     <section
       id='home'
-      className='w-full pt-32 pb-16 md:pt-40 md:pb-24 bg-[#f8f9ff] overflow-hidden'
+      className='relative w-full pt-32 pb-16 md:pt-40 md:pb-24 bg-[#f8f9ff] overflow-hidden'
     >
-      <div className='max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6'>
+      {/* --- ACADEMIC FORMULA BACKGROUND --- */}
+      <div className='absolute inset-0 pointer-events-none select-none overflow-hidden'>
+        {formulas.map((formula, index) => (
+          <motion.div
+            key={index}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.15 }} // Very subtle so it doesn't distract
+            transition={{ delay: 0.2 * index, duration: 1 }}
+            className='absolute font-serif italic text-blue-900 text-lg md:text-2xl whitespace-nowrap'
+            style={{
+              top: formula.top,
+              left: formula.left,
+              transform: `rotate(${formula.rotate}deg)`,
+            }}
+          >
+            {formula.text}
+          </motion.div>
+        ))}
+      </div>
+
+      <div className='relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6'>
         {/* LEFT TEXT CONTENT */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -23,7 +54,6 @@ export default function Hero() {
           transition={{ duration: 0.6 }}
           className='text-center md:text-left'
         >
-          {/* Reduced text sizes: text-3xl for mobile, 4xl for desktop */}
           <h1 className='text-3xl md:text-4xl font-extrabold text-black leading-tight'>
             Empowering Students to <br />
             <span className='text-[#002EFF]'>Excel in UTME & WAEC</span>
@@ -39,7 +69,7 @@ export default function Hero() {
               href='https://wa.link/7wim2w'
               target='_blank'
               rel='noopener noreferrer'
-              className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#002EFF] text-white rounded-lg font-bold transition-all hover:bg-blue-700 active:scale-95 text-sm md:text-base'
+              className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#002EFF] text-white rounded-lg font-bold transition-all hover:bg-blue-700 active:scale-95 text-sm md:text-base shadow-lg shadow-blue-200'
             >
               Start Learning
               <ArrowRight size={18} />
@@ -64,7 +94,9 @@ export default function Hero() {
           transition={{ duration: 0.6 }}
           className='relative flex justify-center items-center mt-12 md:mt-0'
         >
-          {/* Scaled down Main Circle: w-60 (mobile) to w-80 (desktop) */}
+          {/* Decorative Circles */}
+          <div className='absolute w-[120%] h-[120%] border border-blue-100 rounded-full -z-10 animate-[spin_20s_linear_infinite]' />
+
           <div className='relative w-60 h-60 md:w-80 md:h-80 bg-[#FCB900] rounded-full flex items-center justify-center shadow-xl'>
             <Image
               src={Hero01}
@@ -75,12 +107,10 @@ export default function Hero() {
               priority
             />
 
-            {/* Decorative Bubbles - Hidden on very small screens to avoid clutter, visible on md+ */}
             <div className='absolute -top-2 -left-2 w-6 h-6 bg-[#002EFF] rounded-full animate-bounce opacity-80'></div>
             <div className='absolute bottom-4 -right-2 w-8 h-8 bg-[#002EFF] rounded-full animate-pulse opacity-60'></div>
           </div>
 
-          {/* Floating Image 1 (Top Left) - Scaled for mobile */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}
@@ -96,7 +126,6 @@ export default function Hero() {
             />
           </motion.div>
 
-          {/* Floating Image 2 (Bottom Right) - Scaled for mobile */}
           <motion.div
             initial={{ scale: 0 }}
             animate={{ scale: 1 }}

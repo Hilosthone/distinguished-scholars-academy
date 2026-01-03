@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import {
   BookOpen,
@@ -23,9 +24,17 @@ const features = [
 ]
 
 export default function Features() {
+  const [mounted, setMounted] = useState(false)
+
+  // Ensure component only renders once browser is ready
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <section id='materials' className='w-full py-24 bg-white'>
-      {/* Increased padding to match About and Programs sections */}
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE */}
         <motion.div
@@ -50,23 +59,20 @@ export default function Features() {
             const Icon = feat.icon
             return (
               <motion.div
-                key={index}
+                key={`feat-benefit-${index}`}
                 initial={{ opacity: 0, y: 30 }}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.4, delay: index * 0.05 }}
-                className='group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm
-                hover:shadow-xl hover:border-[#002EFF]/20 hover:-translate-y-1 transition-all duration-300'
+                className='group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#002EFF]/20 hover:-translate-y-1 transition-all duration-300'
               >
                 <div className='flex flex-col items-center text-center md:items-start md:text-left gap-4'>
-                  {/* Icon with a soft background circle */}
                   <div className='w-12 h-12 rounded-xl bg-[#f0f4ff] flex items-center justify-center group-hover:bg-[#002EFF] transition-colors duration-300'>
                     <Icon
                       className='text-[#002EFF] group-hover:text-white transition-colors duration-300'
                       size={24}
                     />
                   </div>
-
                   <h3 className='text-base font-bold text-gray-800 leading-tight group-hover:text-[#002EFF] transition-colors'>
                     {feat.title}
                   </h3>

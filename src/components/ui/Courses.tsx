@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -45,9 +46,16 @@ const programs = [
 ]
 
 export default function Programs() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <section id='programs' className='w-full py-24 bg-[#f8faff]'>
-      {/* Consistent padding with other sections */}
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE */}
         <motion.div
@@ -70,19 +78,20 @@ export default function Programs() {
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10'>
           {programs.map((program, index) => (
             <motion.div
-              key={index}
+              key={`program-${index}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.5, delay: index * 0.1 }}
               className='group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300'
             >
-              {/* Image Container with Fixed Aspect Ratio */}
+              {/* Image Container */}
               <div className='relative aspect-video w-full overflow-hidden'>
                 <Image
                   src={program.img}
                   fill
                   alt={program.name}
+                  sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                   className='object-cover transition-transform duration-500 group-hover:scale-110'
                 />
                 <div className='absolute inset-0 bg-black/10 group-hover:bg-transparent transition-colors duration-300'></div>
@@ -118,8 +127,7 @@ export default function Programs() {
           <motion.button
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.98 }}
-            className='px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg 
-            hover:bg-[#FCB900] hover:text-black transition-all duration-300 flex items-center gap-2'
+            className='px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300 flex items-center gap-2'
           >
             Explore All Programs
             <ArrowRight size={20} />

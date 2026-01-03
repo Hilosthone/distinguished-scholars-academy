@@ -1,5 +1,6 @@
 'use client'
 
+import { useState, useEffect } from 'react'
 import Header from '@/components/ui/Header'
 import Hero from '@/components/ui/Hero'
 import Features from '@/components/ui/Features'
@@ -16,6 +17,18 @@ import FAQs from '@/components/ui/FAQs'
 import Footer from '@/components/ui/Footer'
 
 export default function HomePage() {
+  const [hasMounted, setHasMounted] = useState(false)
+
+  useEffect(() => {
+    setHasMounted(true)
+  }, [])
+
+  // If the app hasn't mounted on the client yet, we can return a
+  // simple background color or null to prevent the console error.
+  if (!hasMounted) {
+    return <div className='bg-white min-h-screen' />
+  }
+
   return (
     <>
       <Header />
@@ -27,8 +40,8 @@ export default function HomePage() {
       <Tutors />
       <WatchUs />
       <Testimonial />
-      <BlogPosts />
       <RapidQuiz />
+      <BlogPosts />
       <CTA />
       <FAQs />
       <Footer />

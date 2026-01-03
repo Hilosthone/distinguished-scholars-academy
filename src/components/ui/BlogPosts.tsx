@@ -1,4 +1,5 @@
 'use client'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -32,9 +33,16 @@ const blogs = [
 ]
 
 export default function BlogPosts() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <section id='blog' className='w-full py-24 bg-[#f8faff]'>
-      {/* Container aligned with About and Programs */}
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
@@ -54,7 +62,7 @@ export default function BlogPosts() {
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {blogs.map((blog, index) => (
             <motion.div
-              key={index}
+              key={`blog-post-${index}`}
               initial={{ opacity: 0, y: 30 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
@@ -67,6 +75,7 @@ export default function BlogPosts() {
                   src={blog.img}
                   alt={blog.title}
                   fill
+                  sizes='(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw'
                   className='object-cover transition-transform duration-500 group-hover:scale-110'
                 />
                 <div className='absolute top-4 left-4 bg-[#002EFF] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider'>
@@ -106,7 +115,7 @@ export default function BlogPosts() {
         >
           <Link
             href='/blog'
-            className='inline-flex items-center gap-2 px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300'
+            className='inline-flex items-center gap-2 px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300 active:scale-95'
           >
             View All Blog Posts
           </Link>
