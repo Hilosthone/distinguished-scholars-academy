@@ -1,6 +1,5 @@
 'use client'
 import { useState } from 'react'
-import { supabase } from '@/lib/supabase'
 import { motion } from 'framer-motion'
 import { User, Mail, Lock, ArrowRight, Loader2 } from 'lucide-react'
 import Link from 'next/link'
@@ -17,25 +16,18 @@ export default function SignUp() {
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setMsg({ type: '', text: '' })
 
-    const { data, error } = await supabase.auth.signUp({
-      email: formData.email,
-      password: formData.password,
-      options: {
-        // This 'full_name' is what your SQL trigger uses!
-        data: { full_name: formData.name },
-      },
-    })
-
-    if (error) {
-      setMsg({ type: 'error', text: error.message })
-    } else {
+    // Simulate a network delay for the "Static/Demo" mode
+    setTimeout(() => {
+      setLoading(false)
+      // Since we aren't using Supabase, we show a success message locally
       setMsg({
         type: 'success',
-        text: 'Registration successful! Check your email for a verification link.',
+        text: 'Registration successful! (Demo Mode: No database connection active).',
       })
-    }
-    setLoading(false)
+      console.log('User Registered locally:', formData)
+    }, 1500)
   }
 
   return (
@@ -46,8 +38,8 @@ export default function SignUp() {
         className='bg-white p-10 rounded-[40px] shadow-xl max-w-md w-full border border-gray-100'
       >
         <div className='text-center mb-10'>
-          <h1 className='text-3xl font-black text-[#002EFF] mb-2'>
-            JOIN DSA ACADEMY
+          <h1 className='text-2xl font-black text-[#002EFF] mb-2 uppercase tracking-tighter'>
+            Join DSA Academy
           </h1>
           <p className='text-gray-400 font-medium'>
             Create your student portal account
@@ -55,6 +47,7 @@ export default function SignUp() {
         </div>
 
         <form onSubmit={handleSignUp} className='space-y-4'>
+          {/* Name Input */}
           <div className='relative'>
             <User
               className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
@@ -64,13 +57,14 @@ export default function SignUp() {
               type='text'
               placeholder='Full Name'
               required
-              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold'
+              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold text-gray-800'
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
             />
           </div>
 
+          {/* Email Input */}
           <div className='relative'>
             <Mail
               className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
@@ -80,13 +74,14 @@ export default function SignUp() {
               type='email'
               placeholder='Email Address'
               required
-              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold'
+              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold text-gray-800'
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
             />
           </div>
 
+          {/* Password Input */}
           <div className='relative'>
             <Lock
               className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
@@ -96,15 +91,18 @@ export default function SignUp() {
               type='password'
               placeholder='Create Password'
               required
-              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold'
+              className='w-full pl-12 pr-4 py-4 bg-gray-50 border-2 border-transparent focus:border-[#002EFF] rounded-2xl outline-none transition-all font-bold text-gray-800'
               onChange={(e) =>
                 setFormData({ ...formData, password: e.target.value })
               }
             />
           </div>
 
+          {/* Feedback Message */}
           {msg.text && (
-            <div
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
               className={`p-4 rounded-xl text-sm font-bold ${
                 msg.type === 'error'
                   ? 'bg-red-50 text-red-600'
@@ -112,12 +110,12 @@ export default function SignUp() {
               }`}
             >
               {msg.text}
-            </div>
+            </motion.div>
           )}
 
           <button
             disabled={loading}
-            className='w-full py-5 bg-[#002EFF] text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100'
+            className='w-full py-5 bg-[#002EFF] text-white font-black rounded-2xl hover:bg-black transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-100 disabled:opacity-50'
           >
             {loading ? (
               <Loader2 className='animate-spin' />
