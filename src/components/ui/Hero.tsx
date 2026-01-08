@@ -4,11 +4,12 @@ import { motion } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
+
+// Ensure these paths match your folder structure exactly
 import Hero01 from '../../imges/hero-01.jpg'
 import Hero02 from '../../imges/hero-02.jpg'
 import Hero03 from '../../imges/hero-03.jpg'
 
-// Academic symbols to scatter in the background
 const formulas = [
   { text: 'E = mc²', top: '10%', left: '5%', rotate: -15 },
   { text: 'H₂O + CO₂', top: '15%', left: '85%', rotate: 10 },
@@ -32,9 +33,9 @@ export default function Hero() {
           <motion.div
             key={index}
             initial={{ opacity: 0 }}
-            animate={{ opacity: 0.15 }} // Very subtle so it doesn't distract
-            transition={{ delay: 0.2 * index, duration: 1 }}
-            className='absolute font-serif italic text-blue-900 text-lg md:text-2xl whitespace-nowrap'
+            animate={{ opacity: 0.12 }}
+            transition={{ delay: 0.1 * index, duration: 1 }}
+            className='absolute font-serif italic text-blue-900 text-lg md:text-2xl whitespace-nowrap hidden sm:block'
             style={{
               top: formula.top,
               left: formula.left,
@@ -46,7 +47,7 @@ export default function Hero() {
         ))}
       </div>
 
-      <div className='relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 items-center px-6'>
+      <div className='relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-6'>
         {/* LEFT TEXT CONTENT */}
         <motion.div
           initial={{ opacity: 0, x: -30 }}
@@ -54,34 +55,43 @@ export default function Hero() {
           transition={{ duration: 0.6 }}
           className='text-center md:text-left'
         >
-          <h1 className='text-3xl md:text-4xl font-extrabold text-black leading-tight'>
+          <div className='inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 border border-blue-100'>
+            <span className='text-[#002EFF] text-[10px] md:text-xs font-black uppercase tracking-widest'>
+              📍 Based in Ibadan, Nigeria
+            </span>
+          </div>
+
+          <h1 className='text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight'>
             Empowering Students to <br />
             <span className='text-[#002EFF]'>Excel in UTME & WAEC</span>
           </h1>
 
-          <p className='text-base md:text-lg text-gray-600 mt-4 max-w-md mx-auto md:mx-0 leading-relaxed'>
-            Join thousands of students learning faster, scoring higher, and
+          <p className='text-sm md:text-base text-gray-600 mt-6 max-w-md mx-auto md:mx-0 leading-relaxed font-medium'>
+            Join thousands of scholars learning faster, scoring higher, and
             building academic confidence with the DSA learning system.
           </p>
 
-          <div className='flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mt-8'>
+          <div className='flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mt-10'>
             <Link
               href='https://wa.link/7wim2w'
               target='_blank'
               rel='noopener noreferrer'
-              className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 bg-[#002EFF] text-white rounded-lg font-bold transition-all hover:bg-blue-700 active:scale-95 text-sm md:text-base shadow-lg shadow-blue-200'
+              className='w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 bg-[#002EFF] text-white rounded-2xl font-bold transition-all hover:bg-blue-700 active:scale-95 text-sm shadow-xl shadow-blue-200 group'
             >
               Start Learning
-              <ArrowRight size={18} />
+              <ArrowRight
+                size={18}
+                className='group-hover:translate-x-1 transition-transform'
+              />
             </Link>
 
             <Link
               href='https://wa.link/xtiui2'
               target='_blank'
               rel='noopener noreferrer'
-              className='w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 border-2 border-[#002EFF] text-[#002EFF] rounded-lg font-bold transition-all hover:bg-[#FCB900] hover:text-black hover:border-[#FCB900] active:scale-95 text-sm md:text-base'
+              className='w-full sm:w-auto flex items-center justify-center gap-2 px-8 py-4 border-2 border-gray-200 text-gray-700 bg-white rounded-2xl font-bold transition-all hover:border-[#FCB900] hover:text-black active:scale-95 text-sm'
             >
-              <Play size={18} fill='currentColor' />
+              <Play size={16} fill='currentColor' />
               Join Free Classes
             </Link>
           </div>
@@ -89,59 +99,93 @@ export default function Hero() {
 
         {/* RIGHT IMAGE SECTION */}
         <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
-          className='relative flex justify-center items-center mt-12 md:mt-0'
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ duration: 0.7 }}
+          className='relative flex justify-center items-center mt-16 md:mt-0'
         >
-          {/* Decorative Circles */}
-          <div className='absolute w-[120%] h-[120%] border border-blue-100 rounded-full -z-10 animate-[spin_20s_linear_infinite]' />
+          {/* Animated Background Ring */}
+          <div className='absolute w-[110%] h-[110%] border-2 border-dashed border-blue-100 rounded-full -z-10 animate-[spin_30s_linear_infinite]' />
 
-          <div className='relative w-60 h-60 md:w-80 md:h-80 bg-[#FCB900] rounded-full flex items-center justify-center shadow-xl'>
-            <Image
-              src={Hero01}
-              width={350}
-              height={350}
-              className='rounded-full object-cover w-[94%] h-[94%] border-2 border-white'
-              alt='Main Students'
-              priority
-            />
+          {/* Main Profile Image */}
+          <div className='relative w-64 h-64 md:w-80 md:h-80 bg-[#FCB900] rounded-3xl rotate-3 flex items-center justify-center shadow-2xl'>
+            <div className='w-full h-full -rotate-3 overflow-hidden rounded-3xl border-4 border-white'>
+              <Image
+                src={Hero01}
+                fill
+                className='object-cover'
+                alt='Main Students'
+                priority
+              />
+            </div>
 
-            <div className='absolute -top-2 -left-2 w-6 h-6 bg-[#002EFF] rounded-full animate-bounce opacity-80'></div>
-            <div className='absolute bottom-4 -right-2 w-8 h-8 bg-[#002EFF] rounded-full animate-pulse opacity-60'></div>
+            {/* Floating Accents */}
+            <div className='absolute -top-4 -right-4 w-12 h-12 bg-[#002EFF] rounded-2xl flex items-center justify-center shadow-lg -rotate-12 animate-bounce'>
+              <GraduationCap className='text-white' size={24} />
+            </div>
           </div>
 
+          {/* Secondary Floating Images */}
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.4 }}
-            className='absolute -left-2 top-0 md:-left-6 md:top-4'
+            initial={{ y: 20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className='absolute -left-4 top-0 md:-left-12'
           >
-            <Image
-              src={Hero02}
-              width={80}
-              height={80}
-              className='w-16 h-16 md:w-24 md:h-24 rounded-full border-4 border-white shadow-lg object-cover'
-              alt='Student 1'
-            />
+            <div className='relative w-20 h-20 md:w-28 md:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden rotate-[-10deg]'>
+              <Image
+                src={Hero02}
+                fill
+                className='object-cover'
+                alt='Student 1'
+              />
+            </div>
           </motion.div>
 
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ delay: 0.6 }}
-            className='absolute -right-2 bottom-0 md:right-0 md:bottom-4'
+            initial={{ y: -20, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.7 }}
+            className='absolute -right-4 bottom-0 md:-right-8'
           >
-            <Image
-              src={Hero03}
-              width={100}
-              height={100}
-              className='w-20 h-20 md:w-28 md:h-28 rounded-full border-4 border-white shadow-lg object-cover'
-              alt='Student 2'
-            />
+            <div className='relative w-24 h-24 md:w-32 md:h-32 rounded-2xl border-4 border-white shadow-xl overflow-hidden rotate-10'>
+              <Image
+                src={Hero03}
+                fill
+                className='object-cover'
+                alt='Student 2'
+              />
+            </div>
           </motion.div>
         </motion.div>
       </div>
     </section>
+  )
+}
+
+// Small helper for the icon in the accent
+function GraduationCap({
+  className,
+  size,
+}: {
+  className?: string
+  size?: number
+}) {
+  return (
+    <svg
+      xmlns='http://www.w3.org/2000/svg'
+      width={size}
+      height={size}
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='2'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+      className={className}
+    >
+      <path d='M22 10v6M2 10l10-5 10 5-10 5z' />
+      <path d='M6 12v5c3 3 9 3 12 0v-5' />
+    </svg>
   )
 }

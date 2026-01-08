@@ -1,3 +1,5 @@
+// questions.ts
+
 export const questionBank = [
   // --- ENGLISH (ENG) ---
   {

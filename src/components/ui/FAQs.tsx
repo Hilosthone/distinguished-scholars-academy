@@ -7,7 +7,7 @@ const faqs = [
   {
     question: 'Do you teach UTME & WAEC students?',
     answer:
-      'Yes! We provide comprehensive preparation for UTME, WAEC, NECO, and Post-UTME. Our curriculum is designed to ensure students understand core concepts thoroughly rather than just memorizing facts.',
+      'Yes! We provide physical classes at our centre in Ibadan, located near the University of Ibadan, Oyo State.',
   },
   {
     question: 'Are classes online or physical?',

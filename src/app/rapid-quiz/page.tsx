@@ -1,19 +1,96 @@
 'use client'
-import { useState, useEffect, useCallback } from 'react'
+
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Trophy,
-  Clock,
   LayoutGrid,
   CheckCircle2,
-  XCircle,
   RotateCcw,
-  BookOpenText,
-  ChevronRight,
-  Zap,
   Home,
+  Printer,
+  GraduationCap,
+  Info,
+  Calculator,
+  Flag,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  X,
 } from 'lucide-react'
 import { questionBank } from './questions'
+
+// --- Calculator Component ---
+const ScientificCalculator = ({ onClose }: { onClose: () => void }) => {
+  const [display, setDisplay] = useState('0')
+  const handleBtn = (val: string) => {
+    if (val === 'C') setDisplay('0')
+    else if (val === '=') {
+      try {
+        setDisplay(eval(display).toString())
+      } catch {
+        setDisplay('Error')
+      }
+    } else {
+      setDisplay(display === '0' ? val : display + val)
+    }
+  }
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: -20 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      className='fixed top-20 left-1/2 -translate-x-1/2 z-60 bg-zinc-900 p-4 rounded-2xl text-white shadow-2xl border border-white/10 w-[280px]'
+    >
+      <div className='flex justify-between items-center mb-3'>
+        <span className='text-[10px] font-black uppercase tracking-widest opacity-50'>
+          Calculator
+        </span>
+        <button onClick={onClose} className='p-1 hover:bg-white/10 rounded-lg'>
+          <X size={16} />
+        </button>
+      </div>
+      <div className='text-right mb-3 bg-black/40 p-3 rounded-xl font-mono text-lg truncate border border-white/5'>
+        {display}
+      </div>
+      <div className='grid grid-cols-4 gap-1.5'>
+        {[
+          'C',
+          '/',
+          '*',
+          '-',
+          '7',
+          '8',
+          '9',
+          '+',
+          '4',
+          '5',
+          '6',
+          '.',
+          '1',
+          '2',
+          '3',
+          '0',
+        ].map((k) => (
+          <button
+            key={k}
+            onClick={() => handleBtn(k)}
+            className='h-10 bg-white/10 rounded-lg hover:bg-white/20 text-sm font-bold transition-all'
+          >
+            {k}
+          </button>
+        ))}
+        <button
+          onClick={() => handleBtn('=')}
+          className='col-span-4 h-10 bg-[#002EFF] rounded-lg text-xs font-black mt-1 uppercase'
+        >
+          Calculate
+        </button>
+      </div>
+    </motion.div>
+  )
+}
 
 export default function RapidQuizPortal() {
   const [step, setStep] = useState<'setup' | 'quiz' | 'result' | 'review'>(
@@ -22,77 +99,30 @@ export default function RapidQuizPortal() {
   const [selectedSubs, setSelectedSubs] = useState<string[]>([])
   const [qPerSubject, setQPerSubject] = useState(10)
   const [totalMinutes, setTotalMinutes] = useState(15)
-  const [quizData, setQuizData] = useState<typeof questionBank>([])
+  const [isStudyMode, setIsStudyMode] = useState(false)
+  const [quizData, setQuizData] = useState<any[]>([])
   const [currentIdx, setCurrentIdx] = useState(0)
   const [answers, setAnswers] = useState<(number | null)[]>([])
+  const [flagged, setFlagged] = useState<boolean[]>([])
   const [timeLeft, setTimeLeft] = useState(0)
-
-  // Redirect to Main Site
-  const exitToMainSite = () => {
-    window.location.href = 'http://localhost:3000'
-  }
-
-  const playDing = useCallback(() => {
-    const AudioContextClass =
-      window.AudioContext || (window as any).webkitAudioContext
-    if (!AudioContextClass) return
-
-    const context = new AudioContextClass()
-    const oscillator = context.createOscillator()
-    const gainNode = context.createGain()
-
-    oscillator.type = 'sine'
-    oscillator.frequency.setValueAtTime(523.25, context.currentTime)
-    oscillator.frequency.exponentialRampToValueAtTime(
-      1046.5,
-      context.currentTime + 0.1
-    )
-
-    gainNode.gain.setValueAtTime(0.1, context.currentTime)
-    gainNode.gain.exponentialRampToValueAtTime(
-      0.0001,
-      context.currentTime + 0.5
-    )
-
-    oscillator.connect(gainNode)
-    gainNode.connect(context.destination)
-
-    oscillator.start()
-    oscillator.stop(context.currentTime + 0.5)
-  }, [])
-
-  const goHome = () => {
-    setStep('setup')
-    setCurrentIdx(0)
-    setAnswers([])
-    setSelectedSubs([])
-  }
-
-  const slideIn = {
-    initial: { x: 20, opacity: 0 },
-    animate: { x: 0, opacity: 1 },
-    exit: { x: -20, opacity: 0 },
-  }
+  const [showCalc, setShowCalc] = useState(false)
 
   const handleStart = () => {
     if (selectedSubs.length === 0) return
-
-    let finalPool: typeof questionBank = []
-
-    selectedSubs.forEach((sub: string) => {
-      const subQuestions = questionBank
+    let pool: any[] = []
+    selectedSubs.forEach((sub) => {
+      const filtered = questionBank
         .filter((q) => q.subject === sub)
         .sort(() => 0.5 - Math.random())
         .slice(0, qPerSubject)
-      finalPool = [...finalPool, ...subQuestions]
+      pool = [...pool, ...filtered]
     })
-
-    // Mix subjects randomly so they don't appear in blocks
-    finalPool.sort(() => 0.5 - Math.random())
-
-    setQuizData(finalPool)
-    setAnswers(new Array(finalPool.length).fill(null))
+    const shuffled = pool.sort(() => 0.5 - Math.random())
+    setQuizData(shuffled)
+    setAnswers(new Array(shuffled.length).fill(null))
+    setFlagged(new Array(shuffled.length).fill(false))
     setTimeLeft(totalMinutes * 60)
+    setCurrentIdx(0)
     setStep('quiz')
   }
 
@@ -100,366 +130,360 @@ export default function RapidQuizPortal() {
     if (step === 'quiz' && timeLeft > 0) {
       const t = setInterval(() => setTimeLeft((p) => p - 1), 1000)
       return () => clearInterval(t)
-    } else if (timeLeft === 0 && step === 'quiz') {
-      setStep('result')
-    }
+    } else if (timeLeft === 0 && step === 'quiz') setStep('result')
   }, [timeLeft, step])
 
-  if (step === 'review')
-    return (
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className='min-h-screen bg-[#F8FAFF] pb-20'
-      >
-        <div className='bg-white border-b px-6 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm'>
-          <button
-            onClick={goHome}
-            className='flex items-center gap-2 hover:opacity-70 transition-opacity'
-          >
-            <BookOpenText className='text-[#002EFF]' />
-            <h2 className='font-black text-gray-800 tracking-tight uppercase'>
-              Correction Portal
-            </h2>
-          </button>
-          <div className='flex gap-3'>
-            <button
-              onClick={exitToMainSite}
-              className='flex items-center gap-2 bg-gray-100 text-gray-600 px-4 py-2 rounded-xl font-bold text-sm'
-            >
-              <Home size={16} /> HOME
-            </button>
-            <button
-              onClick={() => window.location.reload()}
-              className='flex items-center gap-2 bg-[#002EFF] text-white px-6 py-2 rounded-xl font-bold text-sm'
-            >
-              <RotateCcw size={16} /> RESTART
-            </button>
-          </div>
-        </div>
-
-        <div className='max-w-3xl mx-auto p-6 space-y-8 mt-4'>
-          {quizData.map((q, i) => {
-            const isCorrect = answers[i] === q.correct
-            return (
-              <div
-                key={i}
-                className={`bg-white p-8 rounded-3xl border-2 ${
-                  isCorrect ? 'border-green-100' : 'border-red-100'
-                }`}
-              >
-                <div className='flex justify-between mb-4'>
-                  <span className='text-[10px] font-black px-3 py-1 bg-gray-100 rounded-full text-gray-500'>
-                    {q.subject} • Q{i + 1}
-                  </span>
-                  {isCorrect ? (
-                    <span className='text-green-600 font-bold text-sm'>
-                      Correct
-                    </span>
-                  ) : (
-                    <span className='text-red-600 font-bold text-sm'>
-                      Incorrect
-                    </span>
-                  )}
-                </div>
-                <h3 className='text-lg font-bold mb-6'>{q.question}</h3>
-                <div className='grid gap-3 mb-6'>
-                  {q.options.map((opt, optIdx) => (
-                    <div
-                      key={optIdx}
-                      className={`p-4 rounded-xl border-2 font-bold ${
-                        q.correct === optIdx
-                          ? 'bg-green-50 border-green-500 text-green-700'
-                          : answers[i] === optIdx
-                          ? 'bg-red-50 border-red-500 text-red-700'
-                          : 'bg-gray-50 text-gray-400'
-                      }`}
-                    >
-                      {String.fromCharCode(65 + optIdx)}. {opt}
-                    </div>
-                  ))}
-                </div>
-                <div className='bg-blue-50 p-5 rounded-2xl text-blue-800 text-sm font-medium'>
-                  <p className='text-[10px] font-black uppercase mb-1'>
-                    Explanation
-                  </p>
-                  {q.explanation}
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </motion.div>
-    )
+  const userScore = Math.round(
+    (answers.filter((a, i) => a === quizData[i]?.correct).length /
+      quizData.length) *
+      100
+  )
 
   if (step === 'setup')
     return (
-      <div className='min-h-screen bg-[#F8FAFF] flex flex-col items-center justify-center p-6'>
-        <button
-          onClick={exitToMainSite}
-          className='mb-6 flex items-center gap-2 text-gray-400 hover:text-[#002EFF] font-bold text-sm transition-colors'
-        >
-          <XCircle size={18} /> BACK TO MAIN SITE
-        </button>
-
+      <div className='min-h-screen bg-[#F0F4FF] flex items-center justify-center p-4 md:p-6'>
         <motion.div
-          initial={{ y: 20, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          className='bg-white p-10 rounded-[40px] shadow-2xl max-w-lg w-full'
+          initial={{ scale: 0.95, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          className='bg-white p-6 md:p-10 rounded-4xl shadow-xl max-w-md w-full'
         >
-          <div className='flex justify-center mb-4'>
-            <Zap className='text-[#002EFF]' size={32} />
-          </div>
-          <h2 className='text-3xl font-black text-[#002EFF] mb-8 text-center uppercase tracking-tighter'>
-            Exam Portal
+          <h2 className='text-2xl md:text-3xl font-black text-[#002EFF] mb-6 text-center tracking-tight uppercase'>
+            Exam Setup
           </h2>
 
-          <div className='mb-8'>
-            <p className='text-[10px] font-black uppercase text-gray-400 mb-3'>
-              1. Select Subjects
-            </p>
-            <div className='grid grid-cols-3 gap-2'>
-              {['ENG', 'MATH', 'PHY', 'CHEM', 'BIO'].map((s) => (
-                <button
-                  key={s}
-                  onClick={() =>
-                    setSelectedSubs((p) =>
-                      p.includes(s) ? p.filter((x) => x !== s) : [...p, s]
-                    )
-                  }
-                  className={`py-3 rounded-xl font-bold border-2 transition-all ${
-                    selectedSubs.includes(s)
-                      ? 'bg-[#002EFF] border-[#002EFF] text-white'
-                      : 'bg-gray-50 border-gray-100 text-gray-400'
-                  }`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          <div className='grid grid-cols-3 gap-2 mb-4'>
+            {['ENG', 'MATH', 'PHY', 'CHEM', 'BIO'].map((s) => (
+              <button
+                key={s}
+                onClick={() =>
+                  setSelectedSubs((p) =>
+                    p.includes(s) ? p.filter((x) => x !== s) : [...p, s]
+                  )
+                }
+                className={`py-2.5 rounded-xl text-xs font-black border-2 transition-all ${
+                  selectedSubs.includes(s)
+                    ? 'bg-[#002EFF] border-[#002EFF] text-white'
+                    : 'bg-gray-50 text-gray-400 border-transparent'
+                }`}
+              >
+                {s}
+              </button>
+            ))}
           </div>
 
-          <div className='space-y-6 mb-8'>
-            <div className='flex justify-between items-center'>
-              <p className='text-[10px] font-black uppercase text-gray-400'>
-                Questions / Subject: {qPerSubject}
-              </p>
-              <input
-                type='range'
-                min='1'
-                max='20'
+          <div className='grid grid-cols-2 gap-3 mb-4'>
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-bold text-gray-400 uppercase ml-1'>
+                Questions
+              </label>
+              <select
                 value={qPerSubject}
-                onChange={(e) => setQPerSubject(parseInt(e.target.value))}
-                className='accent-[#002EFF]'
-              />
+                onChange={(e) => setQPerSubject(Number(e.target.value))}
+                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold outline-none border border-gray-100'
+              >
+                {[5, 10, 20, 40].map((n) => (
+                  <option key={n} value={n}>
+                    {n} Per Sub
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className='flex justify-between items-center'>
-              <p className='text-[10px] font-black uppercase text-gray-400'>
-                Duration: {totalMinutes}m
-              </p>
-              <input
-                type='range'
-                min='5'
-                max='120'
-                step='5'
+            <div className='space-y-1.5'>
+              <label className='text-[10px] font-bold text-gray-400 uppercase ml-1'>
+                Time
+              </label>
+              <select
                 value={totalMinutes}
-                onChange={(e) => setTotalMinutes(parseInt(e.target.value))}
-                className='accent-[#FCB900]'
-              />
-            </div>
-
-            <div className='p-4 bg-blue-50 rounded-2xl flex justify-between items-center'>
-              <span className='text-xs font-bold text-blue-900'>
-                Total Exam Questions:
-              </span>
-              <span className='text-lg font-black text-[#002EFF]'>
-                {selectedSubs.length * qPerSubject}
-              </span>
+                onChange={(e) => setTotalMinutes(Number(e.target.value))}
+                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold outline-none border border-gray-100'
+              >
+                {[15, 30, 60, 120].map((n) => (
+                  <option key={n} value={n}>
+                    {n} Mins
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
+
+          <button
+            onClick={() => setIsStudyMode(!isStudyMode)}
+            className={`w-full mb-6 p-3.5 rounded-xl border-2 flex items-center justify-between transition-all ${
+              isStudyMode
+                ? 'bg-green-50 border-green-500'
+                : 'bg-gray-50 border-transparent'
+            }`}
+          >
+            <div className='flex items-center gap-2'>
+              <GraduationCap
+                size={18}
+                className={isStudyMode ? 'text-green-500' : 'text-gray-300'}
+              />
+              <span className='font-bold text-[11px] uppercase'>
+                Instant Feedback
+              </span>
+            </div>
+            <div
+              className={`w-8 h-4 rounded-full relative ${
+                isStudyMode ? 'bg-green-500' : 'bg-gray-200'
+              }`}
+            >
+              <motion.div
+                animate={{ x: isStudyMode ? 16 : 0 }}
+                className='absolute top-0.5 left-0.5 w-3 h-3 bg-white rounded-full'
+              />
+            </div>
+          </button>
 
           <button
             disabled={selectedSubs.length === 0}
             onClick={handleStart}
-            className='w-full py-5 bg-[#FCB900] text-black font-black rounded-3xl disabled:opacity-30 shadow-xl hover:scale-[1.02] transition-transform'
+            className='w-full py-4 bg-[#FCB900] text-black font-black rounded-2xl shadow-lg active:scale-95 transition-all disabled:opacity-30 text-sm uppercase'
           >
-            START ASSESSMENT
+            Start Examination
           </button>
         </motion.div>
       </div>
     )
 
+  const isReview = step === 'review'
   const currentQ = quizData[currentIdx]
 
   return (
-    <div className='min-h-screen bg-[#F8FAFF] pb-12'>
-      <div className='bg-white border-b px-6 py-4 sticky top-0 z-20 flex justify-between items-center shadow-sm'>
-        <button
-          onClick={goHome}
-          className='font-black text-xl text-[#002EFF] hover:opacity-70 transition-all'
-        >
-          DSA CBT
-        </button>
-        <div className='flex items-center gap-4'>
-          <div
-            className={`text-xl font-mono font-black px-4 py-2 rounded-2xl border ${
-              timeLeft < 60
-                ? 'bg-red-50 text-red-600 border-red-200 animate-pulse'
-                : 'bg-gray-50'
-            }`}
-          >
-            {Math.floor(timeLeft / 60)}:
-            {(timeLeft % 60).toString().padStart(2, '0')}
-          </div>
-          <button
-            onClick={() => {
-              if (confirm('Are you sure you want to end this mock?'))
-                setStep('result')
-            }}
-            className='bg-red-600 text-white px-5 py-2 rounded-xl font-bold text-sm'
-          >
-            FINISH
-          </button>
-        </div>
-      </div>
+    <div className='min-h-screen bg-[#F8FAFF] pb-10'>
+      <AnimatePresence>
+        {showCalc && (
+          <ScientificCalculator onClose={() => setShowCalc(false)} />
+        )}
+      </AnimatePresence>
 
-      <div className='max-w-5xl mx-auto p-6'>
-        <AnimatePresence mode='wait'>
+      <nav className='bg-white border-b px-4 py-3 sticky top-0 z-40 flex justify-between items-center shadow-sm'>
+        <div className='flex items-center gap-2'>
+          <button
+            onClick={() => setStep('setup')}
+            className='p-2 hover:bg-gray-100 rounded-lg'
+          >
+            <Home size={18} />
+          </button>
+          {!isReview && (
+            <button
+              onClick={() => setShowCalc(!showCalc)}
+              className={`p-2 rounded-lg border transition-all ${
+                showCalc ? 'bg-black text-white' : 'bg-gray-50 text-gray-400'
+              }`}
+            >
+              <Calculator size={18} />
+            </button>
+          )}
+        </div>
+        <div className='flex items-center gap-2'>
+          {!isReview ? (
+            <>
+              <div
+                className={`px-3 py-1.5 rounded-lg font-mono font-bold text-sm ${
+                  timeLeft < 60
+                    ? 'bg-red-50 text-red-600 animate-pulse'
+                    : 'bg-gray-100'
+                }`}
+              >
+                {Math.floor(timeLeft / 60)}:
+                {(timeLeft % 60).toString().padStart(2, '0')}
+              </div>
+              <button
+                onClick={() => setStep('result')}
+                className='bg-red-600 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase'
+              >
+                Finish
+              </button>
+            </>
+          ) : (
+            <button
+              onClick={() => setStep('result')}
+              className='bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase'
+            >
+              Results
+            </button>
+          )}
+        </div>
+      </nav>
+
+      <main className='max-w-5xl mx-auto p-4 md:p-6 grid lg:grid-cols-[1fr_280px] gap-6'>
+        <div className='space-y-4'>
           <motion.div
             key={currentIdx}
-            initial='initial'
-            animate='animate'
-            exit='exit'
-            variants={slideIn}
-            className='bg-white p-8 md:p-12 rounded-[40px] shadow-sm border border-gray-100'
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            className='bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100 relative'
           >
-            <div className='flex justify-between items-center mb-8'>
-              <span className='bg-blue-50 text-[#002EFF] px-4 py-1.5 rounded-full font-black text-[10px] uppercase'>
+            {!isReview && (
+              <button
+                onClick={() => {
+                  const f = [...flagged]
+                  f[currentIdx] = !f[currentIdx]
+                  setFlagged(f)
+                }}
+                className={`absolute top-6 right-6 p-2 rounded-xl border transition-all ${
+                  flagged[currentIdx]
+                    ? 'bg-orange-500 border-orange-500 text-white'
+                    : 'text-gray-200 border-gray-100'
+                }`}
+              >
+                <Flag size={16} fill={flagged[currentIdx] ? 'white' : 'none'} />
+              </button>
+            )}
+            <div className='mb-4'>
+              <span className='px-3 py-0.5 bg-blue-50 text-[#002EFF] rounded-full text-[9px] font-black uppercase'>
                 {currentQ?.subject}
               </span>
-              <span className='text-gray-400 font-bold text-sm'>
-                Question {currentIdx + 1} of {quizData.length}
-              </span>
             </div>
-
-            <h2 className='text-xl md:text-2xl font-bold text-gray-800 mb-8'>
+            <h2 className='text-lg md:text-xl font-bold text-gray-800 mb-6 leading-snug'>
               {currentQ?.question}
             </h2>
-            <div className='grid gap-3'>
-              {currentQ?.options.map((opt, i) => (
+            <div className='grid gap-2.5'>
+              {currentQ?.options.map((opt: string, i: number) => {
+                const isSelected = answers[currentIdx] === i
+                const isCorrect = i === currentQ.correct
+                let style = 'bg-gray-50 border-transparent text-gray-600'
+                if (isSelected)
+                  style = 'border-[#002EFF] bg-blue-50 text-[#002EFF]'
+                if (isReview || (isStudyMode && answers[currentIdx] !== null)) {
+                  if (isCorrect)
+                    style = 'border-green-500 bg-green-50 text-green-700'
+                  else if (isSelected)
+                    style = 'border-red-500 bg-red-50 text-red-700'
+                }
+                return (
+                  <button
+                    key={i}
+                    disabled={
+                      isReview || (isStudyMode && answers[currentIdx] !== null)
+                    }
+                    onClick={() => {
+                      const a = [...answers]
+                      a[currentIdx] = i
+                      setAnswers(a)
+                    }}
+                    className={`p-4 rounded-xl border-2 text-left text-sm font-semibold transition-all flex justify-between items-center ${style}`}
+                  >
+                    <span>
+                      {String.fromCharCode(65 + i)}. {opt}
+                    </span>
+                    {(isReview ||
+                      (isStudyMode && answers[currentIdx] !== null)) &&
+                      isCorrect && (
+                        <CheckCircle2 size={16} className='text-green-500' />
+                      )}
+                  </button>
+                )
+              })}
+            </div>
+            {(isReview || (isStudyMode && answers[currentIdx] !== null)) && (
+              <div className='mt-6 p-5 bg-blue-50/50 rounded-2xl border border-blue-100'>
+                <p className='text-[9px] font-black text-[#002EFF] uppercase mb-1 flex items-center gap-1'>
+                  <Info size={12} /> Explanation
+                </p>
+                <p className='text-xs text-blue-900 leading-relaxed'>
+                  {currentQ?.explanation}
+                </p>
+              </div>
+            )}
+          </motion.div>
+
+          <div className='flex justify-between items-center bg-white p-3 rounded-2xl border border-gray-100'>
+            <button
+              disabled={currentIdx === 0}
+              onClick={() => setCurrentIdx((p) => p - 1)}
+              className='p-2 font-bold text-gray-400 uppercase text-[10px] flex items-center gap-1 disabled:opacity-20'
+            >
+              <ChevronLeft size={14} /> Prev
+            </button>
+            <span className='text-[10px] font-bold text-gray-400 uppercase tracking-widest'>
+              {currentIdx + 1} / {quizData.length}
+            </span>
+            <button
+              onClick={() =>
+                currentIdx === quizData.length - 1
+                  ? setStep('result')
+                  : setCurrentIdx((p) => p + 1)
+              }
+              className='px-6 py-2.5 bg-black text-white rounded-xl font-bold uppercase text-[10px] transition-all'
+            >
+              {currentIdx === quizData.length - 1 ? 'Finish' : 'Next'}
+            </button>
+          </div>
+        </div>
+
+        <aside className='space-y-4'>
+          <div className='bg-white p-5 rounded-2xl border border-gray-100 shadow-sm'>
+            <p className='text-[10px] font-bold text-gray-400 uppercase mb-3 flex items-center gap-2'>
+              <LayoutGrid size={12} /> Navigation
+            </p>
+            <div className='grid grid-cols-5 gap-1.5'>
+              {quizData.map((_, i) => (
                 <button
                   key={i}
-                  onClick={() => {
-                    playDing()
-                    const a = [...answers]
-                    a[currentIdx] = i
-                    setAnswers(a)
-                  }}
-                  className={`p-5 rounded-2xl border-2 text-left font-bold transition-all flex justify-between items-center ${
-                    answers[currentIdx] === i
-                      ? 'border-[#002EFF] bg-blue-50 text-[#002EFF]'
-                      : 'border-gray-50 bg-gray-50 hover:bg-white'
+                  onClick={() => setCurrentIdx(i)}
+                  className={`aspect-square rounded-lg text-[10px] font-bold transition-all border-2 
+                  ${currentIdx === i ? 'border-black' : 'border-transparent'}
+                  ${
+                    isReview
+                      ? answers[i] === quizData[i].correct
+                        ? 'bg-green-500 text-white'
+                        : 'bg-red-500 text-white'
+                      : flagged[i]
+                      ? 'bg-orange-500 text-white'
+                      : answers[i] !== null
+                      ? 'bg-[#002EFF] text-white'
+                      : 'bg-gray-100 text-gray-400'
                   }`}
                 >
-                  <span>
-                    {String.fromCharCode(65 + i)}. {opt}
-                  </span>
-                  <div
-                    className={`w-5 h-5 rounded-full border-2 ${
-                      answers[currentIdx] === i
-                        ? 'bg-[#002EFF] border-[#002EFF]'
-                        : 'border-gray-300'
-                    }`}
-                  />
+                  {i + 1}
                 </button>
               ))}
             </div>
-
-            <div className='flex justify-between mt-10 pt-8 border-t border-gray-100'>
-              <button
-                disabled={currentIdx === 0}
-                onClick={() => setCurrentIdx((p) => p - 1)}
-                className='px-6 py-3 rounded-xl font-black text-sm bg-gray-100 disabled:opacity-30'
-              >
-                PREVIOUS
-              </button>
-              <button
-                onClick={() =>
-                  currentIdx === quizData.length - 1
-                    ? setStep('result')
-                    : setCurrentIdx((p) => p + 1)
-                }
-                className='px-8 py-3 rounded-xl font-black text-sm bg-black text-white'
-              >
-                {currentIdx === quizData.length - 1
-                  ? 'SUBMIT'
-                  : 'NEXT QUESTION'}
-              </button>
-            </div>
-          </motion.div>
-        </AnimatePresence>
-
-        <div className='mt-8 bg-white p-8 rounded-[40px] flex flex-wrap justify-center gap-2'>
-          {quizData.map((_, i) => (
-            <button
-              key={i}
-              onClick={() => setCurrentIdx(i)}
-              className={`w-10 h-10 rounded-xl font-black text-xs border-b-4 transition-all ${
-                currentIdx === i
-                  ? 'bg-[#002EFF] text-white border-blue-900 -translate-y-1'
-                  : answers[i] !== null
-                  ? 'bg-green-500 border-green-700 text-white'
-                  : 'bg-gray-100 text-gray-400 border-gray-200'
-              }`}
-            >
-              {i + 1}
-            </button>
-          ))}
-        </div>
-      </div>
+          </div>
+        </aside>
+      </main>
 
       <AnimatePresence>
         {step === 'result' && (
-          <div className='fixed inset-0 bg-black/90 backdrop-blur-md z-50 flex items-center justify-center p-4'>
+          <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4'>
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className='bg-white p-12 rounded-[50px] max-w-md w-full text-center'
+              className='bg-white p-8 rounded-4xl max-w-sm w-full text-center shadow-2xl'
             >
-              <Trophy size={48} className='text-[#FCB900] mx-auto mb-6' />
-              <h2 className='text-3xl font-black mb-2'>MOCK COMPLETED</h2>
-              <div className='text-7xl font-black text-[#002EFF] my-6'>
-                {Math.round(
-                  (answers.filter((a, i) => a === quizData[i].correct).length /
-                    quizData.length) *
-                    100
-                )}
-                %
-              </div>
-              <p className='mb-6 text-gray-500 font-bold'>
-                You scored{' '}
-                {answers.filter((a, i) => a === quizData[i].correct).length} out
-                of {quizData.length}
+              <Trophy size={48} className='mx-auto mb-3 text-[#FCB900]' />
+              <h2 className='text-5xl font-black mb-1 tracking-tighter'>
+                {userScore}%
+              </h2>
+              <p className='text-gray-400 font-bold uppercase text-[10px] mb-8'>
+                Exam Complete
               </p>
-              <div className='grid gap-3'>
+              <div className='space-y-2'>
                 <button
-                  onClick={() => setStep('review')}
-                  className='w-full py-4 bg-black text-white font-black rounded-2xl'
+                  onClick={() => {
+                    setCurrentIdx(0)
+                    setStep('review')
+                  }}
+                  className='w-full py-3.5 bg-black text-white rounded-xl font-bold flex items-center justify-center gap-2 text-sm'
                 >
-                  VIEW CORRECTIONS
+                  <Eye size={16} /> Review Errors
                 </button>
-                <button
-                  onClick={exitToMainSite}
-                  className='w-full py-4 bg-[#002EFF] text-white font-black rounded-2xl shadow-lg shadow-blue-200'
-                >
-                  RETURN TO HOME PAGE
-                </button>
-                <button
-                  onClick={() => window.location.reload()}
-                  className='w-full py-4 border-2 border-gray-100 text-gray-400 font-black rounded-2xl'
-                >
-                  RETRY MOCK
-                </button>
+                <div className='grid grid-cols-2 gap-2'>
+                  <button
+                    onClick={() => setStep('setup')}
+                    className='py-3 bg-gray-100 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-1'
+                  >
+                    <RotateCcw size={14} /> Retake
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className='py-3 bg-gray-100 rounded-xl font-bold text-[10px] uppercase flex items-center justify-center gap-1'
+                  >
+                    <Printer size={14} /> Print
+                  </button>
+                </div>
               </div>
             </motion.div>
           </div>

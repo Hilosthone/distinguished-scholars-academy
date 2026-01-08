@@ -28,17 +28,17 @@ export default function Footer() {
   const socialLinks = [
     {
       name: 'Facebook',
-      icon: <Facebook size={20} />,
+      icon: <Facebook size={18} />,
       href: 'https://www.facebook.com/profile.php?id=100086918049765',
     },
     {
       name: 'Instagram',
-      icon: <Instagram size={20} />,
+      icon: <Instagram size={18} />,
       href: 'https://www.instagram.com/dsa_tutelage',
     },
     {
       name: 'Telegram',
-      icon: <Send size={20} />,
+      icon: <Send size={18} />,
       href: 'https://t.me/joinchat/EalrMZQfTGY0MzQ0',
     },
   ]
@@ -46,84 +46,57 @@ export default function Footer() {
   if (!mounted) return null
 
   return (
-    <footer className='w-full bg-[#0a0e1a] text-gray-400 pt-20 pb-10 relative overflow-hidden'>
+    <footer className='w-full bg-[#0a0e1a] text-gray-400 pt-16 pb-8 relative overflow-hidden'>
       {/* REPEATING FORMULA PATTERN */}
-      <div className='absolute inset-0 opacity-[0.1] pointer-events-none'>
+      <div className='absolute inset-0 opacity-[0.07] pointer-events-none'>
         <svg width='100%' height='100%' xmlns='http://www.w3.org/2000/svg'>
           <defs>
             <pattern
               id='formula-pattern'
               x='0'
               y='0'
-              width='400'
-              height='400'
+              width='300'
+              height='300'
               patternUnits='userSpaceOnUse'
             >
-              <text x='20' y='50' fill='white' fontSize='14' fontFamily='serif'>
+              <text x='20' y='50' fill='white' fontSize='12' fontFamily='serif'>
                 E=mc²
               </text>
               <text
-                x='250'
+                x='180'
                 y='80'
                 fill='white'
-                fontSize='12'
+                fontSize='10'
                 fontFamily='serif'
               >
                 H₂O
               </text>
               <text
-                x='120'
+                x='80'
                 y='150'
                 fill='white'
-                fontSize='15'
+                fontSize='12'
                 fontFamily='serif'
               >
                 πr²
               </text>
               <text
-                x='300'
+                x='220'
                 y='180'
                 fill='white'
-                fontSize='13'
+                fontSize='11'
                 fontFamily='serif'
               >
                 F=ma
               </text>
               <text
-                x='50'
-                y='250'
+                x='40'
+                y='240'
                 fill='white'
-                fontSize='14'
-                fontFamily='serif'
-              >
-                Δx/Δt
-              </text>
-              <text
-                x='200'
-                y='320'
-                fill='white'
-                fontSize='12'
+                fontSize='10'
                 fontFamily='serif'
               >
                 PV=nRT
-              </text>
-              <text
-                x='40'
-                y='370'
-                fill='white'
-                fontSize='11'
-                fontFamily='serif'
-              >
-                sin²θ + cos²θ = 1
-              </text>
-              <text
-                x='280'
-                y='380'
-                fill='white'
-                fontSize='14'
-                fontFamily='serif'
-              >
-                v = u + at
               </text>
             </pattern>
           </defs>
@@ -131,41 +104,45 @@ export default function Footer() {
         </svg>
       </div>
 
-      <div className='max-w-7xl mx-auto px-10 md:px-20 relative z-10'>
-        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-12 pb-16 border-b border-white/5'>
+      <div className='max-w-7xl mx-auto px-6 md:px-12 relative z-10'>
+        <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 pb-12 border-b border-white/5'>
           {/* BRAND COLUMN */}
-          <div className='space-y-6'>
-            <h3 className='text-white font-extrabold text-xl tracking-tighter uppercase'>
+          <div className='space-y-5'>
+            <h3 className='text-white font-black text-lg tracking-tight uppercase'>
               Distinguished <span className='text-[#002EFF]'>Scholars</span>{' '}
               Academy
             </h3>
-            <p className='text-sm leading-relaxed'>
+            <p className='text-xs leading-relaxed max-w-sm'>
               Empowering students with the right skills, speed, and confidence
               to dominate national exams and secure university admissions.
             </p>
-            <div className='space-y-3'>
-              <div className='flex items-center gap-3 text-sm'>
-                <Phone size={16} className='text-[#FCB900]' />
-                <span>+234 (0) 810 000 0000</span>
+            <div className='space-y-2.5'>
+              <div className='flex items-center gap-3 text-[13px]'>
+                <Phone size={14} className='text-[#FCB900]' />
+                <span className='hover:text-white transition-colors'>
+                  +234 906 186 4717
+                </span>
               </div>
-              <div className='flex items-center gap-3 text-sm'>
-                <Mail size={16} className='text-[#FCB900]' />
-                <span>info@dsatutelage.com</span>
+              <div className='flex items-center gap-3 text-[13px]'>
+                <Mail size={14} className='text-[#FCB900]' />
+                <span className='hover:text-white transition-colors'>
+                  dsatutelage@gmail.com
+                </span>
               </div>
             </div>
           </div>
 
           {/* EXPLORE COLUMN */}
           <div>
-            <h4 className='text-white font-bold mb-6 uppercase tracking-widest text-xs'>
+            <h4 className='text-white font-bold mb-5 uppercase tracking-widest text-[10px]'>
               Explore
             </h4>
-            <ul className='space-y-4'>
+            <ul className='space-y-3'>
               {exploreLinks.map((link) => (
                 <li key={`explore-${link.name}`}>
                   <Link
                     href={link.href}
-                    className='text-sm hover:text-[#FCB900] transition-colors duration-300'
+                    className='text-[13px] hover:text-[#FCB900] transition-colors'
                   >
                     {link.name}
                   </Link>
@@ -176,15 +153,15 @@ export default function Footer() {
 
           {/* LEGAL COLUMN */}
           <div>
-            <h4 className='text-white font-bold mb-6 uppercase tracking-widest text-xs'>
+            <h4 className='text-white font-bold mb-5 uppercase tracking-widest text-[10px]'>
               Legal
             </h4>
-            <ul className='space-y-4'>
+            <ul className='space-y-3'>
               {legalLinks.map((link) => (
                 <li key={`legal-${link.name}`}>
                   <Link
                     href={link.href}
-                    className='text-sm hover:text-[#FCB900] transition-colors duration-300'
+                    className='text-[13px] hover:text-[#FCB900] transition-colors'
                   >
                     {link.name}
                   </Link>
@@ -195,22 +172,22 @@ export default function Footer() {
 
           {/* NEWSLETTER COLUMN */}
           <div>
-            <h4 className='text-white font-bold mb-6 uppercase tracking-widest text-xs'>
-              Stay Updated
+            <h4 className='text-white font-bold mb-5 uppercase tracking-widest text-[10px]'>
+              Newsletter
             </h4>
-            <p className='text-sm mb-4'>
-              Subscribe to get exam updates and study tips.
+            <p className='text-[13px] mb-4'>
+              Subscribe for exam updates and study tips.
             </p>
-            <form className='relative' onSubmit={(e) => e.preventDefault()}>
+            <form className='space-y-2' onSubmit={(e) => e.preventDefault()}>
               <input
                 type='email'
                 required
-                className='w-full px-4 py-3 rounded-xl bg-white/5 border border-white/10 text-white focus:outline-none focus:border-[#002EFF] transition-all'
-                placeholder='Your Email Address'
+                className='w-full px-4 py-2.5 rounded-lg bg-white/5 border border-white/10 text-white text-sm focus:outline-none focus:border-[#002EFF] transition-all'
+                placeholder='Email Address'
               />
               <button
                 type='submit'
-                className='mt-3 w-full py-3 bg-[#002EFF] text-white font-bold rounded-xl hover:bg-[#FCB900] hover:text-black transition-all duration-300 active:scale-95'
+                className='w-full py-2.5 bg-[#002EFF] text-white font-bold rounded-lg hover:bg-[#FCB900] hover:text-black transition-all text-xs uppercase'
               >
                 Subscribe
               </button>
@@ -219,25 +196,25 @@ export default function Footer() {
         </div>
 
         {/* BOTTOM SECTION */}
-        <div className='pt-10 flex flex-col md:flex-row items-center justify-between gap-6'>
-          <p className='text-xs text-gray-500 text-center md:text-left leading-relaxed'>
+        <div className='pt-8 flex flex-col md:flex-row items-center justify-between gap-6'>
+          <p className='text-[11px] text-gray-500 text-center md:text-left leading-relaxed'>
             © {year}{' '}
             <span className='text-gray-300 font-semibold'>
               Distinguished Scholars Academy
             </span>
-            . <br className='md:hidden' />
-            Built for excellence. All rights reserved.
+            .
+            <br className='md:hidden' /> Built for excellence. All rights
+            reserved.
           </p>
 
-          <div className='flex items-center gap-4'>
+          <div className='flex items-center gap-3'>
             {socialLinks.map((social) => (
               <a
                 key={`social-${social.name}`}
                 href={social.href}
                 target='_blank'
                 rel='noopener noreferrer'
-                aria-label={social.name}
-                className='w-10 h-10 flex items-center justify-center rounded-full bg-white/5 text-gray-400 hover:bg-[#FCB900] hover:text-black transition-all duration-300 shadow-xl'
+                className='w-9 h-9 flex items-center justify-center rounded-lg bg-white/5 text-gray-400 hover:bg-[#FCB900] hover:text-black transition-all shadow-sm'
               >
                 {social.icon}
               </a>
