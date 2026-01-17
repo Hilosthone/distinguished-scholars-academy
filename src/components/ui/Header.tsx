@@ -205,7 +205,7 @@ export default function Header() {
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.5, x: 20 }}
             onClick={() => handleSmoothScroll(null, 'home')}
-            className='fixed bottom-8 right-8 z-60 p-4 bg-white text-[#002EFF] border border-gray-100 shadow-2xl rounded-2xl hover:bg-[#002EFF] hover:text-white transition-all group'
+            className='fixed bottom-8 right-8 z-50 p-4 bg-white text-[#002EFF] border border-gray-100 shadow-2xl rounded-2xl hover:bg-[#002EFF] hover:text-white transition-all group'
           >
             <ChevronUp
               size={24}
@@ -215,7 +215,7 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      {/* 4. COMPACT MOBILE MENU */}
+      {/* 4. COMPACT MOBILE MENU (FIXED) */}
       <AnimatePresence>
         {open && (
           <>
@@ -224,80 +224,93 @@ export default function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className='fixed inset-0 bg-[#002EFF]/10 backdrop-blur-md z-65 md:hidden'
+              className='fixed inset-0 bg-[#002EFF]/10 backdrop-blur-md z-60 md:hidden'
             />
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className='fixed top-4 right-4 w-[75%] max-w-[320px] h-[calc(100vh-32px)] bg-white z-70 shadow-2xl p-6 flex flex-col md:hidden rounded-[2.5rem] border border-gray-100'
+              className='fixed top-4 right-4 w-[85%] max-w-[320px] max-h-[calc(100vh-32px)] bg-white z-gi70 shadow-2xl flex flex-col md:hidden rounded-[2.5rem] border border-gray-100 overflow-hidden'
             >
-              <div className='flex justify-between items-center mb-8 px-2'>
+              {/* Header inside Sidebar */}
+              <div className='flex justify-between items-center p-6 pb-2'>
                 <span className='font-black text-[#002EFF] tracking-[0.2em] text-[10px] uppercase'>
                   Menu
                 </span>
                 <button
                   onClick={() => setOpen(false)}
-                  className='p-2.5 bg-gray-50 text-gray-400 rounded-xl'
+                  className='p-2 bg-gray-50 text-gray-400 rounded-xl'
                 >
                   <X size={18} />
                 </button>
               </div>
 
-              <div className='flex flex-col gap-1'>
-                {navLinks.map((link, index) => (
-                  <motion.button
-                    key={link.id}
-                    initial={{ opacity: 0, x: 10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.05 + index * 0.05 }}
-                    onClick={(e) => handleSmoothScroll(e, link.id)}
-                    className={`text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all group flex justify-between items-center ${
-                      activeSection === link.id
-                        ? 'bg-[#002EFF] text-white shadow-md shadow-blue-100'
-                        : 'text-gray-400 hover:text-black hover:bg-gray-50'
-                    }`}
-                  >
-                    {link.name}
-                    <ArrowRight
-                      size={14}
-                      className={`transition-transform duration-300 ${
+              {/* Scrollable Content Area */}
+              <div className='flex-1 overflow-y-auto px-6 py-2 custom-scrollbar'>
+                <div className='flex flex-col gap-1 mb-6'>
+                  {navLinks.map((link, index) => (
+                    <motion.button
+                      key={link.id}
+                      initial={{ opacity: 0, x: 10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.05 + index * 0.05 }}
+                      onClick={(e) => handleSmoothScroll(e, link.id)}
+                      className={`text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all group flex justify-between items-center ${
                         activeSection === link.id
-                          ? 'opacity-100'
-                          : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'
+                          ? 'bg-[#002EFF] text-white'
+                          : 'text-gray-400 hover:text-black hover:bg-gray-50'
                       }`}
-                    />
-                  </motion.button>
-                ))}
-              </div>
-
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ delay: 0.4 }}
-                className='mt-auto pt-6 border-t border-gray-50'
-              >
-                <div className='p-5 bg-blue-50/50 rounded-3xl mb-4'>
-                  <p className='text-[#002EFF] font-bold text-[10px] uppercase tracking-wider mb-1'>
-                    Success Awaits
-                  </p>
-                  <p className='text-gray-500 text-[10px] leading-tight'>
-                    Ready to excel? Let's start your journey.
-                  </p>
+                    >
+                      {link.name}
+                      <ArrowRight
+                        size={14}
+                        className={`transition-transform duration-300 ${
+                          activeSection === link.id
+                            ? 'opacity-100'
+                            : 'opacity-0 -translate-x-2'
+                        }`}
+                      />
+                    </motion.button>
+                  ))}
                 </div>
-                <Link
-                  href='https://wa.link/7wim2w'
-                  target='_blank'
-                  className='w-full py-4 bg-[#FCB900] text-black rounded-2xl font-black uppercase tracking-widest text-[11px] text-center flex items-center justify-center gap-2 shadow-lg active:scale-95 transition-transform'
-                >
-                  Enrol Now <ArrowRight size={16} />
-                </Link>
-              </motion.div>
+
+                {/* Footer Section of Sidebar */}
+                <div className='pb-6'>
+                  <div className='p-5 bg-blue-50/50 rounded-3xl mb-4'>
+                    <p className='text-[#002EFF] font-bold text-[10px] uppercase tracking-wider mb-1'>
+                      Success Awaits
+                    </p>
+                    <p className='text-gray-500 text-[10px] leading-tight'>
+                      Ready to excel? Let's start your journey today.
+                    </p>
+                  </div>
+                  <Link
+                    href='https://wa.link/7wim2w'
+                    target='_blank'
+                    className='w-full py-4 bg-[#FCB900] text-black rounded-2xl font-black uppercase tracking-widest text-[11px] text-center flex items-center justify-center gap-2 shadow-lg hover:brightness-105 active:scale-95 transition-all'
+                  >
+                    Enrol Now <ArrowRight size={16} />
+                  </Link>
+                </div>
+              </div>
             </motion.div>
           </>
         )}
       </AnimatePresence>
+
+      <style jsx global>{`
+        .custom-scrollbar::-webkit-scrollbar {
+          width: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+          background: transparent;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+          background: #e2e8f0;
+          border-radius: 10px;
+        }
+      `}</style>
     </>
   )
 }
