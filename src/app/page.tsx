@@ -23,28 +23,52 @@ export default function HomePage() {
     setHasMounted(true)
   }, [])
 
-  // If the app hasn't mounted on the client yet, we can return a
-  // simple background color or null to prevent the console error.
+  // Prevents Hydration Mismatch by waiting for client-side mounting
   if (!hasMounted) {
     return <div className='bg-white min-h-screen' />
   }
 
   return (
-    <>
+    <main className='relative'>
       <Header />
+
       <Hero />
-      <AboutUs />
+
+      <section id='about'>
+        <AboutUs />
+      </section>
+
       <Features />
-      <Courses />
+
+      <section id='programs'>
+        <Courses />
+      </section>
+
       <Features1 />
-      <Tutors />
+
+      <section id='tutors'>
+        <Tutors />
+      </section>
+
       <WatchUs />
+
       <Testimonial />
-      <RapidQuiz />
-      <BlogPosts />
+
+      <section id='RapidQuiz'>
+        <RapidQuiz />
+      </section>
+
+      <section id='blog'>
+        <BlogPosts />
+      </section>
+
       <CTA />
-      <FAQs />
+
+      <section id='faq'>
+        <FAQs />
+      </section>
+
       <Footer />
-    </>
+    </main>
   )
 }

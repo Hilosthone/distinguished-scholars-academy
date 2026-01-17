@@ -37,10 +37,19 @@ const faqs = [
 ]
 
 const backgroundFormulas = [
-  { text: 'Σ n=1 → ∞', top: '10%', left: '5%', rotate: -10 },
-  { text: 'A ⇌ B + C', top: '20%', right: '8%', rotate: 15 },
-  { text: 'dy/dx', top: '80%', left: '10%', rotate: -5 },
-  { text: 'F = G(m₁m₂)/r²', top: '75%', right: '5%', rotate: 12 },
+  { text: 'Σ n=1 → ∞', top: '10%', left: '5%', rotate: -10, color: '#002EFF' },
+  { text: 'A ⇌ B + C', top: '15%', right: '10%', rotate: 15, color: '#FCB900' },
+  { text: 'dy/dx', top: '45%', left: '2%', rotate: -15, color: '#002EFF' },
+  { text: 'H₂SO₄', top: '50%', right: '3%', rotate: 10, color: '#002EFF' },
+  { text: '∫ sin(x) dx', top: '80%', left: '8%', rotate: -5, color: '#FCB900' },
+  {
+    text: 'F = G(m₁m₂)/r²',
+    top: '75%',
+    right: '5%',
+    rotate: 12,
+    color: '#002EFF',
+  },
+  { text: 'πr²', top: '30%', left: '15%', rotate: 20, color: '#002EFF' },
 ]
 
 export default function FAQs() {
@@ -52,68 +61,92 @@ export default function FAQs() {
       className='relative w-full py-24 bg-[#f8faff] overflow-hidden'
     >
       {/* --- BACKGROUND ACADEMIC ELEMENTS --- */}
-      <div className='absolute inset-0 pointer-events-none select-none opacity-[0.07] hidden md:block'>
+      <style jsx>{`
+        @keyframes floatFAQ {
+          0%,
+          100% {
+            transform: translateY(0) rotate(var(--rot));
+            filter: drop-shadow(0 0 5px var(--glow));
+          }
+          50% {
+            transform: translateY(-20px) rotate(calc(var(--rot) + 5deg));
+            filter: drop-shadow(0 0 15px var(--glow));
+          }
+        }
+        .faq-formula {
+          animation: floatFAQ 8s ease-in-out infinite;
+          opacity: 0.10;
+          transition: opacity 0.3s ease;
+        }
+        .faq-formula:hover {
+          opacity: 0.4;
+        }
+      `}</style>
+
+      <div className='absolute inset-0 pointer-events-none select-none hidden md:block'>
         {backgroundFormulas.map((f, i) => (
-          <motion.div
+          <div
             key={i}
-            animate={{ y: [0, -10, 0] }}
-            transition={{
-              repeat: Infinity,
-              duration: 6 + i,
-              ease: 'easeInOut',
-            }}
-            className='absolute font-serif italic text-[#002EFF] text-2xl font-bold'
-            style={{
-              top: f.top,
-              left: f.left,
-              right: f.right,
-              transform: `rotate(${f.rotate}deg)`,
-            }}
+            className='absolute font-serif italic text-2xl md:text-4xl font-black faq-formula'
+            style={
+              {
+                top: f.top,
+                left: f.left,
+                right: f.right,
+                color: f.color,
+                '--rot': `${f.rotate}deg`,
+                '--glow':
+                  f.color === '#FCB900'
+                    ? 'rgba(252,185,0,0.4)'
+                    : 'rgba(0,46,255,0.4)',
+                animationDelay: `${i * 0.7}s`,
+              } as any
+            }
           >
             {f.text}
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className='max-w-7xl mx-auto px-6 md:px-20 relative z-10'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            whileInView={{ opacity: 1, scale: 1 }}
-            viewport={{ once: true }}
-            className='inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-4 border border-blue-100'
+          <div
+            data-aos='zoom-in'
+            data-aos-duration='500'
+            className='inline-flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-full mb-4 border border-blue-100 shadow-sm'
           >
             <HelpCircle size={16} className='text-[#002EFF]' />
             <span className='text-[#002EFF] text-[10px] font-black uppercase tracking-[0.2em]'>
               Support Center
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          <h2
+            data-aos='fade-up'
+            data-aos-duration='600'
             className='text-4xl md:text-5xl font-black text-black uppercase tracking-tighter'
           >
             Common <span className='text-[#002EFF]'>Questions</span>
-          </motion.h2>
-          <div className='w-24 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full shadow-sm'></div>
+          </h2>
+          <div
+            data-aos='zoom-in'
+            data-aos-delay='300'
+            className='w-24 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full shadow-sm'
+          ></div>
         </div>
 
         <div className='max-w-3xl mx-auto space-y-5'>
           {faqs.map((faq, index) => {
             const isOpen = openIndex === index
             return (
-              <motion.div
+              <div
                 key={index}
-                initial={{ opacity: 0, y: 15 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.05 }}
+                data-aos='fade-up'
+                data-aos-delay={index * 50}
                 className={`rounded-[30px] transition-all duration-500 overflow-hidden ${
                   isOpen
-                    ? 'bg-white shadow-[0_20px_40px_rgba(0,46,255,0.08)] ring-1 ring-[#002EFF]/20'
+                    ? 'bg-white shadow-[0_30px_60px_rgba(0,46,255,0.12)] ring-1 ring-[#002EFF]/20 scale-[1.02]'
                     : 'bg-white/60 hover:bg-white border border-gray-100 hover:shadow-xl'
                 }`}
               >
@@ -129,13 +162,13 @@ export default function FAQs() {
                     {faq.question}
                   </h3>
                   <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-500 ${
+                    className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ${
                       isOpen
-                        ? 'bg-[#002EFF] text-white rotate-180'
+                        ? 'bg-[#002EFF] text-white rotate-180 shadow-lg shadow-blue-200'
                         : 'bg-gray-100 text-gray-400 group-hover:bg-blue-50 group-hover:text-[#002EFF]'
                     }`}
                   >
-                    <ChevronDown size={18} strokeWidth={3} />
+                    <ChevronDown size={20} strokeWidth={3} />
                   </div>
                 </button>
 
@@ -156,27 +189,30 @@ export default function FAQs() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-              </motion.div>
+              </div>
             )
           })}
         </div>
 
         {/* Support CTA */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+        <div
+          data-aos='fade-in'
+          data-aos-delay='400'
           className='mt-16 text-center'
         >
-          <p className='text-gray-400 font-bold text-sm uppercase tracking-widest'>
-            Still have questions?
-            <a
-              href='https://wa.link/7wim2w'
-              className='text-[#002EFF] ml-2 hover:underline'
-            >
-              Chat with an expert
-            </a>
-          </p>
-        </motion.div>
+          <div className='inline-block px-8 py-4 bg-white rounded-2xl shadow-sm border border-gray-100'>
+            <p className='text-gray-500 font-bold text-sm uppercase tracking-widest'>
+              Still have questions?
+              <a
+                href='https://wa.link/7wim2w'
+                className='text-[#002EFF] ml-2 hover:underline inline-flex items-center gap-1'
+              >
+                Chat with an expert{' '}
+                <ChevronDown size={14} className='-rotate-90' />
+              </a>
+            </p>
+          </div>
+        </div>
       </div>
     </section>
   )

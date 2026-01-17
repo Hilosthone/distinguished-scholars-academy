@@ -1,36 +1,134 @@
 'use client'
-import { motion } from 'framer-motion'
+import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
 import { CheckCircle, Award, BookOpen, Users, Lightbulb } from 'lucide-react'
+import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion'
 import DSAStudent from '../../imges/AboutDSA.jpg'
 
 export default function AboutDSA() {
+  const [offset, setOffset] = useState(0)
+
+  // Ref for the 3D Tilt Effect
+  const cardRef = useRef<HTMLDivElement>(null)
+  const x = useMotionValue(0)
+  const y = useMotionValue(0)
+
+  const mouseXSpring = useSpring(x)
+  const mouseYSpring = useSpring(y)
+
+  const rotateX = useTransform(mouseYSpring, [-0.5, 0.5], ['10deg', '-10deg'])
+  const rotateY = useTransform(mouseXSpring, [-0.5, 0.5], ['-10deg', '10deg'])
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!cardRef.current) return
+    const rect = cardRef.current.getBoundingClientRect()
+    const width = rect.width
+    const height = rect.height
+    const mouseX = e.clientX - rect.left
+    const mouseY = e.clientY - rect.top
+    const xPct = mouseX / width - 0.5
+    const yPct = mouseY / height - 0.5
+    x.set(xPct)
+    y.set(yPct)
+  }
+
+  const handleMouseLeave = () => {
+    x.set(0)
+    y.set(0)
+  }
+
+  useEffect(() => {
+    const handleScroll = () => setOffset(window.pageYOffset)
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
   return (
     <section
       id='about'
-      className='relative w-full py-24 bg-white overflow-hidden'
+      className='relative w-full py-16 md:py-24 bg-white overflow-hidden'
     >
-      {/* --- BACKGROUND ACADEMIC ELEMENTS --- */}
-      <div className='absolute inset-0 pointer-events-none opacity-5 select-none hidden md:block'>
-        <div className='absolute top-20 left-10 text-4xl font-serif italic text-[#002EFF]'>
+      {/* --- PARALLAX BACKGROUND ELEMENTS --- */}
+      <div className='absolute inset-0 pointer-events-none opacity-10 select-none hidden md:block'>
+        <div
+          className='absolute top-20 left-10 text-4xl font-serif italic text-[#002EFF]'
+          style={{ transform: `translateY(${offset * 0.15}px) rotate(-10deg)` }}
+        >
           sin(θ) = o/h
         </div>
-        <div className='absolute bottom-20 right-10 text-4xl font-serif italic text-[#002EFF]'>
+        <div
+          className='absolute bottom-20 right-10 text-4xl font-serif italic text-[#002EFF]'
+          style={{ transform: `translateY(-${offset * 0.1}px) rotate(10deg)` }}
+        >
           NaCl + H₂O
         </div>
-        <div className='absolute top-1/2 left-[48%] text-6xl font-serif italic text-[#002EFF]'>
+        <div
+          className='absolute top-1/2 left-[45%] text-7xl font-serif italic text-[#002EFF]'
+          style={{ transform: `translateY(${offset * 0.05}px)` }}
+        >
           π
         </div>
       </div>
 
-      <div className='max-w-7xl mx-auto px-6 md:px-12 lg:px-20 grid md:grid-cols-2 gap-16 lg:gap-24 items-center'>
-        {/* LEFT TEXT CONTENT */}
+      <div className='max-w-7xl mx-auto px-6 md:px-12 lg:px-20 grid lg:grid-cols-2 gap-12 lg:gap-20 items-center'>
+        {/* IMAGE CONTAINER WITH 3D TILT */}
         <motion.div
-          initial={{ opacity: 0, x: -40 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
+          ref={cardRef}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
+          style={{ rotateX, rotateY, transformStyle: 'preserve-3d' }}
+          data-aos='fade-up'
+          className='relative order-1 lg:order-2 perspective-1000'
         >
+          {/* Orbital Ring */}
+          <div className='absolute -inset-10 border border-blue-100 rounded-full animate-[spin_30s_linear_infinite] opacity-30' />
+
+          <div className='relative w-full bg-[#002EFF] rounded-[30px] md:rounded-[40px] shadow-2xl p-1.5 md:p-2 overflow-visible'>
+            {/* IMAGE BOX: 
+                Switched to aspect-video (16:9) to capture more width 
+                Switched to object-contain to ensure nobody is cut off 
+            */}
+            <div className='relative w-full aspect-video lg:aspect-3/2 overflow-hidden rounded-3xl md:rounded-[36px] bg-gray-100'>
+              <Image
+                src={DSAStudent}
+                alt='DSA Students and Tutors'
+                fill
+                sizes='(max-width: 768px) 100vw, 50vw'
+                className='object-contain bg-gray-50 hover:scale-105 transition-transform duration-700'
+                priority
+              />
+            </div>
+
+            {/* F=ma Badge (Floating above 3D card) */}
+            <div
+              style={{ transform: 'translateZ(50px)' }}
+              className='absolute -top-6 -right-2 md:-top-10 md:right-4 z-20 bg-white shadow-xl p-2 md:p-4 rounded-xl border border-gray-100 text-[#002EFF] font-serif font-bold italic animate-pulse text-xs md:text-lg'
+            >
+              F = ma
+            </div>
+
+            {/* Excellence Badge (Floating above 3D card) */}
+            <div
+              style={{ transform: 'translateZ(40px)' }}
+              className='absolute -bottom-6 -left-4 md:-bottom-8 md:-left-8 bg-white p-4 md:p-6 shadow-2xl rounded-[20px] md:rounded-[30px] flex items-center gap-3 border border-gray-50 z-10'
+            >
+              <div className='bg-[#FCB900] w-10 h-10 md:w-16 md:h-16 rounded-xl text-white font-black text-lg md:text-3xl flex items-center justify-center'>
+                10+
+              </div>
+              <div className='flex flex-col'>
+                <span className='text-[10px] md:text-sm font-black text-black uppercase'>
+                  Years of
+                </span>
+                <span className='text-[10px] md:text-sm font-black text-[#002EFF] uppercase'>
+                  Excellence
+                </span>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* TEXT CONTENT */}
+        <div data-aos='fade-right' className='relative z-10 order-2 lg:order-1'>
           <div className='flex items-center gap-2 mb-4'>
             <div className='h-0.5 w-8 bg-[#FCB900]' />
             <span className='text-[#002EFF] font-black tracking-[0.3em] text-xs uppercase'>
@@ -38,32 +136,28 @@ export default function AboutDSA() {
             </span>
           </div>
 
-          <h2 className='text-4xl md:text-5xl font-black text-black mt-2 leading-[1.1] tracking-tight'>
+          <h2 className='text-3xl md:text-5xl font-black text-black mt-2 leading-tight'>
             About Distinguished <br />
             <span className='text-[#002EFF]'>Scholars Academy</span>
           </h2>
 
-          <p className='text-gray-500 mt-6 leading-relaxed text-lg font-medium'>
+          <p className='text-gray-500 mt-6 leading-relaxed text-base md:text-lg font-medium'>
             DSA is an educational institution dedicated to raising excellent
             students through effective teaching, consistent practice, and
-            result-driven mentorship. We combine structured learning with modern
-            technology to help every learner excel.
+            result-driven mentorship.
           </p>
 
-          {/* Philosophy Box with glassmorphism feel */}
-          <div className='mt-10 p-8 border-l-8 border-[#FCB900] bg-gray-50/50 rounded-r-4xl relative overflow-hidden'>
-            <Lightbulb className='absolute -right-4 -top-4 text-gray-100 size-24 rotate-12' />
-            <h3 className='font-black text-[#002EFF] text-xl uppercase tracking-widest mb-2 relative z-10'>
+          <div className='mt-8 p-6 border-l-8 border-[#FCB900] bg-gray-50 rounded-r-2xl'>
+            <h3 className='font-black text-[#002EFF] text-lg uppercase mb-2'>
               Our Philosophy
             </h3>
-            <p className='text-gray-700 text-lg italic leading-snug relative z-10'>
+            <p className='text-gray-700 text-base md:text-lg italic'>
               "Every student can become brilliant — all they need is the right
-              support, guidance, and learning environment."
+              support."
             </p>
           </div>
 
-          {/* Feature Grid */}
-          <div className='grid grid-cols-2 gap-y-6 gap-x-4 mt-12'>
+          <div className='grid grid-cols-2 gap-4 mt-10'>
             {[
               { label: 'Expert Tutors', icon: <Users size={20} /> },
               { label: 'CBT Practice', icon: <BookOpen size={20} /> },
@@ -72,68 +166,18 @@ export default function AboutDSA() {
             ].map((item) => (
               <div
                 key={item.label}
-                className='flex items-center gap-3 text-black font-bold group'
+                className='flex items-center gap-3 text-black font-bold'
               >
-                <div className='bg-blue-50 p-2 rounded-lg text-[#002EFF] group-hover:bg-[#002EFF] group-hover:text-white transition-colors'>
+                <div className='bg-blue-50 p-2 rounded-lg text-[#002EFF]'>
                   {item.icon}
                 </div>
-                <span className='text-sm uppercase tracking-wider'>
+                <span className='text-[10px] md:text-xs uppercase'>
                   {item.label}
                 </span>
               </div>
             ))}
           </div>
-        </motion.div>
-
-        {/* RIGHT IMAGE CONTAINER */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className='relative'
-        >
-          {/* Scientific Orbital Rings around the image */}
-          <div className='absolute -inset-10 border border-blue-100 rounded-full animate-[spin_15s_linear_infinite] opacity-50' />
-          <div className='absolute -inset-4 border border-blue-50 rounded-full animate-[spin_10s_linear_infinite_reverse] opacity-50' />
-
-          {/* Floating Academic Icons */}
-          <motion.div
-            animate={{ y: [0, -15, 0] }}
-            transition={{ repeat: Infinity, duration: 4 }}
-            className='absolute -top-10 right-10 z-20 bg-white shadow-xl p-3 rounded-2xl border border-gray-100 text-blue-600 font-serif font-bold italic'
-          >
-            F = ma
-          </motion.div>
-
-          <div className='relative w-full aspect-4/5 md:aspect-4/3 bg-[#002EFF] rounded-[40px] shadow-[0_20px_50px_rgba(0,46,255,0.2)] p-2'>
-            <div className='relative w-full h-full overflow-hidden rounded-4XL bg-gray-100'>
-              <Image
-                src={DSAStudent}
-                alt='DSA Students'
-                fill
-                sizes='(max-width: 768px) 100vw, 50vw'
-                className='object-cover object-top hover:scale-105 transition-transform duration-700'
-                priority
-              />
-            </div>
-
-            {/* Modern Floating Badge */}
-            <div className='absolute -bottom-8 -left-8 bg-white p-6 shadow-2xl rounded-[30px] flex items-center gap-4 border border-gray-50 z-10 group hover:-translate-y-2 transition-transform'>
-              <div className='bg-[#FCB900] w-14 h-14 rounded-2xl text-white font-black text-2xl flex items-center justify-center shadow-lg shadow-yellow-200'>
-                10+
-              </div>
-              <div className='flex flex-col'>
-                <span className='text-[12px] font-black text-black uppercase tracking-widest leading-none'>
-                  Years of
-                </span>
-                <span className='text-[12px] font-black text-[#002EFF] uppercase tracking-widest'>
-                  Excellence
-                </span>
-              </div>
-            </div>
-          </div>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

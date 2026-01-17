@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowRight } from 'lucide-react'
@@ -58,11 +57,9 @@ export default function Programs() {
     <section id='programs' className='w-full py-24 bg-[#f8faff]'>
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <div
+          data-aos='fade-up'
+          data-aos-duration='600'
           className='text-center mb-16'
         >
           <span className='text-[#002EFF] font-bold tracking-widest text-sm uppercase'>
@@ -72,17 +69,16 @@ export default function Programs() {
             Programs & <span className='text-[#002EFF]'>Courses</span>
           </h2>
           <div className='w-20 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
-        </motion.div>
+        </div>
 
         {/* GRID */}
         <div className='grid md:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-10'>
           {programs.map((program, index) => (
-            <motion.div
+            <div
               key={`program-${index}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              data-aos='fade-up'
+              data-aos-delay={index * 100}
+              data-aos-duration='500'
               className='group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-2xl border border-gray-100 transition-all duration-300'
             >
               {/* Image Container */}
@@ -118,20 +114,20 @@ export default function Programs() {
                   </span>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* CTA */}
         <div className='flex justify-center mt-16'>
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.98 }}
-            className='px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300 flex items-center gap-2'
+          <button
+            data-aos='zoom-in'
+            data-aos-duration='400'
+            className='px-10 py-4 bg-[#002EFF] text-white font-bold rounded-xl shadow-lg hover:bg-[#FCB900] hover:text-black transition-all duration-300 flex items-center gap-2 active:scale-95'
           >
             Explore All Programs
             <ArrowRight size={20} />
-          </motion.button>
+          </button>
         </div>
       </div>
     </section>

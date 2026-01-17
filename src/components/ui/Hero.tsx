@@ -1,6 +1,5 @@
 'use client'
 
-import { motion } from 'framer-motion'
 import { ArrowRight, Play } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -30,12 +29,11 @@ export default function Hero() {
       {/* --- ACADEMIC FORMULA BACKGROUND --- */}
       <div className='absolute inset-0 pointer-events-none select-none overflow-hidden'>
         {formulas.map((formula, index) => (
-          <motion.div
+          <div
             key={index}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 0.12 }}
-            transition={{ delay: 0.1 * index, duration: 1 }}
-            className='absolute font-serif italic text-blue-900 text-lg md:text-2xl whitespace-nowrap hidden sm:block'
+            data-aos='fade-in'
+            data-aos-delay={100 * index}
+            className='absolute font-serif italic text-blue-900 text-lg md:text-2xl whitespace-nowrap hidden sm:block opacity-[0.12]'
             style={{
               top: formula.top,
               left: formula.left,
@@ -43,16 +41,15 @@ export default function Hero() {
             }}
           >
             {formula.text}
-          </motion.div>
+          </div>
         ))}
       </div>
 
       <div className='relative z-10 max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-12 items-center px-6'>
         {/* LEFT TEXT CONTENT */}
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.6 }}
+        <div
+          data-aos='fade-right'
+          data-aos-duration='600'
           className='text-center md:text-left'
         >
           <div className='inline-block px-4 py-1.5 mb-6 rounded-full bg-blue-50 border border-blue-100'>
@@ -61,7 +58,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className='text-4xl md:text-5xl font-black text-gray-900 leading-[1.1] tracking-tight'>
+          <h1 className='text-4xl md:text-4xl font-black text-gray-900 leading-[1.1] tracking-tight'>
             Empowering Students to <br />
             <span className='text-[#002EFF]'>Excel in UTME & WAEC</span>
           </h1>
@@ -95,13 +92,12 @@ export default function Hero() {
               Join Free Classes
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* RIGHT IMAGE SECTION */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.7 }}
+        <div
+          data-aos='zoom-in'
+          data-aos-duration='700'
           className='relative flex justify-center items-center mt-16 md:mt-0'
         >
           {/* Animated Background Ring */}
@@ -126,10 +122,9 @@ export default function Hero() {
           </div>
 
           {/* Secondary Floating Images */}
-          <motion.div
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.5 }}
+          <div
+            data-aos='fade-up'
+            data-aos-delay='500'
             className='absolute -left-4 top-0 md:-left-12'
           >
             <div className='relative w-20 h-20 md:w-28 md:h-28 rounded-2xl border-4 border-white shadow-xl overflow-hidden rotate-[-10deg]'>
@@ -140,12 +135,11 @@ export default function Hero() {
                 alt='Student 1'
               />
             </div>
-          </motion.div>
+          </div>
 
-          <motion.div
-            initial={{ y: -20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            transition={{ delay: 0.7 }}
+          <div
+            data-aos='fade-down'
+            data-aos-delay='700'
             className='absolute -right-4 bottom-0 md:-right-8'
           >
             <div className='relative w-24 h-24 md:w-32 md:h-32 rounded-2xl border-4 border-white shadow-xl overflow-hidden rotate-10'>
@@ -156,8 +150,8 @@ export default function Hero() {
                 alt='Student 2'
               />
             </div>
-          </motion.div>
-        </motion.div>
+          </div>
+        </div>
       </div>
     </section>
   )

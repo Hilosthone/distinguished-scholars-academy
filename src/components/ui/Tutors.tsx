@@ -1,5 +1,5 @@
 'use client'
-import { motion } from 'framer-motion'
+import { useState, useEffect } from 'react'
 import Image from 'next/image'
 
 import Emmanuel from '../../imges/Mr. Emmanuel.jpg'
@@ -39,6 +39,14 @@ const tutors = [
 ]
 
 export default function Tutors() {
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
+
   return (
     <section
       id='tutors'
@@ -56,53 +64,52 @@ export default function Tutors() {
       <div className='max-w-7xl mx-auto px-6 md:px-20 relative z-10'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+          <div
+            data-aos='fade-up'
             className='inline-block px-4 py-1.5 bg-yellow-50 rounded-full mb-4 border border-yellow-100'
           >
             <span className='text-[#FCB900] text-[10px] font-black uppercase tracking-[0.2em]'>
               World Class Educators
             </span>
-          </motion.div>
+          </div>
 
-          <motion.h2
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
+          <h2
+            data-aos='fade-up'
+            data-aos-delay='100'
+            data-aos-duration='600'
             className='text-4xl md:text-5xl font-black text-black uppercase tracking-tighter'
           >
             Meet Our <span className='text-[#002EFF]'>Expert Tutors</span>
-          </motion.h2>
+          </h2>
 
-          <div className='w-24 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+          <div
+            data-aos='zoom-in'
+            data-aos-delay='200'
+            className='w-24 h-1.5 bg-[#FCB900] mx-auto mt-4 rounded-full'
+          ></div>
 
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.1 }}
+          <p
+            data-aos='fade-up'
+            data-aos-delay='300'
+            data-aos-duration='700'
             className='text-gray-500 mt-6 max-w-xl mx-auto text-lg font-medium leading-relaxed'
           >
             Our educators are industry experts dedicated to simplifying complex
             topics and ensuring student success.
-          </motion.p>
+          </p>
         </div>
 
         {/* TUTORS GRID */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12'>
           {tutors.map((tutor, index) => (
-            <motion.div
+            <div
               key={index}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              data-aos='fade-up'
+              data-aos-delay={index * 100}
+              data-aos-duration='500'
               className='group relative p-1 bg-gray-50 rounded-[40px] hover:bg-white hover:shadow-[0_30px_60px_rgba(0,46,255,0.12)] transition-all duration-500 border border-transparent hover:border-blue-50'
             >
-              <div className='p-8'>
+              <div className='p-8 text-center md:text-left'>
                 {/* Image Container with Floating Formula */}
                 <div className='relative w-40 h-40 mx-auto'>
                   <div className='absolute inset-0 rounded-full border-2 border-dashed border-[#002EFF]/20 group-hover:rotate-180 transition-all duration-1000' />
@@ -117,17 +124,12 @@ export default function Tutors() {
                   </div>
 
                   {/* Subject Formula Bubble */}
-                  <motion.div
-                    animate={{ y: [0, -5, 0] }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 3,
-                      delay: index * 0.5,
-                    }}
-                    className='absolute -right-2 top-0 bg-white shadow-lg border border-gray-50 rounded-xl px-3 py-1 text-[10px] font-serif italic text-blue-600 font-bold'
+                  <div
+                    className='absolute -right-2 top-0 bg-white shadow-lg border border-gray-50 rounded-xl px-3 py-1 text-[10px] font-serif italic text-blue-600 font-bold animate-bounce'
+                    style={{ animationDuration: '3s' }}
                   >
                     {tutor.formula}
-                  </motion.div>
+                  </div>
                 </div>
 
                 <h3 className='text-2xl font-black text-black mt-8 group-hover:text-[#002EFF] transition-colors tracking-tight'>
@@ -139,12 +141,12 @@ export default function Tutors() {
                   {tutor.subject}
                 </div>
 
-                {/* Social/Bio Hint (Optional visual element) */}
+                {/* Social/Bio Hint */}
                 <p className='mt-4 text-gray-400 text-xs font-medium opacity-0 group-hover:opacity-100 transition-opacity duration-300'>
                   Ready to help you excel in {tutor.subject}
                 </p>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
       </div>

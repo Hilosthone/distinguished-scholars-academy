@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
 import { ArrowUpRight, Calendar } from 'lucide-react'
@@ -46,27 +45,28 @@ export default function BlogPosts() {
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
-          <motion.h2
+          <h2
+            data-aos='fade-up'
+            data-aos-duration='600'
             className='text-3xl md:text-4xl font-extrabold text-black uppercase'
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
           >
             Latest <span className='text-[#002EFF]'>Blog Posts</span>
-          </motion.h2>
-          <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
+          </h2>
+          <div
+            data-aos='zoom-in'
+            data-aos-delay='200'
+            className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'
+          ></div>
         </div>
 
         {/* GRID */}
         <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8'>
           {blogs.map((blog, index) => (
-            <motion.div
+            <div
               key={`blog-post-${index}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.1 }}
+              data-aos='fade-up'
+              data-aos-delay={index * 100}
+              data-aos-duration='500'
               className='group bg-white rounded-2xl overflow-hidden border border-gray-100 shadow-sm hover:shadow-2xl transition-all duration-300'
             >
               {/* Image Container */}
@@ -101,16 +101,15 @@ export default function BlogPosts() {
                   Read More <ArrowUpRight size={18} />
                 </Link>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* CTA BUTTON */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.4 }}
+        <div
+          data-aos='fade-up'
+          data-aos-delay='400'
+          data-aos-duration='700'
           className='mt-16 text-center'
         >
           <Link
@@ -119,7 +118,7 @@ export default function BlogPosts() {
           >
             View All Blog Posts
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

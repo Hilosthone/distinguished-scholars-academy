@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import Image from 'next/image'
 import { Play, Youtube } from 'lucide-react'
 import Clip1 from '../../imges/JAMB-Students-Must-Know.jpg'
@@ -35,7 +34,6 @@ export default function WatchUs() {
     setMounted(true)
   }, [])
 
-  // Prevents the Hydration Mismatch error by waiting for the client
   if (!mounted) return null
 
   return (
@@ -43,38 +41,34 @@ export default function WatchUs() {
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE SECTION */}
         <div className='text-center mb-16'>
-          <motion.h2
+          <h2
+            data-aos='fade-up'
+            data-aos-duration='600'
             className='text-3xl md:text-4xl font-extrabold text-black uppercase'
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.6 }}
           >
             Watch <span className='text-[#002EFF]'>Us</span>
-          </motion.h2>
+          </h2>
           <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
 
-          <motion.p
+          <p
+            data-aos='fade-up'
+            data-aos-delay='200'
+            data-aos-duration='700'
             className='mt-6 text-gray-600 max-w-2xl mx-auto text-lg'
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.7, delay: 0.2 }}
           >
             Watch clips of real classes, tutorials, and success stories. Our
             lessons feature clear explanations and exam-based examples.
-          </motion.p>
+          </p>
         </div>
 
         {/* Video Clips Grid */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8'>
           {clips.map((clip, index) => (
-            <motion.div
+            <div
               key={`video-clip-${index}`}
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6, delay: index * 0.1 }}
+              data-aos='fade-up'
+              data-aos-delay={index * 100}
+              data-aos-duration='600'
               className='group relative rounded-2xl overflow-hidden shadow-sm bg-white border border-gray-100'
             >
               <div className='relative aspect-video w-full overflow-hidden bg-black'>
@@ -107,16 +101,15 @@ export default function WatchUs() {
                   Watch Video <Youtube size={18} className='text-red-600' />
                 </a>
               </div>
-            </motion.div>
+            </div>
           ))}
         </div>
 
         {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7, delay: 0.4 }}
+        <div
+          data-aos='fade-up'
+          data-aos-delay='400'
+          data-aos-duration='700'
           className='mt-16 text-center'
         >
           <a
@@ -128,7 +121,7 @@ export default function WatchUs() {
             <Youtube size={24} />
             Watch More on YouTube
           </a>
-        </motion.div>
+        </div>
       </div>
     </section>
   )

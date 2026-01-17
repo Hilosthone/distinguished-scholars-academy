@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import {
   BookOpen,
   Video,
@@ -26,7 +25,6 @@ const features = [
 export default function Features() {
   const [mounted, setMounted] = useState(false)
 
-  // Ensure component only renders once browser is ready
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -37,11 +35,9 @@ export default function Features() {
     <section id='materials' className='w-full py-24 bg-white'>
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* TITLE */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <div
+          data-aos='fade-up'
+          data-aos-duration='600'
           className='text-center mb-16'
         >
           <span className='text-[#002EFF] font-bold tracking-widest text-sm uppercase italic'>
@@ -51,19 +47,18 @@ export default function Features() {
             What Students <span className='text-[#002EFF]'>Get</span>
           </h2>
           <div className='w-16 h-1 bg-[#FCB900] mx-auto mt-4 rounded-full'></div>
-        </motion.div>
+        </div>
 
         {/* FEATURES GRID */}
         <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mt-14'>
           {features.map((feat, index) => {
             const Icon = feat.icon
             return (
-              <motion.div
+              <div
                 key={`feat-benefit-${index}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.4, delay: index * 0.05 }}
+                data-aos='fade-up'
+                data-aos-delay={index * 50} // Staggered reveal
+                data-aos-duration='400'
                 className='group p-6 rounded-2xl bg-white border border-gray-100 shadow-sm hover:shadow-xl hover:border-[#002EFF]/20 hover:-translate-y-1 transition-all duration-300'
               >
                 <div className='flex flex-col items-center text-center md:items-start md:text-left gap-4'>
@@ -77,7 +72,7 @@ export default function Features() {
                     {feat.title}
                   </h3>
                 </div>
-              </motion.div>
+              </div>
             )
           })}
         </div>

@@ -1,6 +1,5 @@
 'use client'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import {
   Users,
   BookOpen,
@@ -48,7 +47,6 @@ const features = [
 export default function WhyChooseDSA() {
   const [mounted, setMounted] = useState(false)
 
-  // Wait until the component is mounted to the DOM to prevent mismatches
   useEffect(() => {
     setMounted(true)
   }, [])
@@ -59,11 +57,9 @@ export default function WhyChooseDSA() {
     <section id='why-dsa' className='w-full py-24 bg-white'>
       <div className='max-w-7xl mx-auto px-10 md:px-20'>
         {/* SECTION TITLE */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
+        <div
+          data-aos='fade-up'
+          data-aos-duration='600'
           className='text-center max-w-2xl mx-auto'
         >
           <span className='text-[#002EFF] font-bold tracking-widest text-sm uppercase'>
@@ -77,19 +73,18 @@ export default function WhyChooseDSA() {
             We provide a structured, student-focused learning experience that
             guarantees academic improvement.
           </p>
-        </motion.div>
+        </div>
 
         {/* FEATURES GRID */}
         <div className='grid sm:grid-cols-2 lg:grid-cols-3 gap-8 mt-16'>
           {features.map((feature, index) => {
             const Icon = feature.icon
             return (
-              <motion.div
+              <div
                 key={`feature-${index}`}
-                initial={{ opacity: 0, y: 30 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                data-aos='fade-up'
+                data-aos-delay={index * 100}
+                data-aos-duration='500'
                 className='group p-8 rounded-2xl bg-[#f8f9ff] border border-transparent hover:border-[#002EFF]/30 hover:bg-white hover:shadow-2xl transition-all duration-300 ease-out'
               >
                 <div className='w-14 h-14 bg-white rounded-xl flex items-center justify-center shadow-sm group-hover:bg-[#002EFF] transition-colors duration-300'>
@@ -104,17 +99,16 @@ export default function WhyChooseDSA() {
                 <p className='text-gray-600 mt-3 leading-relaxed text-sm md:text-base'>
                   {feature.desc}
                 </p>
-              </motion.div>
+              </div>
             )
           })}
         </div>
 
         {/* CTA */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.5 }}
+        <div
+          data-aos='zoom-in'
+          data-aos-duration='500'
+          data-aos-anchor-placement='top-bottom'
           className='text-center mt-16'
         >
           <Link
@@ -124,7 +118,7 @@ export default function WhyChooseDSA() {
             Explore Programs
             <ArrowRight size={20} />
           </Link>
-        </motion.div>
+        </div>
       </div>
     </section>
   )
