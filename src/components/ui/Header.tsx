@@ -172,7 +172,7 @@ export default function Header() {
       </div>
 
       {/* 2. SIDE DOT NAVIGATION */}
-      <nav className='fixed right-6 top-1/2 -translate-y-1/2 z-55 hidden lg:flex flex-col gap-4'>
+      <nav className='fixed right-6 top-1/2 -translate-y-1/2 z-40 hidden lg:flex flex-col gap-4'>
         {navLinks.map((link) => (
           <button
             key={link.id}
@@ -205,7 +205,7 @@ export default function Header() {
             animate={{ opacity: 1, scale: 1, x: 0 }}
             exit={{ opacity: 0, scale: 0.5, x: 20 }}
             onClick={() => handleSmoothScroll(null, 'home')}
-            className='fixed bottom-8 right-8 z-50 p-4 bg-white text-[#002EFF] border border-gray-100 shadow-2xl rounded-2xl hover:bg-[#002EFF] hover:text-white transition-all group'
+            className='fixed bottom-8 right-8 z-40 p-4 bg-white text-[#002EFF] border border-gray-100 shadow-2xl rounded-2xl hover:bg-[#002EFF] hover:text-white transition-all group'
           >
             <ChevronUp
               size={24}
@@ -215,7 +215,7 @@ export default function Header() {
         )}
       </AnimatePresence>
 
-      {/* 4. COMPACT MOBILE MENU (FIXED) */}
+      {/* 4. COMPACT MOBILE MENU */}
       <AnimatePresence>
         {open && (
           <>
@@ -224,14 +224,14 @@ export default function Header() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               onClick={() => setOpen(false)}
-              className='fixed inset-0 bg-[#002EFF]/10 backdrop-blur-md z-60 md:hidden'
+              className='fixed inset-0 bg-[#002EFF]/10 backdrop-blur-md z-100 md:hidden'
             />
             <motion.div
               initial={{ x: '100%', opacity: 0 }}
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: '100%', opacity: 0 }}
               transition={{ type: 'spring', damping: 28, stiffness: 220 }}
-              className='fixed top-4 right-4 w-[85%] max-w-[320px] max-h-[calc(100vh-32px)] bg-white z-gi70 shadow-2xl flex flex-col md:hidden rounded-[2.5rem] border border-gray-100 overflow-hidden'
+              className='fixed top-4 right-4 w-[85%] max-w-[320px] h-[calc(100vh-32px)] bg-white z-110 shadow-2xl flex flex-col md:hidden rounded-[2.5rem] border border-gray-100 overflow-hidden'
             >
               {/* Header inside Sidebar */}
               <div className='flex justify-between items-center p-6 pb-2'>
@@ -240,7 +240,7 @@ export default function Header() {
                 </span>
                 <button
                   onClick={() => setOpen(false)}
-                  className='p-2 bg-gray-50 text-gray-400 rounded-xl'
+                  className='p-2 bg-gray-50 text-gray-400 rounded-xl active:scale-95'
                 >
                   <X size={18} />
                 </button>
@@ -258,7 +258,7 @@ export default function Header() {
                       onClick={(e) => handleSmoothScroll(e, link.id)}
                       className={`text-left px-5 py-3.5 rounded-2xl font-black uppercase tracking-widest text-[11px] transition-all group flex justify-between items-center ${
                         activeSection === link.id
-                          ? 'bg-[#002EFF] text-white'
+                          ? 'bg-[#002EFF] text-white shadow-lg shadow-blue-200'
                           : 'text-gray-400 hover:text-black hover:bg-gray-50'
                       }`}
                     >
@@ -267,15 +267,14 @@ export default function Header() {
                         size={14}
                         className={`transition-transform duration-300 ${
                           activeSection === link.id
-                            ? 'opacity-100'
-                            : 'opacity-0 -translate-x-2'
+                            ? 'opacity-100 translate-x-0'
+                            : 'opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0'
                         }`}
                       />
                     </motion.button>
                   ))}
                 </div>
 
-                {/* Footer Section of Sidebar */}
                 <div className='pb-6'>
                   <div className='p-5 bg-blue-50/50 rounded-3xl mb-4'>
                     <p className='text-[#002EFF] font-bold text-[10px] uppercase tracking-wider mb-1'>
