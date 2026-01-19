@@ -599,37 +599,41 @@ export default function RapidQuizPortal() {
 
       <AnimatePresence>
         {step === 'result' && (
-          <div className='fixed inset-0 bg-black/60 backdrop-blur-md z-150 flex items-center justify-center p-4 overflow-y-auto'>
+          <div className='fixed inset-0 bg-black/60 backdrop-blur-md z-150 flex items-center justify-center p-6 overflow-y-auto'>
+            {/* Main Modal Container */}
             <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className='bg-white p-6 md:p-10 rounded-[40px] max-w-lg w-full text-center shadow-2xl my-auto'
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              className='bg-white p-6 md:p-8 rounded-4xl max-w-md w-full text-center shadow-2xl my-auto border border-white/20 relative'
             >
-              <div className='w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4'>
-                <Trophy size={32} className='text-[#FCB900]' />
+              {/* Decorative Trophy Icon */}
+              <div className='w-14 h-14 bg-yellow-50 rounded-2xl flex items-center justify-center mx-auto mb-4 -mt-2'>
+                <Trophy size={28} className='text-[#FCB900]' />
               </div>
-              <h2 className='text-5xl font-black mb-1 tracking-tighter text-zinc-900'>
+
+              <h2 className='text-4xl font-black mb-1 tracking-tighter text-zinc-900'>
                 {userScore}%
               </h2>
-              <p className='text-gray-400 font-black uppercase text-[10px] tracking-[0.2em] mb-6'>
+              <p className='text-gray-400 font-black uppercase text-[9px] tracking-[0.15em] mb-6'>
                 Simulator Scorecard
               </p>
 
-              <div className='space-y-3 mb-8 text-left'>
-                <p className='text-[10px] font-black text-gray-400 uppercase flex items-center gap-2 mb-2'>
+              {/* Scrollable Area for Subjects if list is long */}
+              <div className='space-y-2.5 mb-6 text-left max-h-[300px] overflow-y-auto pr-1 custom-scrollbar'>
+                <p className='text-[10px] font-black text-gray-400 uppercase flex items-center gap-2 mb-2 sticky top-0 bg-white py-1'>
                   <BarChart3 size={14} /> Subject Breakdown
                 </p>
                 {getSubjectStats().map((sub) => (
                   <div
                     key={sub.name}
-                    className='p-4 bg-gray-50 rounded-2xl border border-gray-100'
+                    className='p-3.5 bg-gray-50/80 rounded-2xl border border-gray-100 hover:bg-gray-50 transition-colors'
                   >
-                    <div className='flex justify-between items-center mb-2'>
-                      <span className='font-black text-xs text-zinc-700'>
+                    <div className='flex justify-between items-center mb-1.5'>
+                      <span className='font-bold text-[11px] text-zinc-700 uppercase'>
                         {sub.name}
                       </span>
                       <span
-                        className={`text-xs font-black ${sub.percent >= 50 ? 'text-green-600' : 'text-red-600'}`}
+                        className={`text-[11px] font-black ${sub.percent >= 50 ? 'text-green-600' : 'text-red-600'}`}
                       >
                         {sub.percent}%
                       </span>
@@ -641,41 +645,46 @@ export default function RapidQuizPortal() {
                         className={`h-full ${sub.percent >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
                       />
                     </div>
-                    <p className='text-[9px] text-gray-400 mt-2 font-bold uppercase'>
-                      Score: {sub.correct} / {sub.total} Correct
-                    </p>
+                    <div className='flex justify-between mt-1.5'>
+                      <p className='text-[8px] text-gray-400 font-bold uppercase'>
+                        Score: {sub.correct} / {sub.total}
+                      </p>
+                    </div>
                   </div>
                 ))}
               </div>
 
-              <div className='space-y-3'>
+              {/* Refined Buttons - Smaller & Tighter */}
+              <div className='space-y-2'>
                 <button
                   onClick={() => {
                     setCurrentIdx(0)
                     setStep('review')
                   }}
-                  className='w-full py-4 bg-[#002EFF] text-white rounded-2xl font-black flex items-center justify-center gap-3 text-xs uppercase shadow-xl hover:bg-blue-600'
+                  className='w-full py-3 bg-[#002EFF] text-white rounded-xl font-black flex items-center justify-center gap-2 text-[10px] uppercase shadow-lg shadow-blue-200 hover:bg-blue-600 active:scale-95 transition-all'
                 >
-                  <Eye size={18} /> Review Answers
+                  <Eye size={16} /> Review Answers
                 </button>
+
                 <button
                   onClick={downloadPDF}
-                  className='w-full py-4 bg-emerald-600 text-white rounded-2xl font-black flex items-center justify-center gap-3 text-xs uppercase shadow-xl hover:bg-emerald-700'
+                  className='w-full py-3 bg-emerald-600 text-white rounded-xl font-black flex items-center justify-center gap-2 text-[10px] uppercase shadow-lg shadow-emerald-100 hover:bg-emerald-700 active:scale-95 transition-all'
                 >
-                  <Download size={18} /> Download Results
+                  <Download size={16} /> Get Result PDF
                 </button>
-                <div className='grid grid-cols-2 gap-3'>
+
+                <div className='grid grid-cols-2 gap-2 mt-2'>
                   <button
                     onClick={() => setStep('setup')}
-                    className='py-3 bg-gray-100 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-gray-200'
+                    className='py-2.5 bg-gray-100 text-gray-600 rounded-xl font-black text-[9px] uppercase flex items-center justify-center gap-2 hover:bg-gray-200 transition-all'
                   >
-                    <RotateCcw size={16} /> Retake
+                    <RotateCcw size={14} /> Retake
                   </button>
                   <button
                     onClick={resetToHome}
-                    className='py-3 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-black'
+                    className='py-2.5 bg-zinc-900 text-white rounded-xl font-black text-[9px] uppercase flex items-center justify-center gap-2 hover:bg-black transition-all'
                   >
-                    <Home size={16} /> New Setup
+                    <Home size={14} /> New Setup
                   </button>
                 </div>
               </div>
