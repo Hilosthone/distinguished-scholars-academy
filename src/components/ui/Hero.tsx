@@ -58,7 +58,7 @@ export default function Hero() {
             </span>
           </div>
 
-          <h1 className='text-4xl md:text-4xl font-black text-gray-900 leading-[1.1] tracking-tight'>
+          <h1 className='text-3xl md:text-4xl font-black text-gray-900 leading-[1.1] tracking-tight'>
             Empowering Students to <br />
             <span className='text-[#002EFF]'>Excel in UTME & WAEC</span>
           </h1>

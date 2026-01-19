@@ -1,27 +1,31 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import AOS from 'aos'
 import 'aos/dist/aos.css'
+import { motion, AnimatePresence } from 'framer-motion'
+import jsPDF from 'jspdf'
+import autoTable from 'jspdf-autotable'
 
+// Import Lucide icons
 import {
+  Eye,
   Trophy,
   LayoutGrid,
   CheckCircle2,
   RotateCcw,
   Home,
-  Printer,
   GraduationCap,
   Info,
   Calculator,
   Flag,
-  ChevronLeft,
-  ChevronRight,
-  Eye,
   X,
   GripHorizontal,
+  Download,
+  AlertTriangle,
+  Save,
+  BarChart3,
 } from 'lucide-react'
+
 import { questionBank } from './questions'
 
 // --- Draggable Scientific Calculator Component ---
@@ -56,13 +60,13 @@ const ScientificCalculator = ({ onClose }: { onClose: () => void }) => {
         initial={{ opacity: 0, scale: 0.9, y: 20 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.9 }}
-        className='fixed top-24 left-1/2 -translate-x-1/2 z-100 bg-zinc-900 p-4 rounded-2xl text-white shadow-2xl border border-white/10 w-[280px] cursor-default touch-none'
+        className='fixed top-24 left-1/2 -translate-x-1/2 z-101 bg-zinc-900 p-4 rounded-2xl text-white shadow-2xl border border-white/10 w-[280px] cursor-default touch-none'
       >
         <div className='flex justify-between items-center mb-3 cursor-grab active:cursor-grabbing p-1 bg-white/5 rounded-lg'>
           <div className='flex items-center gap-2 opacity-50'>
             <GripHorizontal size={14} />
             <span className='text-[10px] font-black uppercase tracking-widest'>
-              Move Me
+              Calculator
             </span>
           </div>
           <button
@@ -115,17 +119,9 @@ const ScientificCalculator = ({ onClose }: { onClose: () => void }) => {
 }
 
 export default function RapidQuizPortal() {
-  useEffect(() => {
-    // Only run AOS once on mount to prevent "flying" elements during state updates
-    AOS.init({
-      duration: 600,
-      once: true,
-      easing: 'ease-out',
-    })
-  }, [])
-
+  const [mounted, setMounted] = useState(false)
   const [step, setStep] = useState<'setup' | 'quiz' | 'result' | 'review'>(
-    'setup'
+    'setup',
   )
   const [selectedSubs, setSelectedSubs] = useState<string[]>([])
   const [qPerSubject, setQPerSubject] = useState(10)
@@ -137,6 +133,55 @@ export default function RapidQuizPortal() {
   const [flagged, setFlagged] = useState<boolean[]>([])
   const [timeLeft, setTimeLeft] = useState(0)
   const [showCalc, setShowCalc] = useState(false)
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [hasResumed, setHasResumed] = useState(false)
+
+  // 1. Fixing the Client-Side Exception: Wait for Mount
+  useEffect(() => {
+    setMounted(true)
+
+    // Dynamic import for AOS to avoid SSR errors
+    const initAOS = async () => {
+      const AOS = (await import('aos')).default
+      AOS.init({ duration: 600, once: true })
+    }
+    initAOS()
+
+    // Safe access to localStorage after mounting
+    const saved = localStorage.getItem('quiz_session')
+    if (saved) {
+      const data = JSON.parse(saved)
+      setQuizData(data.quizData)
+      setAnswers(data.answers)
+      setFlagged(data.flagged)
+      setTimeLeft(data.timeLeft)
+      setCurrentIdx(data.currentIdx)
+      setStep('quiz')
+      setHasResumed(true)
+    }
+  }, [])
+
+  // 2. State Persistence
+  useEffect(() => {
+    if (mounted && step === 'quiz') {
+      localStorage.setItem(
+        'quiz_session',
+        JSON.stringify({ quizData, answers, flagged, timeLeft, currentIdx }),
+      )
+    }
+  }, [quizData, answers, flagged, timeLeft, currentIdx, step, mounted])
+
+  const resetToHome = () => {
+    localStorage.removeItem('quiz_session')
+    setStep('setup')
+    setSelectedSubs([])
+    setQuizData([])
+    setAnswers([])
+    setFlagged([])
+    setCurrentIdx(0)
+    setShowExitConfirm(false)
+    setHasResumed(false)
+  }
 
   const handleStart = () => {
     if (selectedSubs.length === 0) return
@@ -161,50 +206,95 @@ export default function RapidQuizPortal() {
     if (step === 'quiz' && timeLeft > 0) {
       const t = setInterval(() => setTimeLeft((p) => p - 1), 1000)
       return () => clearInterval(t)
-    } else if (timeLeft === 0 && step === 'quiz') setStep('result')
+    } else if (timeLeft === 0 && step === 'quiz') {
+      localStorage.removeItem('quiz_session')
+      setStep('result')
+    }
   }, [timeLeft, step])
 
-  const userScore = Math.round(
-    (answers.filter((a, i) => a === quizData[i]?.correct).length /
-      (quizData.length || 1)) *
-      100
-  )
-  const isReview = step === 'review'
-  const currentQ = quizData[currentIdx]
+  // Stats Calculations
+  const correctCount = answers.filter(
+    (a, i) => a === quizData[i]?.correct,
+  ).length
+  const userScore = Math.round((correctCount / (quizData.length || 1)) * 100)
+  const secondsUsed = totalMinutes * 60 - timeLeft
+
+  const getSubjectStats = () => {
+    const subs = Array.from(new Set(quizData.map((q) => q.subject)))
+    return subs.map((sub) => {
+      const qInSub = quizData.filter((q) => q.subject === sub)
+      const correctInSub = qInSub.filter((q) => {
+        const idx = quizData.indexOf(q)
+        return answers[idx] === q.correct
+      }).length
+      return {
+        name: sub,
+        correct: correctInSub,
+        total: qInSub.length,
+        percent: Math.round((correctInSub / qInSub.length) * 100),
+      }
+    })
+  }
+
+  const downloadPDF = () => {
+    const doc = new jsPDF()
+    doc.setFontSize(22)
+    doc.text('Examination Result Report', 105, 20, { align: 'center' })
+    autoTable(doc, {
+      startY: 35,
+      head: [['Performance Metric', 'Value']],
+      body: [
+        ['Overall Average', `${userScore}%`],
+        ['Questions Answered', quizData.length.toString()],
+        ['Total Correct', correctCount.toString()],
+        ['Time Spent', `${Math.floor(secondsUsed / 60)}m ${secondsUsed % 60}s`],
+      ],
+    })
+    autoTable(doc, {
+      startY: (doc as any).lastAutoTable.finalY + 10,
+      head: [['Subject', 'Score', 'Total', 'Percentage']],
+      body: getSubjectStats().map((s) => [
+        s.name,
+        s.correct,
+        s.total,
+        `${s.percent}%`,
+      ]),
+    })
+    doc.save('Scholars_Quiz_Result.pdf')
+  }
+
+  // Prevent "Hydration Mismatch" errors
+  if (!mounted) return null
 
   if (step === 'setup')
     return (
-      <div className='min-h-screen bg-[#F0F4FF] flex items-center justify-center p-4'>
-        {/* AOS only on the main container to prevent individual items from flying away on click */}
-        <div
-          data-aos='zoom-in'
-          className='bg-white p-6 md:p-10 rounded-4xl shadow-xl max-w-md w-full relative overflow-hidden'
+      <div className='min-h-screen bg-[#F0F4FF] flex flex-col items-center justify-center p-4'>
+        <button
+          onClick={() => (window.location.href = '/')}
+          className='mb-6 flex items-center gap-2 text-gray-500 hover:text-[#002EFF] font-black uppercase text-[10px] tracking-widest transition-all'
         >
+          <Home size={16} /> Main Website
+        </button>
+        <div className='bg-white p-6 md:p-10 rounded-3xl shadow-xl max-w-md w-full'>
           <h2 className='text-2xl font-black text-[#002EFF] mb-6 text-center uppercase tracking-tight'>
-            Exam Setup
+            Simulator Setup
           </h2>
-
           <div className='grid grid-cols-3 gap-2 mb-4'>
             {['ENG', 'MATH', 'PHY', 'CHEM', 'BIO'].map((s) => (
               <button
                 key={s}
                 onClick={() =>
                   setSelectedSubs((p) =>
-                    p.includes(s) ? p.filter((x) => x !== s) : [...p, s]
+                    p.includes(s) ? p.filter((x) => x !== s) : [...p, s],
                   )
                 }
-                className={`py-3 rounded-xl text-xs font-black border-2 transition-all duration-200 transform active:scale-95 ${
-                  selectedSubs.includes(s)
-                    ? 'bg-[#002EFF] border-[#002EFF] text-white shadow-lg'
-                    : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'
-                }`}
+                className={`py-3 rounded-xl text-xs font-black border-2 transition-all ${selectedSubs.includes(s) ? 'bg-[#002EFF] border-[#002EFF] text-white shadow-lg' : 'bg-gray-50 text-gray-400 border-transparent hover:bg-gray-100'}`}
               >
                 {s}
               </button>
             ))}
           </div>
-
-          <div className='grid grid-cols-2 gap-3 mb-4'>
+          <div className='grid grid-cols-2 gap-3 mb-6'>
             <div className='space-y-1'>
               <p className='text-[9px] font-bold text-gray-400 uppercase ml-1'>
                 Quantity
@@ -212,7 +302,7 @@ export default function RapidQuizPortal() {
               <select
                 value={qPerSubject}
                 onChange={(e) => setQPerSubject(Number(e.target.value))}
-                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold border border-gray-100 outline-none focus:border-blue-300 transition-colors'
+                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold border-none outline-none'
               >
                 {[5, 10, 20, 40].map((n) => (
                   <option key={n} value={n}>
@@ -223,12 +313,12 @@ export default function RapidQuizPortal() {
             </div>
             <div className='space-y-1'>
               <p className='text-[9px] font-bold text-gray-400 uppercase ml-1'>
-                Duration
+                Time
               </p>
               <select
                 value={totalMinutes}
                 onChange={(e) => setTotalMinutes(Number(e.target.value))}
-                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold border border-gray-100 outline-none focus:border-blue-300 transition-colors'
+                className='w-full p-3 bg-gray-50 rounded-xl text-sm font-bold border-none outline-none'
               >
                 {[15, 30, 60, 120].map((n) => (
                   <option key={n} value={n}>
@@ -238,51 +328,35 @@ export default function RapidQuizPortal() {
               </select>
             </div>
           </div>
-
-          {/* Instant Feedback Toggle - Locked in place */}
           <button
             onClick={() => setIsStudyMode(!isStudyMode)}
-            className={`w-full mb-6 p-4 rounded-xl border-2 flex items-center justify-between transition-all duration-300 ${
-              isStudyMode
-                ? 'bg-green-50 border-green-500'
-                : 'bg-gray-50 border-transparent'
-            }`}
+            className={`w-full mb-6 p-4 rounded-xl border-2 flex items-center justify-between transition-all ${isStudyMode ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-transparent'}`}
           >
             <div className='flex items-center gap-3'>
               <div
-                className={`p-2 rounded-lg ${
-                  isStudyMode
-                    ? 'bg-green-500 text-white'
-                    : 'bg-gray-200 text-gray-400'
-                }`}
+                className={`p-2 rounded-lg ${isStudyMode ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-400'}`}
               >
                 <GraduationCap size={18} />
               </div>
               <span
-                className={`font-bold text-xs uppercase tracking-tight ${
-                  isStudyMode ? 'text-green-700' : 'text-gray-500'
-                }`}
+                className={`font-bold text-xs uppercase ${isStudyMode ? 'text-green-700' : 'text-gray-500'}`}
               >
-                Instant Feedback
+                Study Mode
               </span>
             </div>
             <div
-              className={`w-10 h-5 rounded-full relative transition-colors ${
-                isStudyMode ? 'bg-green-500' : 'bg-gray-300'
-              }`}
+              className={`w-10 h-5 rounded-full relative ${isStudyMode ? 'bg-green-500' : 'bg-gray-300'}`}
             >
               <motion.div
                 animate={{ x: isStudyMode ? 20 : 2 }}
-                transition={{ type: 'spring', stiffness: 500, damping: 30 }}
                 className='absolute top-1 w-3 h-3 bg-white rounded-full'
               />
             </div>
           </button>
-
           <button
             disabled={selectedSubs.length === 0}
             onClick={handleStart}
-            className='w-full py-4 bg-[#FCB900] text-black font-black rounded-2xl shadow-lg active:scale-[0.98] disabled:opacity-30 disabled:grayscale text-sm uppercase tracking-widest transition-all'
+            className='w-full py-4 bg-[#FCB900] text-black font-black rounded-2xl shadow-lg disabled:opacity-30 text-sm uppercase tracking-widest'
           >
             Start Examination
           </button>
@@ -290,28 +364,69 @@ export default function RapidQuizPortal() {
       </div>
     )
 
+  const currentQ = quizData[currentIdx]
+  const isReview = step === 'review'
+
   return (
     <div className='min-h-screen bg-[#F8FAFF] pb-10'>
       <AnimatePresence>
         {showCalc && (
           <ScientificCalculator onClose={() => setShowCalc(false)} />
         )}
+        {showExitConfirm && (
+          <div className='fixed inset-0 bg-black/60 backdrop-blur-sm z-200 flex items-center justify-center p-4'>
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className='bg-white p-8 rounded-3xl max-w-sm w-full text-center shadow-2xl'
+            >
+              <div className='w-16 h-16 bg-red-50 text-red-500 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <AlertTriangle size={32} />
+              </div>
+              <h3 className='text-xl font-black mb-2 text-zinc-900'>
+                Exit Quiz?
+              </h3>
+              <p className='text-gray-500 text-sm mb-6'>
+                Progress is saved. Choose to exit to the website or restart the
+                setup.
+              </p>
+              <div className='flex flex-col gap-2'>
+                <button
+                  onClick={() => (window.location.href = '/')}
+                  className='py-3 bg-zinc-900 text-white rounded-xl font-black text-[10px] uppercase'
+                >
+                  Back to Website
+                </button>
+                <button
+                  onClick={resetToHome}
+                  className='py-3 bg-red-600 text-white rounded-xl font-black text-[10px] uppercase'
+                >
+                  New Quiz Setup
+                </button>
+                <button
+                  onClick={() => setShowExitConfirm(false)}
+                  className='py-3 bg-gray-100 text-zinc-400 rounded-xl font-black text-[10px] uppercase'
+                >
+                  Cancel
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
       </AnimatePresence>
 
       <nav className='bg-white border-b px-4 py-3 sticky top-0 z-40 flex justify-between items-center shadow-sm'>
         <div className='flex items-center gap-2'>
           <button
-            onClick={() => setStep('setup')}
-            className='p-2 hover:bg-gray-100 rounded-lg transition-colors'
+            onClick={() => setShowExitConfirm(true)}
+            className='p-2 hover:bg-gray-100 rounded-lg text-gray-500 transition-colors'
           >
             <Home size={18} />
           </button>
           {!isReview && (
             <button
               onClick={() => setShowCalc(!showCalc)}
-              className={`p-2 rounded-lg border transition-all ${
-                showCalc ? 'bg-black text-white' : 'bg-gray-50 text-gray-400'
-              }`}
+              className={`p-2 rounded-lg border ml-2 ${showCalc ? 'bg-black text-white' : 'text-gray-400'}`}
             >
               <Calculator size={18} />
             </button>
@@ -321,20 +436,19 @@ export default function RapidQuizPortal() {
           {!isReview ? (
             <>
               <div
-                className={`px-4 py-1.5 rounded-lg font-mono font-bold text-sm ${
-                  timeLeft < 60
-                    ? 'bg-red-50 text-red-600 animate-pulse'
-                    : 'bg-gray-100 text-gray-700'
-                }`}
+                className={`px-4 py-1.5 rounded-lg font-mono font-bold text-sm ${timeLeft < 60 ? 'bg-red-50 text-red-600 animate-pulse' : 'bg-gray-100 text-gray-700'}`}
               >
                 {Math.floor(timeLeft / 60)}:
                 {(timeLeft % 60).toString().padStart(2, '0')}
               </div>
               <button
-                onClick={() => setStep('result')}
-                className='bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase transition-colors'
+                onClick={() => {
+                  localStorage.removeItem('quiz_session')
+                  setStep('result')
+                }}
+                className='bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase'
               >
-                Finish
+                Submit
               </button>
             </>
           ) : (
@@ -342,26 +456,24 @@ export default function RapidQuizPortal() {
               onClick={() => setStep('result')}
               className='bg-black text-white px-4 py-1.5 rounded-lg font-bold text-[10px] uppercase'
             >
-              View Results
+              Summary
             </button>
           )}
         </div>
       </nav>
 
       <main className='max-w-5xl mx-auto p-4 md:p-6 grid lg:grid-cols-[1fr_300px] gap-6'>
-        <div data-aos='fade-up'>
+        <div className='w-full'>
           <div className='bg-white p-6 md:p-10 rounded-3xl shadow-sm border border-gray-100 relative min-h-[400px]'>
-            <AnimatePresence mode='wait'>
+            {currentQ && (
               <motion.div
                 key={currentIdx}
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -10 }}
-                transition={{ duration: 0.2 }}
               >
                 <div className='flex justify-between items-center mb-6'>
-                  <span className='px-4 py-1.5 bg-blue-50 text-[#002EFF] rounded-full text-[10px] font-black uppercase tracking-wider'>
-                    {currentQ?.subject}
+                  <span className='px-4 py-1.5 bg-blue-50 text-[#002EFF] rounded-full text-[10px] font-black uppercase'>
+                    {currentQ.subject}
                   </span>
                   {!isReview && (
                     <button
@@ -370,11 +482,7 @@ export default function RapidQuizPortal() {
                         f[currentIdx] = !f[currentIdx]
                         setFlagged(f)
                       }}
-                      className={`p-2.5 rounded-xl border transition-all ${
-                        flagged[currentIdx]
-                          ? 'bg-orange-500 border-orange-500 text-white shadow-md'
-                          : 'text-gray-300 border-gray-100 hover:border-orange-200'
-                      }`}
+                      className={`p-2.5 rounded-xl border transition-all ${flagged[currentIdx] ? 'bg-orange-500 border-orange-500 text-white shadow-md' : 'text-gray-300 border-gray-100'}`}
                     >
                       <Flag
                         size={18}
@@ -383,32 +491,26 @@ export default function RapidQuizPortal() {
                     </button>
                   )}
                 </div>
-
-                <h2 className='text-lg md:text-xl font-bold text-gray-800 mb-8 leading-relaxed'>
-                  {currentQ?.question}
+                <h2 className='text-lg md:text-xl font-bold text-gray-800 mb-8'>
+                  {currentQ.question}
                 </h2>
-
                 <div className='grid gap-3'>
-                  {currentQ?.options.map((opt: string, i: number) => {
+                  {currentQ.options.map((opt: string, i: number) => {
                     const isSelected = answers[currentIdx] === i
                     const isCorrect = i === currentQ.correct
                     let style =
                       'bg-gray-50 border-gray-100 text-gray-600 hover:border-blue-200'
-
                     if (isSelected)
                       style = 'border-[#002EFF] bg-blue-50/50 text-[#002EFF]'
-
                     if (
                       isReview ||
                       (isStudyMode && answers[currentIdx] !== null)
                     ) {
                       if (isCorrect)
-                        style =
-                          'border-green-500 bg-green-50 text-green-700 shadow-sm'
+                        style = 'border-green-500 bg-green-50 text-green-700'
                       else if (isSelected)
                         style = 'border-red-500 bg-red-50 text-red-700'
                     }
-
                     return (
                       <button
                         key={i}
@@ -421,19 +523,10 @@ export default function RapidQuizPortal() {
                           a[currentIdx] = i
                           setAnswers(a)
                         }}
-                        className={`p-5 rounded-2xl border-2 text-left text-sm font-semibold transition-all flex justify-between items-center active:scale-[0.99] ${style}`}
+                        className={`p-5 rounded-2xl border-2 text-left text-sm font-semibold transition-all flex justify-between items-center ${style}`}
                       >
-                        <span className='flex gap-3'>
-                          <span
-                            className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] border ${
-                              isSelected
-                                ? 'bg-[#002EFF] border-[#002EFF] text-white'
-                                : 'border-gray-300 text-gray-400'
-                            }`}
-                          >
-                            {String.fromCharCode(65 + i)}
-                          </span>
-                          {opt}
+                        <span>
+                          {String.fromCharCode(65 + i)}. {opt}
                         </span>
                         {(isReview ||
                           (isStudyMode && answers[currentIdx] !== null)) &&
@@ -447,120 +540,113 @@ export default function RapidQuizPortal() {
                     )
                   })}
                 </div>
-
-                <AnimatePresence>
-                  {(isReview ||
-                    (isStudyMode && answers[currentIdx] !== null)) && (
-                    <motion.div
-                      initial={{ height: 0, opacity: 0 }}
-                      animate={{ height: 'auto', opacity: 1 }}
-                      className='mt-8 p-6 bg-blue-50/50 rounded-2xl border border-blue-100'
-                    >
-                      <p className='text-[10px] font-black text-[#002EFF] uppercase flex items-center gap-2 mb-2'>
-                        <Info size={14} /> Explanation
-                      </p>
-                      <p className='text-sm text-blue-900 leading-relaxed font-medium'>
-                        {currentQ?.explanation}
-                      </p>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
+                {(isReview ||
+                  (isStudyMode && answers[currentIdx] !== null)) && (
+                  <div className='mt-8 p-6 bg-blue-50 rounded-2xl border border-blue-100'>
+                    <p className='text-[10px] font-black text-[#002EFF] uppercase flex items-center gap-2 mb-2'>
+                      <Info size={14} /> Explanation
+                    </p>
+                    <p className='text-sm text-blue-900 leading-relaxed font-medium'>
+                      {currentQ.explanation}
+                    </p>
+                  </div>
+                )}
               </motion.div>
-            </AnimatePresence>
+            )}
           </div>
-
           <div className='flex justify-between items-center bg-white p-4 mt-4 rounded-2xl border border-gray-100 shadow-sm'>
             <button
               disabled={currentIdx === 0}
               onClick={() => setCurrentIdx((p) => p - 1)}
-              className='p-3 font-black text-gray-400 uppercase text-[10px] flex items-center gap-2 disabled:opacity-10 hover:text-black transition-colors'
+              className='text-[10px] font-black uppercase text-gray-400 disabled:opacity-10 px-4'
             >
-              <ChevronLeft size={16} /> Previous
+              Previous
             </button>
-
-            <div className='flex gap-1.5'>
-              {/* Optional: Simple dot indicators or just the text */}
-              <span className='text-[11px] font-black text-gray-900 bg-gray-100 px-3 py-1 rounded-full uppercase'>
-                Q. {currentIdx + 1} of {quizData.length}
-              </span>
-            </div>
-
+            <span className='text-[11px] font-black text-zinc-900 bg-gray-100 px-3 py-1 rounded-full uppercase'>
+              {currentIdx + 1} / {quizData.length}
+            </span>
             <button
               onClick={() =>
                 currentIdx === quizData.length - 1
                   ? setStep('result')
                   : setCurrentIdx((p) => p + 1)
               }
-              className='px-8 py-3 bg-black text-white rounded-xl font-black uppercase text-[10px] hover:bg-zinc-800 transition-all shadow-lg flex items-center gap-2'
+              className='px-8 py-3 bg-black text-white rounded-xl font-black uppercase text-[10px] shadow-lg'
             >
-              {currentIdx === quizData.length - 1 ? 'Finish' : 'Next'}{' '}
-              <ChevronRight size={16} />
+              Next
             </button>
           </div>
         </div>
-
-        <aside data-aos='fade-left' className='space-y-4'>
+        <aside className='hidden lg:block'>
           <div className='bg-white p-6 rounded-3xl border border-gray-100 shadow-sm sticky top-24'>
-            <p className='text-[10px] font-black text-gray-400 uppercase mb-5 flex items-center gap-2 tracking-widest'>
-              <LayoutGrid size={14} /> Question Map
+            <p className='text-[10px] font-black text-gray-400 uppercase mb-5 flex items-center gap-2'>
+              <LayoutGrid size={14} /> Question Grid
             </p>
             <div className='grid grid-cols-5 gap-2'>
               {quizData.map((_, i) => (
                 <button
                   key={i}
                   onClick={() => setCurrentIdx(i)}
-                  className={`aspect-square rounded-xl text-[10px] font-black transition-all border-2 flex items-center justify-center ${
-                    currentIdx === i
-                      ? 'border-black scale-110 shadow-md z-10'
-                      : 'border-transparent'
-                  } ${
-                    isReview
-                      ? answers[i] === quizData[i].correct
-                        ? 'bg-green-500 text-white'
-                        : 'bg-red-500 text-white'
-                      : flagged[i]
-                      ? 'bg-orange-500 text-white'
-                      : answers[i] !== null
-                      ? 'bg-[#002EFF] text-white'
-                      : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                  }`}
+                  className={`aspect-square rounded-xl text-[10px] font-black border-2 flex items-center justify-center ${currentIdx === i ? 'border-black' : 'border-transparent'} ${isReview ? (answers[i] === quizData[i].correct ? 'bg-green-500 text-white' : 'bg-red-500 text-white') : flagged[i] ? 'bg-orange-500 text-white' : answers[i] !== null ? 'bg-[#002EFF] text-white' : 'bg-gray-100 text-gray-400'}`}
                 >
                   {i + 1}
                 </button>
               ))}
             </div>
-
-            <div className='mt-8 pt-6 border-t border-gray-50 space-y-3'>
-              <div className='flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase'>
-                <div className='w-2 h-2 rounded-full bg-[#002EFF]' /> Answered
-              </div>
-              <div className='flex items-center gap-2 text-[9px] font-bold text-gray-400 uppercase'>
-                <div className='w-2 h-2 rounded-full bg-orange-500' /> Flagged
-              </div>
-            </div>
           </div>
         </aside>
       </main>
 
-      {/* Results Modal */}
       <AnimatePresence>
         {step === 'result' && (
-          <div className='fixed inset-0 bg-black/60 backdrop-blur-md z-200 flex items-center justify-center p-4'>
+          <div className='fixed inset-0 bg-black/60 backdrop-blur-md z-150 flex items-center justify-center p-4 overflow-y-auto'>
             <motion.div
-              initial={{ scale: 0.9, opacity: 0, y: 20 }}
-              animate={{ scale: 1, opacity: 1, y: 0 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              className='bg-white p-10 rounded-[40px] max-w-sm w-full text-center shadow-2xl border border-white/20'
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className='bg-white p-6 md:p-10 rounded-[40px] max-w-lg w-full text-center shadow-2xl my-auto'
             >
-              <div className='w-20 h-20 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-6'>
-                <Trophy size={40} className='text-[#FCB900]' />
+              <div className='w-16 h-16 bg-yellow-50 rounded-full flex items-center justify-center mx-auto mb-4'>
+                <Trophy size={32} className='text-[#FCB900]' />
               </div>
-              <h2 className='text-6xl font-black mb-2 tracking-tighter text-zinc-900'>
+              <h2 className='text-5xl font-black mb-1 tracking-tighter text-zinc-900'>
                 {userScore}%
               </h2>
-              <p className='text-gray-400 font-black uppercase text-[10px] tracking-[0.2em] mb-10'>
-                Examination Results
+              <p className='text-gray-400 font-black uppercase text-[10px] tracking-[0.2em] mb-6'>
+                Simulator Scorecard
               </p>
+
+              <div className='space-y-3 mb-8 text-left'>
+                <p className='text-[10px] font-black text-gray-400 uppercase flex items-center gap-2 mb-2'>
+                  <BarChart3 size={14} /> Subject Breakdown
+                </p>
+                {getSubjectStats().map((sub) => (
+                  <div
+                    key={sub.name}
+                    className='p-4 bg-gray-50 rounded-2xl border border-gray-100'
+                  >
+                    <div className='flex justify-between items-center mb-2'>
+                      <span className='font-black text-xs text-zinc-700'>
+                        {sub.name}
+                      </span>
+                      <span
+                        className={`text-xs font-black ${sub.percent >= 50 ? 'text-green-600' : 'text-red-600'}`}
+                      >
+                        {sub.percent}%
+                      </span>
+                    </div>
+                    <div className='w-full h-1.5 bg-gray-200 rounded-full overflow-hidden'>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${sub.percent}%` }}
+                        className={`h-full ${sub.percent >= 50 ? 'bg-green-500' : 'bg-red-500'}`}
+                      />
+                    </div>
+                    <p className='text-[9px] text-gray-400 mt-2 font-bold uppercase'>
+                      Score: {sub.correct} / {sub.total} Correct
+                    </p>
+                  </div>
+                ))}
+              </div>
 
               <div className='space-y-3'>
                 <button
@@ -568,22 +654,28 @@ export default function RapidQuizPortal() {
                     setCurrentIdx(0)
                     setStep('review')
                   }}
-                  className='w-full py-4 bg-black text-white rounded-2xl font-black flex items-center justify-center gap-3 text-xs uppercase tracking-widest hover:bg-zinc-800 transition-all shadow-xl active:scale-95'
+                  className='w-full py-4 bg-[#002EFF] text-white rounded-2xl font-black flex items-center justify-center gap-3 text-xs uppercase shadow-xl hover:bg-blue-600'
                 >
-                  <Eye size={18} /> Review Correction
+                  <Eye size={18} /> Review Answers
+                </button>
+                <button
+                  onClick={downloadPDF}
+                  className='w-full py-4 bg-emerald-600 text-white rounded-2xl font-black flex items-center justify-center gap-3 text-xs uppercase shadow-xl hover:bg-emerald-700'
+                >
+                  <Download size={18} /> Download Results
                 </button>
                 <div className='grid grid-cols-2 gap-3'>
                   <button
                     onClick={() => setStep('setup')}
-                    className='py-4 bg-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors'
+                    className='py-3 bg-gray-100 rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-gray-200'
                   >
                     <RotateCcw size={16} /> Retake
                   </button>
                   <button
-                    onClick={() => window.print()}
-                    className='py-4 bg-gray-100 rounded-2xl font-black text-[10px] uppercase tracking-wider flex items-center justify-center gap-2 hover:bg-gray-200 transition-colors'
+                    onClick={resetToHome}
+                    className='py-3 bg-zinc-900 text-white rounded-2xl font-black text-[10px] uppercase flex items-center justify-center gap-2 hover:bg-black'
                   >
-                    <Printer size={16} /> Print
+                    <Home size={16} /> New Setup
                   </button>
                 </div>
               </div>
