@@ -222,9 +222,10 @@ export default function RapidQuiz() {
                 </div>
               </Link>
 
-              <Link href='/rapid-quiz' className='group'>
+              {/* --- STUDENT PORTAL LINK --- */}
+              <Link href='/signup' className='group'>
                 <div className='flex items-center gap-5 p-6 bg-gray-50 rounded-3xl border-2 border-transparent hover:border-[#FCB900] hover:bg-yellow-50/50 transition-all duration-300'>
-                  <div className='w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md text-[#FCB900] group-hover:scale-110 transition-transform'>
+                  <div className='w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md text-[#FCB900] group-hover:scale-110 group-hover:bg-[#FCB900] group-hover:text-white transition-all duration-300'>
                     <User size={36} />
                   </div>
                   <div className='text-left'>
@@ -232,7 +233,7 @@ export default function RapidQuiz() {
                       Student
                     </h4>
                     <p className='text-sm text-gray-500 mt-1 font-medium'>
-                      Enter test environment
+                      Create account & start testing
                     </p>
                   </div>
                   <ArrowRight className='ml-auto text-gray-300 group-hover:text-[#FCB900] group-hover:translate-x-2 transition-all' />
