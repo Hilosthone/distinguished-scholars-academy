@@ -7,7 +7,17 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { motion } from 'framer-motion'
-import { Mail, Lock, LogIn, Loader2, AlertCircle, User } from 'lucide-react'
+import {
+  Mail,
+  Lock,
+  LogIn,
+  Loader2,
+  AlertCircle,
+  User,
+  Eye,
+  EyeOff,
+  AtSign,
+} from 'lucide-react'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -19,30 +29,36 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Checkbox } from '@/components/ui/checkbox'
 
 const loginSchema = z.object({
-  // Added username validation
-  username: z.string().min(3, 'Username must be at least 3 characters'),
+  username: z.string().min(3, 'Username is required'),
   email: z.string().email('Please enter a valid email address'),
-  password: z.string().min(4, 'Password must be at least 4 characters'),
+  password: z.string().min(8, 'Password must be at least 8 characters'),
   rememberMe: z.boolean().default(false).optional(),
 })
 
 export default function LoginPage() {
   const [loading, setLoading] = useState(false)
+  const [showPass, setShowPass] = useState(false)
   const [error, setError] = useState('')
   const router = useRouter()
 
   const form = useForm<z.infer<typeof loginSchema>>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { 
-      username: '', // Initialize username
-      email: '', 
-      password: '', 
-      rememberMe: false 
+    defaultValues: {
+      username: '',
+      email: '',
+      password: '',
+      rememberMe: false,
     },
   })
 
@@ -54,11 +70,11 @@ export default function LoginPage() {
     setTimeout(() => {
       setLoading(false)
       const email = values.email.toLowerCase()
-      
-      if (email === 'admin@dsa.com') {
+
+      if (values.username === 'admin' && email === 'admin@dsa.com' && values.password === 'dsaadminpass') {
         router.push('/admin')
       } else {
-        router.push('/rapid-quiz')
+        router.push('/dashboard')
       }
     }, 1500)
   }
@@ -99,14 +115,14 @@ export default function LoginPage() {
                       </FormLabel>
                       <FormControl>
                         <div className='relative'>
-                          <User
+                          <AtSign
                             className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
                             size={18}
                           />
-                          <Input
-                            placeholder='Username'
+                          <input
                             {...field}
-                            className='pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all'
+                            placeholder='username'
+                            className='flex w-full pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none text-sm'
                           />
                         </div>
                       </FormControl>
@@ -130,10 +146,11 @@ export default function LoginPage() {
                             className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
                             size={18}
                           />
-                          <Input
-                            placeholder='name@example.com'
+                          <input
                             {...field}
-                            className='pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all'
+                            type='email'
+                            placeholder='name@example.com'
+                            className='flex w-full pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none text-sm'
                           />
                         </div>
                       </FormControl>
@@ -165,12 +182,23 @@ export default function LoginPage() {
                             className='absolute left-4 top-1/2 -translate-y-1/2 text-gray-400'
                             size={18}
                           />
-                          <Input
-                            type='password'
-                            placeholder='••••••••••••••••'
+                          <input
                             {...field}
-                            className='pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all'
+                            type={showPass ? 'text' : 'password'}
+                            placeholder='••••••••••••'
+                            className='flex w-full pl-12 pr-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none text-sm'
                           />
+                          <button
+                            type='button'
+                            onClick={() => setShowPass(!showPass)}
+                            className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#002EFF] transition-colors'
+                          >
+                            {showPass ? (
+                              <EyeOff size={18} />
+                            ) : (
+                              <Eye size={18} />
+                            )}
+                          </button>
                         </div>
                       </FormControl>
                       <FormMessage className='text-[10px]' />

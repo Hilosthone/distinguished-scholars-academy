@@ -113,7 +113,7 @@ export default function RapidQuiz() {
             data-aos-delay='100'
             className='text-4xl md:text-5xl font-black text-black uppercase tracking-tight'
           >
-            Rapid <span className='text-[#002EFF]'>Quiz Portal</span>
+            Quiz360Pro <span className='text-[#002EFF]'>Portal</span>
           </h2>
           <div
             data-aos='zoom-in'
@@ -233,7 +233,7 @@ export default function RapidQuiz() {
                       Student
                     </h4>
                     <p className='text-sm text-gray-500 mt-1 font-medium'>
-                      Create account & start testing
+                      Create account & start Quiz360Pro
                     </p>
                   </div>
                   <ArrowRight className='ml-auto text-gray-300 group-hover:text-[#FCB900] group-hover:translate-x-2 transition-all' />

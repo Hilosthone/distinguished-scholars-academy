@@ -12,7 +12,7 @@ const navLinks = [
   { id: 'about', name: 'About', href: '#about' },
   { id: 'programs', name: 'Programs', href: '#programs' },
   { id: 'tutors', name: 'Tutors', href: '#tutors' },
-  { id: 'RapidQuiz', name: 'Rapid Quiz', href: '#RapidQuiz' },
+  { id: 'RapidQuiz', name: 'Quiz360Pro', href: '#RapidQuiz' },
   { id: 'contact', name: 'Contact', href: '#contact' },
 ]
 
