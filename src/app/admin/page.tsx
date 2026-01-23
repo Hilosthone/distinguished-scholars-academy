@@ -23,21 +23,21 @@ import {
 
 const INITIAL_STUDENTS = [
   {
-    id: 'TDA-001',
+    id: 'DSA-001',
     full_name: 'Hilosthone A',
     status: 'active',
     email: 'hilosthone@gmail.com',
     performance: 88,
   },
   {
-    id: 'TDA-002',
+    id: 'DSA-002',
     full_name: 'Sarah Adebayo',
     status: 'restricted',
     email: 'sarah.a@gmail.com',
     performance: 45,
   },
   {
-    id: 'TDA-003',
+    id: 'DSA-003',
     full_name: 'John Dumelo',
     status: 'active',
     email: 'john.d@outlook.com',
