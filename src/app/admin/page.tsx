@@ -138,7 +138,10 @@ export default function AdminDashboard() {
             <NavItem id='settings' label='System Settings' icon={Settings} />
           </div>
         </nav>
-        <button className='mt-auto flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all'>
+        <button
+          onClick={() => router.push('/signin')}
+          className='mt-auto flex items-center gap-3 px-4 py-3 text-sm font-medium text-rose-300 hover:bg-rose-500/10 rounded-xl transition-all'
+        >
           <LogOut size={18} /> End Session
         </button>
       </aside>
