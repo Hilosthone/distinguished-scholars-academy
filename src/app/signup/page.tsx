@@ -103,7 +103,7 @@ export default function DSASignUp() {
 
   function onSubmit(values: z.infer<typeof formSchema>) {
     console.log('Registering Student:', values)
-    router.push('/welcome-tutorial')
+    router.push('/signin')
   }
 
   return (
