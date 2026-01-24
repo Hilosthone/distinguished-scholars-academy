@@ -42,7 +42,7 @@ const bgFormulas = [
   { text: 'sin²θ + cos²θ = 1', top: '85%', right: '12%', rotate: -10 },
 ]
 
-export default function RapidQuiz() {
+export default function Quiz360Pro() {
   const [showModal, setShowModal] = useState(false)
   const [mounted, setMounted] = useState(false)
 
@@ -54,7 +54,7 @@ export default function RapidQuiz() {
 
   return (
     <section
-      id='RapidQuiz'
+      id='Quiz360Pro'
       className='w-full py-24 bg-white relative overflow-hidden'
     >
       {/* --- ACADEMIC BACKGROUND ELEMENTS --- */}
@@ -205,7 +205,7 @@ export default function RapidQuiz() {
             </div>
 
             <div className='flex flex-col gap-4'>
-              <Link href='/admin' className='group'>
+              <Link href='/signin' className='group'>
                 <div className='flex items-center gap-5 p-6 bg-gray-50 rounded-3xl border-2 border-transparent hover:border-[#002EFF] hover:bg-blue-50/50 transition-all duration-300'>
                   <div className='w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md text-[#002EFF] group-hover:scale-110 transition-transform'>
                     <ShieldCheck size={36} />
