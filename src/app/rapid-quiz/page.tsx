@@ -1,3 +1,4 @@
+// src/app/rapid-quiz/page.tsx
 'use client'
 
 import { useState, useEffect, useRef } from 'react'

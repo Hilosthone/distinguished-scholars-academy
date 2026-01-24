@@ -1,300 +1,353 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 import {
-Camera,
   User,
-  Target,
+  Lock,
   Bell,
   ShieldCheck,
-  ChevronLeft,
-  Check,
+  CreditCard,
+  ChevronRight,
+  Camera,
+  Fingerprint,
   Smartphone,
-  Mail,
-  Lock,
-  EyeOff,
-  Trash2,
+  Sparkles,
+  ShieldAlert,
+  Check,
+  Loader2,
 } from 'lucide-react'
-import Link from 'next/link'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Progress } from '@/components/ui/progress'
 
-export default function SettingsPage() {
-  const [activeTab, setActiveTab] = useState('profile')
-  const [saved, setSaved] = useState(false)
+export default function SettingsView() {
+  const [activeTab, setActiveTab] = useState('Account Info')
+  const [profileImage, setProfileImage] = useState(
+    'https://api.dicebear.com/7.x/avataaars/svg?seed=Felix',
+  )
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false)
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
-  const handleSave = () => {
-    setSaved(true)
-    setTimeout(() => setSaved(false), 2000)
+  const avatarSeeds = [
+    { name: 'Felix', style: 'avataaars' },
+    { name: 'Aneka', style: 'avataaars' },
+    { name: 'Max', style: 'avataaars' },
+    { name: 'Luna', style: 'avataaars' },
+    { name: 'Jack', style: 'avataaars' },
+    { name: 'Zoe', style: 'avataaars' },
+    { name: 'Oliver', style: 'open-peeps' },
+    { name: 'Sophia', style: 'open-peeps' },
+    { name: 'Liam', style: 'open-peeps' },
+    { name: 'Maya', style: 'open-peeps' },
+    { name: 'Noah', style: 'open-peeps' },
+    { name: 'Elena', style: 'open-peeps' },
+  ]
+
+  // --- PERSISTENCE LOGIC ---
+  useEffect(() => {
+    const savedImg = localStorage.getItem('user-pfp')
+    if (savedImg) setProfileImage(savedImg)
+  }, [])
+
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0]
+    if (file) {
+      const reader = new FileReader()
+      reader.onloadend = () => {
+        const base64 = reader.result as string
+        setProfileImage(base64)
+      }
+      reader.readAsDataURL(file)
+    }
+  }
+
+  const handleSaveChanges = () => {
+    setIsSaving(true)
+    // Simulate API Call
+    setTimeout(() => {
+      localStorage.setItem('user-pfp', profileImage)
+      setIsSaving(false)
+      setSaveSuccess(true)
+      // Reset success state after 3 seconds
+      setTimeout(() => setSaveSuccess(false), 3000)
+    }, 800)
   }
 
   return (
-    <div className='max-w-4xl mx-auto space-y-6 p-4 md:p-8 bg-[#FAFBFF] min-h-screen pb-20'>
-      {/* Header */}
-      <div className='flex items-center justify-between'>
-        <div className='flex items-center gap-4'>
-          <Link
-            href='/dashboard'
-            className='p-2 bg-white rounded-xl border border-gray-100 hover:shadow-sm'
-          >
-            <ChevronLeft size={16} className='text-gray-600' />
-          </Link>
-          <h1 className='text-xl font-black text-zinc-900 tracking-tight'>
-            Settings
-          </h1>
-        </div>
-        <Button
-          onClick={handleSave}
-          size='sm'
-          className={`h-9 px-6 rounded-xl font-black uppercase text-[10px] tracking-widest transition-all ${saved ? 'bg-emerald-500' : 'bg-[#002EFF]'}`}
-        >
-          {saved ? <Check size={14} className='mr-2' /> : null}
-          {saved ? 'Saved' : 'Save Changes'}
-        </Button>
-      </div>
-
-      <div className='grid grid-cols-1 md:grid-cols-12 gap-6'>
-        {/* Sidebar Navigation */}
-        <div className='md:col-span-4 space-y-2'>
-          {[
-            { id: 'profile', icon: User, label: 'Profile' },
-            { id: 'goals', icon: Target, label: 'Academic Goals' },
-            { id: 'notifications', icon: Bell, label: 'Notifications' },
-            { id: 'security', icon: ShieldCheck, label: 'Privacy & Security' },
-          ].map((item) => (
+    <div className='max-w-3xl mx-auto space-y-4 animate-in fade-in duration-500 pb-10 scale-[0.98] origin-top'>
+      {/* --- PROFILE HEADER --- */}
+      <Card className='bg-white rounded-3xl border-none p-5 shadow-sm relative overflow-hidden'>
+        <div className='absolute top-0 right-0 w-24 h-24 bg-[#002EFF]/5 rounded-bl-full pointer-events-none' />
+        <div className='flex flex-col md:flex-row items-center gap-5 relative z-10'>
+          <div className='relative group'>
+            <Avatar className='h-20 w-20 border-2 border-blue-50 shadow-lg transition-transform group-hover:scale-105'>
+              <AvatarImage src={profileImage} className='object-cover' />
+              <AvatarFallback className='bg-blue-100 text-[#002EFF] font-black text-sm'>
+                HS
+              </AvatarFallback>
+            </Avatar>
             <button
-              key={item.id}
-              onClick={() => setActiveTab(item.id)}
-              className={`w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all ${
-                activeTab === item.id
-                  ? 'bg-white shadow-sm border border-gray-100 text-[#002EFF]'
-                  : 'text-gray-400 hover:text-gray-600'
-              }`}
+              onClick={() => setShowAvatarPicker(!showAvatarPicker)}
+              className='absolute bottom-0 right-0 p-1.5 bg-[#002EFF] text-white rounded-lg shadow-lg border-2 border-white transition-transform active:scale-90'
             >
-              <item.icon size={18} />
-              <span className='text-xs font-bold uppercase tracking-wider'>
-                {item.label}
-              </span>
+              <Camera size={12} />
             </button>
+          </div>
+
+          <div className='text-center md:text-left flex-1 space-y-0.5'>
+            <div className='flex items-center justify-center md:justify-start gap-2'>
+              <h2 className='text-lg font-black text-gray-800 uppercase italic leading-tight'>
+                Hilosthone Student
+              </h2>
+              <Badge className='bg-[#FCB900] text-[#002EFF] border-none font-black text-[8px] h-4'>
+                GOLD
+              </Badge>
+            </div>
+            <p className='text-[10px] font-bold text-gray-400'>
+              ID: 2026/DSA/042 • Science
+            </p>
+            <div className='pt-2 max-w-[180px] mx-auto md:mx-0'>
+              <div className='flex justify-between items-center mb-1'>
+                <span className='text-[8px] font-black text-[#002EFF] uppercase'>
+                  Profile Strength
+                </span>
+                <span className='text-[8px] font-black text-gray-400'>85%</span>
+              </div>
+              <Progress value={85} className='h-1 bg-blue-50' />
+            </div>
+          </div>
+        </div>
+
+        {/* --- EXPANDED AVATAR PICKER --- */}
+        {showAvatarPicker && (
+          <div className='mt-4 p-3 bg-blue-50/50 rounded-2xl animate-in zoom-in-95 duration-200 border border-blue-100'>
+            <div className='flex items-center justify-between mb-2'>
+              <p className='text-[9px] font-black text-blue-600 uppercase'>
+                Character Gallery
+              </p>
+              <button
+                onClick={() => setShowAvatarPicker(false)}
+                className='text-[8px] font-black text-gray-400 hover:text-[#002EFF]'
+              >
+                CLOSE
+              </button>
+            </div>
+            <div className='grid grid-cols-6 sm:grid-cols-8 gap-2'>
+              {avatarSeeds.map((seed) => {
+                const url = `https://api.dicebear.com/7.x/${seed.style}/svg?seed=${seed.name}`
+                return (
+                  <button
+                    key={seed.name}
+                    onClick={() => setProfileImage(url)}
+                    className={`relative aspect-square rounded-lg overflow-hidden border-2 transition-all bg-white hover:scale-110 ${profileImage === url ? 'border-[#002EFF]' : 'border-white'}`}
+                  >
+                    <img src={url} alt={seed.name} className='h-full w-full' />
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                className='aspect-square border-2 border-dashed border-blue-200 rounded-lg flex items-center justify-center text-blue-400 hover:bg-blue-100 transition-colors'
+              >
+                <PlusIcon size={14} />
+              </button>
+            </div>
+          </div>
+        )}
+        <input
+          type='file'
+          ref={fileInputRef}
+          onChange={handleImageChange}
+          className='hidden'
+          accept='image/*'
+        />
+      </Card>
+
+      <div className='grid grid-cols-1 lg:grid-cols-3 gap-4'>
+        {/* --- NAVIGATION --- */}
+        <div className='space-y-1.5'>
+          {[
+            'Account Info',
+            'Security & Password',
+            'Notifications',
+            'Subscription',
+            'Privacy Settings',
+          ].map((label) => (
+            <SettingNavButton
+              key={label}
+              icon={
+                label === 'Account Info'
+                  ? User
+                  : label === 'Security & Password'
+                    ? Lock
+                    : label === 'Notifications'
+                      ? Bell
+                      : label === 'Subscription'
+                        ? CreditCard
+                        : ShieldCheck
+              }
+              label={label}
+              active={activeTab === label}
+              onClick={() => setActiveTab(label)}
+            />
           ))}
         </div>
 
-        {/* Dynamic Content Area */}
-        <div className='md:col-span-8'>
-          {activeTab === 'goals' && <AcademicGoals />}
-          {activeTab === 'notifications' && <NotificationSettings />}
-          {activeTab === 'security' && <SecuritySettings />}
-          {activeTab === 'profile' && <ProfileSettings />}
+        {/* --- CONTENT AREA --- */}
+        <div className='lg:col-span-2'>
+          {activeTab === 'Account Info' ? (
+            <div className='space-y-4'>
+              <Card className='bg-white rounded-3xl border-none p-5 shadow-sm'>
+                <h3 className='text-[11px] font-black text-[#002EFF] uppercase mb-4 flex items-center gap-2'>
+                  <Fingerprint size={14} /> Personal Details
+                </h3>
+                <div className='space-y-3'>
+                  <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
+                    <div className='space-y-1'>
+                      <label className='text-[9px] font-black text-gray-400 uppercase ml-1'>
+                        Full Name
+                      </label>
+                      <Input
+                        className='h-8 rounded-lg border-gray-100 bg-gray-50/50 text-[11px] font-bold focus:bg-white'
+                        defaultValue='Hilosthone Student'
+                      />
+                    </div>
+                    <div className='space-y-1'>
+                      <label className='text-[9px] font-black text-gray-400 uppercase ml-1'>
+                        Email Address
+                      </label>
+                      <Input
+                        className='h-8 rounded-lg border-gray-100 bg-gray-50/50 text-[11px] font-bold focus:bg-white'
+                        defaultValue='hilo@dsa-portal.com'
+                      />
+                    </div>
+                  </div>
+                  <div className='space-y-1'>
+                    <label className='text-[9px] font-black text-gray-400 uppercase ml-1'>
+                      Target Institution
+                    </label>
+                    <Input
+                      className='h-8 rounded-lg border-gray-100 bg-gray-50/50 text-[11px] font-bold focus:bg-white'
+                      defaultValue='University of Lagos (UNILAG)'
+                    />
+                  </div>
+
+                  {/* --- DYNAMIC ACTION BUTTON --- */}
+                  <Button
+                    onClick={handleSaveChanges}
+                    disabled={isSaving}
+                    className={`transition-all duration-300 font-black text-[9px] rounded-lg px-8 h-8 shadow-md mt-2 w-full md:w-auto ${
+                      saveSuccess
+                        ? 'bg-emerald-500 hover:bg-emerald-600 text-white'
+                        : 'bg-[#002EFF] hover:bg-blue-700 text-white'
+                    }`}
+                  >
+                    {isSaving ? (
+                      <Loader2 size={14} className='animate-spin' />
+                    ) : saveSuccess ? (
+                      <span className='flex items-center gap-2'>
+                        <Check size={14} strokeWidth={3} /> SAVED SUCCESSFULLY
+                      </span>
+                    ) : (
+                      'SAVE CHANGES'
+                    )}
+                  </Button>
+                </div>
+              </Card>
+
+              <div className='grid grid-cols-2 gap-3'>
+                <Card className='p-3 rounded-2xl border-none bg-white shadow-sm flex items-center gap-3'>
+                  <div className='h-8 w-8 bg-orange-50 text-orange-500 rounded-lg flex items-center justify-center shrink-0'>
+                    <ShieldAlert size={14} />
+                  </div>
+                  <p className='text-[9px] font-black text-gray-800 leading-tight uppercase'>
+                    2FA <br />
+                    <span className='text-gray-400 font-bold lowercase'>
+                      Disabled
+                    </span>
+                  </p>
+                </Card>
+                <Card className='p-3 rounded-2xl border-none bg-white shadow-sm flex items-center gap-3'>
+                  <div className='h-8 w-8 bg-blue-50 text-[#002EFF] rounded-lg flex items-center justify-center shrink-0'>
+                    <Smartphone size={14} />
+                  </div>
+                  <p className='text-[9px] font-black text-gray-800 leading-tight uppercase'>
+                    Devices <br />
+                    <span className='text-gray-400 font-bold lowercase'>
+                      2 active
+                    </span>
+                  </p>
+                </Card>
+              </div>
+            </div>
+          ) : (
+            <Card className='bg-white rounded-3xl border-none p-10 shadow-sm flex flex-col items-center justify-center text-center space-y-3 min-h-[300px]'>
+              <div className='h-12 w-12 bg-blue-50 rounded-full flex items-center justify-center text-[#002EFF] animate-pulse'>
+                <Sparkles size={24} />
+              </div>
+              <h3 className='text-sm font-black text-gray-800 uppercase italic'>
+                {activeTab}
+              </h3>
+              <p className='text-[10px] font-bold text-gray-400 max-w-[200px]'>
+                We're currently building this section. Stay tuned!
+              </p>
+              <Badge className='bg-blue-50 text-[#002EFF] border-none font-black text-[8px]'>
+                COMING SOON
+              </Badge>
+            </Card>
+          )}
         </div>
       </div>
     </div>
   )
 }
 
-/* --- SUB-COMPONENTS --- */
-
-function AcademicGoals() {
+function SettingNavButton({ icon: Icon, label, active, onClick }: any) {
   return (
-    <Card className='p-6 border-none shadow-sm rounded-3xl bg-white space-y-6'>
-      <div>
-        <h3 className='font-black text-zinc-900 text-sm uppercase tracking-tight'>
-          Target Percentages
-        </h3>
-        <p className='text-[10px] text-gray-400 font-medium'>
-          These affect your dashboard progress rings.
-        </p>
-      </div>
-      {['Biology', 'Physics', 'Chemistry', 'Mathematics'].map((subject) => (
-        <div key={subject} className='space-y-3'>
-          <div className='flex justify-between text-[10px] font-black uppercase'>
-            <span>{subject}</span>
-            <span className='text-[#002EFF]'>85%</span>
-          </div>
-          <input
-            type='range'
-            className='w-full h-1.5 bg-gray-100 rounded-lg appearance-none cursor-pointer accent-[#002EFF]'
-          />
-        </div>
-      ))}
-    </Card>
-  )
-}
-
-function NotificationSettings() {
-  return (
-    <Card className='p-6 border-none shadow-sm rounded-3xl bg-white space-y-4'>
-      <div className='flex items-center justify-between p-3 bg-gray-50 rounded-2xl'>
-        <div className='flex items-center gap-3'>
-          <div className='p-2 bg-white rounded-xl shadow-sm'>
-            <Mail size={16} className='text-blue-500' />
-          </div>
-          <div>
-            <p className='text-[10px] font-black uppercase'>Email Reports</p>
-            <p className='text-[9px] text-gray-400'>
-              Weekly performance summary
-            </p>
-          </div>
-        </div>
-        <div className='w-8 h-4 bg-blue-600 rounded-full relative'>
-          <div className='absolute right-1 top-1 w-2 h-2 bg-white rounded-full' />
-        </div>
-      </div>
-      <div className='flex items-center justify-between p-3 bg-gray-50 rounded-2xl'>
-        <div className='flex items-center gap-3'>
-          <div className='p-2 bg-white rounded-xl shadow-sm'>
-            <Smartphone size={16} className='text-emerald-500' />
-          </div>
-          <div>
-            <p className='text-[10px] font-black uppercase'>
-              Push Notifications
-            </p>
-            <p className='text-[9px] text-gray-400'>Daily streak reminders</p>
-          </div>
-        </div>
-        <div className='w-8 h-4 bg-gray-200 rounded-full relative'>
-          <div className='absolute left-1 top-1 w-2 h-2 bg-white rounded-full' />
-        </div>
-      </div>
-    </Card>
-  )
-}
-
-function SecuritySettings() {
-  return (
-    <Card className='p-6 border-none shadow-sm rounded-3xl bg-white space-y-6'>
-      <div className='space-y-4'>
-        <button className='w-full flex items-center justify-between p-3 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all'>
-          <div className='flex items-center gap-3'>
-            <Lock size={16} className='text-zinc-400' />
-            <span className='text-[10px] font-black uppercase'>
-              Change Password
-            </span>
-          </div>
-          <ChevronLeft size={14} className='rotate-180 text-gray-300' />
-        </button>
-        <button className='w-full flex items-center justify-between p-3 border border-gray-100 rounded-2xl hover:bg-gray-50 transition-all'>
-          <div className='flex items-center gap-3'>
-            <EyeOff size={16} className='text-zinc-400' />
-            <span className='text-[10px] font-black uppercase'>
-              Privacy Mode
-            </span>
-          </div>
-          <div className='w-8 h-4 bg-gray-200 rounded-full' />
-        </button>
-      </div>
-      <hr className='border-gray-50' />
-      <button className='flex items-center gap-2 text-red-500 hover:text-red-600 transition-colors'>
-        <Trash2 size={14} />
-        <span className='text-[10px] font-black uppercase tracking-widest'>
-          Delete Account
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center justify-between p-3 rounded-xl transition-all group ${active ? 'bg-[#002EFF] text-white shadow-md' : 'bg-white text-gray-500 hover:bg-blue-50'}`}
+    >
+      <div className='flex items-center gap-2.5'>
+        <Icon
+          size={14}
+          className={
+            active
+              ? 'text-[#FCB900]'
+              : 'text-gray-400 group-hover:text-[#002EFF]'
+          }
+        />
+        <span className='text-[10px] font-black uppercase italic tracking-tight'>
+          {label}
         </span>
-      </button>
-    </Card>
+      </div>
+      <ChevronRight
+        size={12}
+        className={active ? 'text-white/50' : 'text-gray-300'}
+      />
+    </button>
   )
 }
 
-function ProfileSettings() {
+function PlusIcon({ size }: { size: number }) {
   return (
-    <Card className='p-6 border-none shadow-sm rounded-3xl bg-white animate-in fade-in slide-in-from-bottom-2 duration-300'>
-      <div className='space-y-8'>
-        {/* Profile Picture Upload */}
-        <div className='flex items-center gap-6'>
-          <div className='relative group cursor-pointer'>
-            <div className='w-20 h-20 rounded-3xl bg-blue-50 border-2 border-dashed border-blue-200 flex items-center justify-center text-[#002EFF] overflow-hidden transition-all group-hover:border-[#002EFF]'>
-              <User size={32} />
-              {/* This would be an <img /> if a photo existed */}
-            </div>
-            <div className='absolute inset-0 bg-zinc-900/40 rounded-3xl opacity-0 group-hover:opacity-100 flex items-center justify-center transition-all backdrop-blur-[2px]'>
-              <Camera size={20} className='text-white' />
-            </div>
-          </div>
-          <div>
-            <h3 className='font-black text-zinc-900 text-sm uppercase tracking-tight'>
-              Profile Avatar
-            </h3>
-            <p className='text-[10px] text-gray-400 font-medium mt-1 leading-relaxed'>
-              PNG or JPG. Max 2MB. <br />
-              This will appear on your certificates.
-            </p>
-            <div className='flex gap-4 mt-3'>
-              <button className='text-[10px] font-black text-[#002EFF] uppercase tracking-widest hover:text-blue-700 transition-colors'>
-                Upload New
-              </button>
-              <button className='text-[10px] font-black text-red-500 uppercase tracking-widest hover:text-red-600 transition-colors'>
-                Remove
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Form Grid */}
-        <div className='grid grid-cols-1 md:grid-cols-2 gap-5'>
-          <div className='space-y-2'>
-            <label className='text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1'>
-              Display Name
-            </label>
-            <input
-              type='text'
-              defaultValue='Hilosthone A.'
-              placeholder='Enter your name'
-              className='w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs font-bold text-zinc-900 focus:ring-2 focus:ring-blue-100 focus:bg-white outline-none transition-all placeholder:text-gray-300'
-            />
-          </div>
-
-          <div className='space-y-2'>
-            <label className='text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1'>
-              Academic Level
-            </label>
-            <div className='relative'>
-              <select className='w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs font-bold text-zinc-900 outline-none appearance-none cursor-pointer focus:ring-2 focus:ring-blue-100'>
-                <option>University / Final Year</option>
-                <option>Senior Secondary (SS3)</option>
-                <option>Senior Secondary (SS2)</option>
-                <option>Post-Graduate</option>
-              </select>
-              <div className='absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none'>
-                <ChevronLeft
-                  size={12}
-                  className='rotate-270 text-gray-400'
-                />
-              </div>
-            </div>
-          </div>
-
-          <div className='md:col-span-2 space-y-2'>
-            <label className='text-[9px] font-black text-gray-400 uppercase tracking-widest ml-1'>
-              Academic Bio
-            </label>
-            <textarea
-              rows={4}
-              placeholder='e.g. Aspiring Surgeon | Mastering Biochemistry...'
-              className='w-full bg-gray-50 border border-gray-100 rounded-2xl px-4 py-3.5 text-xs font-bold text-zinc-900 focus:ring-2 focus:ring-blue-100 focus:bg-white outline-none transition-all resize-none placeholder:text-gray-300'
-            />
-            <div className='flex justify-end'>
-              <span className='text-[8px] font-bold text-gray-300 uppercase tracking-tighter'>
-                0 / 120 Characters
-              </span>
-            </div>
-          </div>
-        </div>
-
-        {/* Verification Badge (Extra Detail) */}
-        <div className='p-4 rounded-2xl bg-blue-50/50 border border-blue-100 flex items-center justify-between'>
-          <div className='flex items-center gap-3'>
-            <div className='p-2 bg-white rounded-xl text-blue-600 shadow-sm'>
-              <ShieldCheck size={16} />
-            </div>
-            <div>
-              <p className='text-[10px] font-black uppercase text-zinc-900'>
-                Verified Student Status
-              </p>
-              <p className='text-[9px] text-blue-600/70 font-bold'>
-                Your account is eligible for official rankings.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
-    </Card>
+    <svg
+      width={size}
+      height={size}
+      viewBox='0 0 24 24'
+      fill='none'
+      stroke='currentColor'
+      strokeWidth='3'
+      strokeLinecap='round'
+      strokeLinejoin='round'
+    >
+      <line x1='12' y1='5' x2='12' y2='19'></line>
+      <line x1='5' y1='12' x2='19' y2='12'></line>
+    </svg>
   )
 }
