@@ -55,6 +55,19 @@ export default function AdminDashboard() {
   >('students')
   const [students, setStudents] = useState(INITIAL_STUDENTS)
 
+  const [form, setForm] = useState({
+    examType: 'JAMB',
+    subject: 'ENG',
+    question: '', 
+    options: {
+      a: '',
+      b: '',
+      c: '',
+      d: '',
+    },
+    correct: 'a',
+  })
+
   useEffect(() => setMounted(true), [])
 
   const toggleStatus = (id: string, currentStatus: string) => {
@@ -326,34 +339,122 @@ export default function AdminDashboard() {
               >
                 {/* Question Form remains similar but with refined spacing */}
                 <div className='bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden'>
-                  <div className='bg-blue-600 p-6 md:p-8 text-white'>
-                    <h2 className='text-lg font-bold'>Central Database</h2>
-                    <p className='text-blue-200 text-[10px] uppercase font-bold tracking-widest mt-1'>
-                      Question Entry System
-                    </p>
-                  </div>
-                  <form className='p-6 md:p-10 space-y-6'>
-                    <div className='space-y-2'>
-                      <label className='text-[10px] font-bold text-slate-400 uppercase'>
-                        Examination Body
-                      </label>
-                      <select className='w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:border-blue-600 outline-none'>
-                        <option>JAMB (UTME)</option>
-                        <option>WAEC (WASSCE)</option>
-                      </select>
+                  {/* Header */}
+                  <div className='bg-blue-600 p-6 md:p-8 text-white flex justify-between items-center'>
+                    <div>
+                      <h2 className='text-lg font-bold'>Central Database</h2>
+                      <p className='text-blue-200 text-[10px] uppercase font-bold tracking-widest mt-1'>
+                        Question Entry System
+                      </p>
                     </div>
+                    <div className='bg-blue-500/30 px-3 py-1 rounded-full border border-blue-400/30'>
+                      <span className='text-[10px] font-black uppercase'>
+                        Pro Editor
+                      </span>
+                    </div>
+                  </div>
+
+                  <form className='p-6 md:p-10 space-y-8'>
+                    {/* Meta Row: Exam Body & Subject */}
+                    <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
+                      <div className='space-y-2'>
+                        <label className='text-[10px] font-bold text-slate-400 uppercase'>
+                          Examination Body
+                        </label>
+                        <select className='w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all'>
+                          <option>JAMB (UTME)</option>
+                          <option>WAEC (WASSCE)</option>
+                          <option>NECO (SSCE)</option>
+                          <option>Post-UTME</option>
+                        </select>
+                      </div>
+                      <div className='space-y-2'>
+                        <label className='text-[10px] font-bold text-slate-400 uppercase'>
+                          Subject Category
+                        </label>
+                        <select className='w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-600/10 focus:border-blue-600 outline-none transition-all'>
+                          {SUBJECTS.map((s) => (
+                            <option key={s}>{s}</option>
+                          ))}
+                        </select>
+                      </div>
+                    </div>
+
+                    {/* Question Text Area */}
                     <div className='space-y-2'>
-                      <label className='text-[10px] font-bold text-slate-400 uppercase'>
-                        Content Prompt
-                      </label>
+                      <div className='flex justify-between items-end'>
+                        <label className='text-[10px] font-bold text-slate-400 uppercase'>
+                          Content Prompt
+                        </label>
+                        <button
+                          type='button'
+                          className='text-[10px] font-bold text-blue-600 hover:underline'
+                        >
+                          Add Diagram +
+                        </button>
+                      </div>
                       <textarea
                         placeholder='Type question content here...'
-                        className='w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 text-sm focus:border-blue-600 outline-none'
+                        className='w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl h-32 text-sm focus:bg-white focus:border-blue-600 outline-none transition-all'
                       />
                     </div>
-                    <button className='w-full py-4 bg-blue-600 text-white rounded-xl text-sm font-bold shadow-lg shadow-blue-200 active:scale-95 transition-all'>
-                      Commit to Database
-                    </button>
+
+                    {/* Options Grid */}
+                    <div className='space-y-4'>
+                      <label className='text-[10px] font-bold text-slate-400 uppercase'>
+                        Answer Variants
+                      </label>
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
+                        {['a', 'b', 'c', 'd'].map((opt) => (
+                          <div key={opt} className='relative flex items-center'>
+                            <span
+                              className={`absolute left-4 text-[10px] font-black uppercase ${form.correct === opt ? 'text-blue-600' : 'text-slate-400'}`}
+                            >
+                              {opt}
+                            </span>
+                            <input
+                              type='text'
+                              placeholder={`Option ${opt.toUpperCase()}`}
+                              className={`w-full pl-10 pr-4 py-3 bg-slate-50 border rounded-xl text-sm outline-none transition-all ${
+                                form.correct === opt
+                                  ? 'border-blue-600 bg-blue-50/30 ring-1 ring-blue-600'
+                                  : 'border-slate-200 focus:border-blue-400'
+                              }`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Pro Feature: Correct Answer Selection */}
+                    <div className='pt-6 border-t border-slate-100 flex flex-col md:flex-row items-center justify-between gap-6'>
+                      <div className='flex flex-col gap-2 w-full md:w-auto'>
+                        <label className='text-[10px] font-bold text-slate-400 uppercase'>
+                          Mark Correct Key
+                        </label>
+                        <div className='flex gap-2 p-1 bg-slate-100 rounded-2xl'>
+                          {['a', 'b', 'c', 'd'].map((opt) => (
+                            <button
+                              key={opt}
+                              type='button'
+                              onClick={() => setForm({ ...form, correct: opt })}
+                              className={`w-12 h-10 rounded-xl text-xs font-black uppercase transition-all ${
+                                form.correct === opt
+                                  ? 'bg-blue-600 text-white shadow-lg shadow-blue-200'
+                                  : 'text-slate-400 hover:text-slate-600 hover:bg-white'
+                              }`}
+                            >
+                              {opt}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+
+                      <button className='w-full md:w-auto px-12 py-4 bg-blue-600 text-white rounded-2xl text-sm font-black shadow-xl shadow-blue-200 active:scale-95 transition-all flex items-center justify-center gap-2'>
+                        <Database size={18} />
+                        COMMIT TO QUIZ
+                      </button>
+                    </div>
                   </form>
                 </div>
               </motion.div>
