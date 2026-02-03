@@ -205,7 +205,7 @@ export default function Quiz360Pro() {
             </div>
 
             <div className='flex flex-col gap-4'>
-              <Link href='/signin' className='group'>
+              <Link href='/adminLogin' className='group'>
                 <div className='flex items-center gap-5 p-6 bg-gray-50 rounded-3xl border-2 border-transparent hover:border-[#002EFF] hover:bg-blue-50/50 transition-all duration-300'>
                   <div className='w-16 h-16 bg-white rounded-2xl flex items-center justify-center shadow-md text-[#002EFF] group-hover:scale-110 transition-transform'>
                     <ShieldCheck size={36} />
