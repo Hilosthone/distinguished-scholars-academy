@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   LayoutDashboard,
@@ -20,7 +20,14 @@ import {
   GraduationCap,
   AlertTriangle,
   ChevronRight,
+  Search,
+  X,
 } from 'lucide-react'
+
+// UI Components
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Badge } from '@/components/ui/badge'
 
 // --- FEATURE IMPORTS ---
 import SuperDashboard from './components/SuperDashboard'
@@ -35,40 +42,70 @@ import RevenueControls from './components/RevenueControls'
 import RolesPermissions from './components/RolesPermissions'
 import Settings from './components/Settings'
 
-export default function AdminNexus() {
+type AdminTab =
+  | 'dashboard'
+  | 'questions'
+  | 'exams'
+  | 'analytics'
+  | 'students'
+  | 'monitoring'
+  | 'broadcast'
+  | 'leaderboard'
+  | 'revenue'
+  | 'roles'
+  | 'settings'
+
+export default function AdminAdmin() {
+  const [mounted, setMounted] = useState(false)
   const [isSidebarOpen, setIsSidebarOpen] = useState(false)
-  const [activeTab, setActiveTab] = useState('dashboard')
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard')
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
 
   const sidebarGroups = [
     {
       group: 'Management',
       items: [
-        { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-        { id: 'questions', label: 'Question Bank', icon: Database },
-        { id: 'exams', label: 'Exam Builder', icon: BookOpen },
+        {
+          id: 'dashboard' as AdminTab,
+          label: 'Dashboard',
+          icon: LayoutDashboard,
+        },
+        { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database },
+        { id: 'exams' as AdminTab, label: 'Exam Builder', icon: BookOpen },
       ],
     },
     {
       group: 'Operations',
       items: [
-        { id: 'analytics', label: 'Analytics', icon: BarChart3 },
-        { id: 'students', label: 'Students', icon: Users },
-        { id: 'monitoring', label: 'Live Monitoring', icon: Activity },
+        { id: 'analytics' as AdminTab, label: 'Analytics', icon: BarChart3 },
+        { id: 'students' as AdminTab, label: 'Students', icon: Users },
+        {
+          id: 'monitoring' as AdminTab,
+          label: 'Live Monitoring',
+          icon: Activity,
+        },
       ],
     },
     {
       group: 'Finance & Engagement',
       items: [
-        { id: 'broadcast', label: 'Announcements', icon: Megaphone },
-        { id: 'leaderboard', label: 'Leaderboard', icon: Trophy },
-        { id: 'revenue', label: 'Revenue', icon: CreditCard },
+        {
+          id: 'broadcast' as AdminTab,
+          label: 'Announcements',
+          icon: Megaphone,
+        },
+        { id: 'leaderboard' as AdminTab, label: 'Leaderboard', icon: Trophy },
+        { id: 'revenue' as AdminTab, label: 'Revenue', icon: CreditCard },
       ],
     },
     {
       group: 'System',
       items: [
-        { id: 'roles', label: 'Permissions', icon: ShieldCheck },
-        { id: 'settings', label: 'Settings', icon: SettingsIcon },
+        { id: 'roles' as AdminTab, label: 'Permissions', icon: ShieldCheck },
+        { id: 'settings' as AdminTab, label: 'Settings', icon: SettingsIcon },
       ],
     },
   ]
@@ -102,156 +139,211 @@ export default function AdminNexus() {
     }
   }
 
+  const SidebarContent = () => (
+    <div className='flex flex-col h-full py-8 px-4'>
+      <div className='flex items-center justify-between mb-10 px-2'>
+        <div className='flex items-center gap-3'>
+          <div className='bg-[#FCB900] p-1.5 rounded-lg shadow-lg shadow-[#FCB900]/20'>
+            <GraduationCap className='text-[#002EFF]' size={20} />
+          </div>
+          <div className='flex flex-col'>
+            <span className='text-white font-black text-sm tracking-tighter uppercase leading-none'>
+              DSA.<span className='text-yellow-400'>Admin</span>
+            </span>
+            <Badge className='bg-blue-500/30 text-blue-100 text-[8px] py-0 h-4 w-fit mt-1 border-none font-bold'>
+              SUPER ADMIN
+            </Badge>
+          </div>
+        </div>
+        {/* Close button for mobile */}
+        <button
+          onClick={() => setIsSidebarOpen(false)}
+          className='lg:hidden p-2 text-white/50 hover:text-white'
+        >
+          <X size={20} />
+        </button>
+      </div>
+
+      <nav className='flex-1 space-y-6 overflow-y-auto pr-2 nav-custom-scrollbar'>
+        {sidebarGroups.map((group, idx) => (
+          <div key={idx} className='space-y-1.5'>
+            <h3 className='px-4 text-[9px] font-black uppercase tracking-[0.2em] text-blue-200/40'>
+              {group.group}
+            </h3>
+            {group.items.map((item) => (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id)
+                  setIsSidebarOpen(false)
+                }}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${
+                  activeTab === item.id
+                    ? 'bg-[#FCB900] text-[#002EFF] font-black shadow-xl shadow-[#FCB900]/20 scale-[1.02]'
+                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <item.icon
+                  size={16}
+                  className={
+                    activeTab === item.id
+                      ? 'animate-pulse'
+                      : 'opacity-70 group-hover:scale-110 transition-transform'
+                  }
+                />
+                <span className='text-[11px] uppercase tracking-wider font-bold'>
+                  {item.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        ))}
+      </nav>
+
+      <div className='mt-auto pt-6 border-t border-white/10'>
+        <button className='w-full flex items-center gap-3 px-4 py-3 rounded-xl text-rose-200/50 hover:bg-rose-500 hover:text-white transition-all group font-bold text-[11px] uppercase tracking-widest'>
+          <LogOut
+            size={16}
+            className='group-hover:-translate-x-1 transition-transform'
+          />
+          Sign Out
+        </button>
+      </div>
+    </div>
+  )
+
   return (
-    <div className='flex h-screen bg-[#F9FAFB] overflow-hidden font-sans text-slate-900 antialiased'>
-      {/* Mobile Overlay */}
+    <div className='flex h-screen bg-[#F8FAFF] overflow-hidden font-sans selection:bg-blue-100'>
+      {mounted && (
+        <style
+          dangerouslySetInnerHTML={{
+            __html: `
+            .nav-custom-scrollbar::-webkit-scrollbar { width: 4px; }
+            .nav-custom-scrollbar::-webkit-scrollbar-thumb { background: #fcb900; border-radius: 10px; }
+            .main-scrollbar::-webkit-scrollbar { width: 6px; }
+            .main-scrollbar::-webkit-scrollbar-thumb { background: #002EFF; border-radius: 10px; }
+          `,
+          }}
+        />
+      )}
+
+      {/* MOBILE SIDEBAR OVERLAY */}
       <AnimatePresence>
         {isSidebarOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={() => setIsSidebarOpen(false)}
-            className='fixed inset-0 bg-blue-900/20 backdrop-blur-xs z-40 lg:hidden'
-          />
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsSidebarOpen(false)}
+              className='fixed inset-0 bg-[#002EFF]/20 backdrop-blur-sm z-60 lg:hidden'
+            />
+            <motion.aside
+              initial={{ x: '-100%' }}
+              animate={{ x: 0 }}
+              exit={{ x: '-100%' }}
+              transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+              className='fixed inset-y-0 left-0 w-72 bg-[#002EFF] z-70 lg:hidden shadow-2xl'
+            >
+              <SidebarContent />
+            </motion.aside>
+          </>
         )}
       </AnimatePresence>
 
-      {/* Sidebar - Original Blue Brand + Compact Layout */}
-      <aside
-        className={`fixed inset-y-0 left-0 z-50 w-56 bg-blue-600 text-white flex flex-col transition-transform duration-200 lg:translate-x-0 lg:static ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className='h-14 flex items-center px-5 border-b border-white/10 gap-2.5 shrink-0'>
-          <div className='w-7 h-7 bg-white/20 rounded-lg flex items-center justify-center border border-white/20 shadow-inner'>
-            <GraduationCap size={16} className='text-white' />
-          </div>
-          <span className='font-bold text-base tracking-tight'>
-            DSA.<span className='text-blue-200'>Admin</span>
-          </span>
-        </div>
-
-        <div className='flex-1 overflow-y-auto py-4 px-3 space-y-5 scrollbar-hide'>
-          {sidebarGroups.map((group, idx) => (
-            <div key={idx} className='space-y-1'>
-              <h3 className='px-3 text-[9px] font-bold uppercase tracking-[0.15em] text-blue-200/50'>
-                {group.group}
-              </h3>
-              <div className='space-y-0.5'>
-                {group.items.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveTab(item.id)
-                      setIsSidebarOpen(false)
-                    }}
-                    className={`w-full flex items-center gap-2.5 px-3 py-1.5 rounded-lg text-[12px] font-bold transition-all duration-200 ${
-                      activeTab === item.id
-                        ? 'bg-white text-blue-600 shadow-md shadow-blue-900/20'
-                        : 'text-blue-100 hover:bg-white/10 hover:text-white'
-                    }`}
-                  >
-                    <item.icon
-                      size={14}
-                      className={
-                        activeTab === item.id ? 'opacity-100' : 'opacity-60'
-                      }
-                    />
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <div className='p-3 border-t border-white/10'>
-          <button className='w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] font-bold text-rose-100 hover:bg-rose-500 hover:text-white transition-all group'>
-            <LogOut
-              size={14}
-              className='group-hover:-translate-x-0.5 transition-transform'
-            />
-            Sign Out
-          </button>
-        </div>
+      {/* DESKTOP SIDEBAR */}
+      <aside className='hidden lg:flex w-64 bg-[#002EFF] m-4 rounded-[2.5rem] flex-col shadow-2xl border border-blue-400/20 shrink-0'>
+        <SidebarContent />
       </aside>
 
-      {/* Main Content Area */}
-      <div className='flex-1 flex flex-col min-w-0 overflow-hidden'>
-        <header className='h-14 bg-white border-b border-slate-200 flex items-center justify-between px-4 lg:px-6 shrink-0'>
-          <div className='flex items-center gap-3'>
+      {/* MAIN CONTENT */}
+      <main className='flex-1 flex flex-col min-w-0 overflow-hidden lg:py-4 lg:pr-4'>
+        <header className='flex items-center justify-between px-6 py-4'>
+          <div className='flex items-center gap-4'>
             <button
               onClick={() => setIsSidebarOpen(true)}
-              className='lg:hidden p-1.5 text-slate-500 hover:bg-slate-50 rounded-md border border-slate-200'
+              className='lg:hidden p-2 text-[#002EFF] bg-blue-50 rounded-xl hover:bg-blue-100 transition-colors'
             >
-              <Menu size={16} />
+              <Menu size={20} />
             </button>
-            <div className='flex items-center text-[10px] font-bold text-slate-400 uppercase tracking-widest'>
-              <span className='hidden sm:inline'>Portal</span>
-              <ChevronRight
-                size={10}
-                className='mx-1.5 text-slate-300 hidden sm:inline'
+
+            <div className='relative hidden md:block w-64 xl:w-80 group'>
+              <Search
+                className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-[#002EFF]'
+                size={14}
               />
-              <span className='text-blue-600'>{activeTab}</span>
+              <Input
+                className='pl-9 bg-white border-zinc-100 rounded-xl focus-visible:ring-[#002EFF]/20 shadow-sm text-xs'
+                placeholder='Search administration...'
+              />
             </div>
           </div>
 
           <div className='flex items-center gap-4'>
-            <button className='p-1.5 text-slate-400 hover:text-blue-600 transition-colors relative'>
-              <Bell size={16} />
-              <span className='absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-rose-500 rounded-full border border-white' />
-            </button>
+            <div className='hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white rounded-xl border border-zinc-100 shadow-sm'>
+              <div className='w-2 h-2 bg-emerald-500 rounded-full animate-pulse' />
+              <span className='text-[9px] font-black uppercase text-zinc-500'>
+                System Live
+              </span>
+            </div>
 
-            <div className='flex items-center gap-2.5 pl-4 border-l border-slate-100'>
-              <div className='text-right hidden sm:block'>
-                <p className='text-[11px] font-bold text-slate-900 leading-none'>
-                  Hilosthone
+            <Button
+              variant='ghost'
+              size='icon'
+              className='relative text-zinc-400 hover:text-blue-600 bg-white rounded-xl shadow-sm border border-zinc-100'
+            >
+              <Bell size={18} />
+              <span className='absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white' />
+            </Button>
+
+            <div className='flex items-center gap-3 pl-3 border-l border-zinc-200'>
+              <div className='text-right hidden xs:block'>
+                <p className='text-[10px] font-black text-zinc-900 leading-none uppercase tracking-tighter'>
+                  Hilosthone S.
                 </p>
-                <p className='text-[9px] font-bold text-blue-600 mt-0.5'>
-                  Super Admin
+                <p className='text-[9px] text-blue-600 font-bold uppercase mt-1'>
+                  Admin Authority
                 </p>
               </div>
-              <div className='w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white text-[10px] font-black shadow-sm'>
+              <div className='w-10 h-10 rounded-2xl bg-[#002EFF] text-[#FCB900] flex items-center justify-center font-black shadow-lg shadow-blue-600/20 border-2 border-white cursor-pointer hover:scale-105 transition-transform'>
                 AD
               </div>
             </div>
           </div>
         </header>
 
-        <main className='flex-1 overflow-y-auto bg-[#F8FAFC]'>
-          <div className='p-4 lg:p-6'>
-            <div className='max-w-7xl mx-auto'>
-              <AnimatePresence mode='wait'>
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -4 }}
-                  transition={{ duration: 0.12 }}
-                >
-                  {renderContent()}
-                </motion.div>
-              </AnimatePresence>
-            </div>
+        <div className='flex-1 overflow-y-auto px-4 md:px-6 pb-6 main-scrollbar'>
+          <div className='max-w-[1600px] mx-auto'>
+            <AnimatePresence mode='wait'>
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.2 }}
+              >
+                {renderContent()}
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </main>
-      </div>
+        </div>
+      </main>
     </div>
   )
 }
 
 function Error404({ tabId }: { tabId: string }) {
   return (
-    <div className='flex flex-col items-center justify-center min-h-[40vh] text-center'>
-      <div className='w-10 h-10 bg-rose-50 text-rose-500 rounded-lg flex items-center justify-center mb-3 border border-rose-100'>
-        <AlertTriangle size={18} />
+    <div className='flex flex-col items-center justify-center min-h-[50vh] text-center bg-white rounded-[2.5rem] border border-dashed border-zinc-200 p-8'>
+      <div className='w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center mb-4 border border-rose-100 shadow-inner'>
+        <AlertTriangle size={32} />
       </div>
-      <h2 className='text-xs font-bold text-slate-900 uppercase'>
-        Component Not Loaded
+      <h2 className='text-sm font-black text-slate-900 uppercase tracking-widest'>
+        Admin Endpoint Missing
       </h2>
-      <p className='text-[10px] text-slate-500 mt-1'>
-        Check if `components/{tabId}.tsx` is exported correctly.
+      <p className='text-[10px] text-slate-500 mt-2 max-w-[200px] font-bold'>
+        The module <span className='text-blue-600'>"{tabId}"</span> has not been
+        initialized in the Admin core.
       </p>
     </div>
   )

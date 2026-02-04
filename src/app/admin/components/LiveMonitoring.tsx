@@ -80,7 +80,7 @@ export default function LiveMonitoring() {
                   Live
                 </span>
               </h1>
-              <p className='text-[10px] text-slate-400 font-bold uppercase tracking-tight mt-1'>
+              <p className='text-[10px] text-[#FCB900] font-bold uppercase tracking-tight mt-1'>
                 42 Concurrent Sessions Active
               </p>
             </div>

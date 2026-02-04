@@ -252,7 +252,7 @@ export default function StudentManagement() {
                       <div
                         className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-black uppercase ${
                           student.plan === 'Premium'
-                            ? 'bg-amber-50 text-amber-600 border border-amber-100'
+                            ? 'bg-amber-50 text-[#FCB900] border border-amber-100'
                             : 'bg-slate-50 text-slate-400'
                         }`}
                       >

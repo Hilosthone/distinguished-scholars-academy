@@ -24,7 +24,7 @@ export default function Analytics() {
           <h1 className='text-2xl font-black text-slate-900'>
             Intelligence Engine
           </h1>
-          <p className='text-sm text-slate-500 font-medium'>
+          <p className='text-sm text-[#FCB900] font-medium'>
             Data-driven insights into student performance
           </p>
         </div>
@@ -105,13 +105,13 @@ export default function Analytics() {
                   transition={{ delay: i * 0.05, duration: 1 }}
                   className={`w-full max-w-[30px] rounded-t-lg ${i === 4 ? 'bg-blue-600' : 'bg-slate-200'}`}
                 />
-                <span className='text-[8px] font-black text-slate-400'>
+                <span className='text-[8px] font-black text-slate-500'>
                   {200 + i * 20}
                 </span>
               </div>
             ))}
           </div>
-          <p className='text-center mt-6 text-[10px] font-black text-slate-400 uppercase tracking-widest'>
+          <p className='text-center mt-6 text-[10px] font-black text-slate-500 uppercase tracking-widest'>
             Calculated across all subjects
           </p>
         </div>
@@ -163,7 +163,7 @@ function MetricCard({
   bg,
 }: any) {
   return (
-    <div className='bg-white p-6 rounded-[2rem] border border-slate-200 shadow-sm flex flex-col gap-4'>
+    <div className='bg-white p-6 rounded-4xl border border-slate-200 shadow-sm flex flex-col gap-4'>
       <div className='flex justify-between items-start'>
         <div className={`p-3 rounded-2xl ${bg} ${color}`}>
           <Icon size={20} />

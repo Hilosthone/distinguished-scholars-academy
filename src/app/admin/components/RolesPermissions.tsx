@@ -134,16 +134,16 @@ export default function RolesPermissions() {
                             .join('')}
                         </div>
                         <div>
-                          <p className='text-xs font-bold text-slate-700'>
+                          <p className='text-xs font-bold text-slate-800'>
                             {member.name}
                           </p>
-                          <p className='text-[9px] text-slate-400 font-medium flex items-center gap-1'>
+                          <p className='text-[9px] text-[#FCB900] font-medium flex items-center gap-1'>
                             <Activity size={8} /> Seen {member.lastSeen}
                           </p>
                         </div>
                       </div>
                     </td>
-                    <td className='px-6 py-4'>
+                    <td className='px-4 py-2'>
                       <span
                         className={`px-2 py-0.5 rounded-md text-[9px] font-black uppercase border ${
                           member.role === 'Super Admin'
@@ -154,7 +154,7 @@ export default function RolesPermissions() {
                         {member.role}
                       </span>
                     </td>
-                    <td className='px-6 py-4 text-[10px] text-slate-500 font-bold uppercase tracking-tight'>
+                    <td className='px-4 py-4 text-[10px] text-slate-500 font-bold uppercase tracking-tight'>
                       {member.access}
                     </td>
                     <td className='px-6 py-4 text-right'>
