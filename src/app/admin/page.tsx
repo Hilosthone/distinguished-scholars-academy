@@ -7,7 +7,7 @@ import {
   Users,
   Database,
   BookOpen,
-  BookOpenCheck, // New Icon for Library
+  BookOpenCheck,
   BarChart3,
   ShieldCheck,
   Activity,
@@ -31,9 +31,9 @@ import { Badge } from '@/components/ui/badge'
 
 // --- FEATURE IMPORTS ---
 import SuperDashboard from './components/SuperDashboard'
-import QuestionBank from './components/QuestionBank'
-import ExamBuilder from './components/ExamBuilder'
-import Library from './components/Library' 
+import ExamBuilder from './components/ExamBuilder' // Formerly QuestionBank
+import MyQuizzes from './components/myQuizzes' // Formerly ExamBuilder
+import Library from './components/Library'
 import Analytics from './components/Analytics'
 import StudentManagement from './components/StudentManagement'
 import LiveMonitoring from './components/LiveMonitoring'
@@ -45,9 +45,9 @@ import Settings from './components/Settings'
 
 type AdminTab =
   | 'dashboard'
-  | 'questions'
-  | 'library' 
-  | 'exams'
+  | 'exam-builder'
+  | 'library'
+  | 'my-quizzes'
   | 'analytics'
   | 'students'
   | 'monitoring'
@@ -75,8 +75,12 @@ export default function AdminAdmin() {
           label: 'Dashboard',
           icon: LayoutDashboard,
         },
-        { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database },
-        { id: 'exams' as AdminTab, label: 'Exam Builder', icon: BookOpen },
+        {
+          id: 'exam-builder' as AdminTab,
+          label: 'Exam Builder',
+          icon: Database,
+        },
+        { id: 'my-quizzes' as AdminTab, label: 'My Quizzes', icon: BookOpen },
         { id: 'library' as AdminTab, label: 'Library', icon: BookOpenCheck },
       ],
     },
@@ -117,12 +121,12 @@ export default function AdminAdmin() {
     switch (activeTab) {
       case 'dashboard':
         return <SuperDashboard />
-      case 'questions':
-        return <QuestionBank />
-      case 'library':
-        return <Library /> // New Case
-      case 'exams':
+      case 'exam-builder':
         return <ExamBuilder />
+      case 'my-quizzes':
+        return <MyQuizzes />
+      case 'library':
+        return <Library />
       case 'analytics':
         return <Analytics />
       case 'students':
@@ -267,7 +271,6 @@ export default function AdminAdmin() {
             >
               <Menu size={20} />
             </button>
-
             <div className='relative hidden md:block w-64 xl:w-80 group'>
               <Search
                 className='absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 group-focus-within:text-[#002EFF]'
@@ -287,7 +290,6 @@ export default function AdminAdmin() {
                 System Live
               </span>
             </div>
-
             <Button
               variant='ghost'
               size='icon'
@@ -296,7 +298,6 @@ export default function AdminAdmin() {
               <Bell size={18} />
               <span className='absolute top-2.5 right-2.5 w-2 h-2 bg-rose-500 rounded-full border-2 border-white' />
             </Button>
-
             <div className='flex items-center gap-3 pl-3 border-l border-zinc-200'>
               <div className='text-right hidden xs:block'>
                 <p className='text-[10px] font-black text-zinc-900 leading-none uppercase tracking-tighter'>
