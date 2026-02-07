@@ -46,7 +46,7 @@ import Settings from './components/Settings'
 type AdminTab =
   | 'dashboard'
   | 'questions'
-  | 'library' // New Tab
+  | 'library' 
   | 'exams'
   | 'analytics'
   | 'students'
@@ -76,8 +76,8 @@ export default function AdminAdmin() {
           icon: LayoutDashboard,
         },
         { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database },
-        { id: 'library' as AdminTab, label: 'Library', icon: BookOpenCheck }, // Added Library here
         { id: 'exams' as AdminTab, label: 'Exam Builder', icon: BookOpen },
+        { id: 'library' as AdminTab, label: 'Library', icon: BookOpenCheck },
       ],
     },
     {
