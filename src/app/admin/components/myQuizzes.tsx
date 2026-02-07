@@ -144,8 +144,8 @@ export default function ExamBuilder() {
             <div className='w-8 h-8 bg-[#002EFF] rounded-lg flex items-center justify-center'>
               <ShieldCheck className='text-white' size={18} />
             </div>
-            <h1 className='text-2xl font-black tracking-tighter'>
-              EXAM <span className='text-[#002EFF]'>ARCHITECT</span>
+            <h1 className='text-2xl font-black tracking-tighter uppercase'>
+              Quiz360Pro <span className='text-[#002EFF]'>ARCHITECT</span>
             </h1>
           </div>
           <p className='text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]'>
