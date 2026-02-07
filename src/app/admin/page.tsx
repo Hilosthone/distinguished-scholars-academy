@@ -7,6 +7,7 @@ import {
   Users,
   Database,
   BookOpen,
+  BookOpenCheck, // New Icon for Library
   BarChart3,
   ShieldCheck,
   Activity,
@@ -19,7 +20,6 @@ import {
   Bell,
   GraduationCap,
   AlertTriangle,
-  ChevronRight,
   Search,
   X,
 } from 'lucide-react'
@@ -33,6 +33,7 @@ import { Badge } from '@/components/ui/badge'
 import SuperDashboard from './components/SuperDashboard'
 import QuestionBank from './components/QuestionBank'
 import ExamBuilder from './components/ExamBuilder'
+import Library from './components/Library' 
 import Analytics from './components/Analytics'
 import StudentManagement from './components/StudentManagement'
 import LiveMonitoring from './components/LiveMonitoring'
@@ -45,6 +46,7 @@ import Settings from './components/Settings'
 type AdminTab =
   | 'dashboard'
   | 'questions'
+  | 'library' // New Tab
   | 'exams'
   | 'analytics'
   | 'students'
@@ -74,6 +76,7 @@ export default function AdminAdmin() {
           icon: LayoutDashboard,
         },
         { id: 'questions' as AdminTab, label: 'Question Bank', icon: Database },
+        { id: 'library' as AdminTab, label: 'Library', icon: BookOpenCheck }, // Added Library here
         { id: 'exams' as AdminTab, label: 'Exam Builder', icon: BookOpen },
       ],
     },
@@ -116,6 +119,8 @@ export default function AdminAdmin() {
         return <SuperDashboard />
       case 'questions':
         return <QuestionBank />
+      case 'library':
+        return <Library /> // New Case
       case 'exams':
         return <ExamBuilder />
       case 'analytics':
@@ -155,7 +160,6 @@ export default function AdminAdmin() {
             </Badge>
           </div>
         </div>
-        {/* Close button for mobile */}
         <button
           onClick={() => setIsSidebarOpen(false)}
           className='lg:hidden p-2 text-white/50 hover:text-white'
@@ -227,7 +231,6 @@ export default function AdminAdmin() {
         />
       )}
 
-      {/* MOBILE SIDEBAR OVERLAY */}
       <AnimatePresence>
         {isSidebarOpen && (
           <>
@@ -251,12 +254,10 @@ export default function AdminAdmin() {
         )}
       </AnimatePresence>
 
-      {/* DESKTOP SIDEBAR */}
       <aside className='hidden lg:flex w-64 bg-[#002EFF] m-4 rounded-[2.5rem] flex-col shadow-2xl border border-blue-400/20 shrink-0'>
         <SidebarContent />
       </aside>
 
-      {/* MAIN CONTENT */}
       <main className='flex-1 flex flex-col min-w-0 overflow-hidden lg:py-4 lg:pr-4'>
         <header className='flex items-center justify-between px-6 py-4'>
           <div className='flex items-center gap-4'>
