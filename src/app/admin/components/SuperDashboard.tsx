@@ -58,7 +58,7 @@ export default function SuperDashboard() {
   ]
 
   return (
-    <div className='w-full max-w-[1400px] mx-auto space-y-4 pb-10 px-4'>
+    <div className='w-full max-w-350 mx-auto space-y-4 pb-10 px-4'>
       {/* --- REFINED HEADER --- */}
       <header className='flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4 pt-2'>
         <div className='flex items-center gap-3'>

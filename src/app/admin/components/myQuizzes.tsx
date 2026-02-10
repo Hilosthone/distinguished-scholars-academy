@@ -1,475 +1,603 @@
 'use client'
 
-import React, { useState, useMemo, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
-  Clock,
   Zap,
-  Plus,
-  Trash2,
   LayoutGrid,
-  Eye,
-  X,
   CheckCircle2,
-  Copy,
-  ExternalLink,
-  ShieldCheck,
-  RefreshCcw,
-  ListChecks,
-  Target,
-  Download,
+  Share2,
+  BarChart3,
+  Edit3,
+  ChevronLeft,
+  User,
+  Trash2,
+  Search,
+  Plus,
+  Clock,
+  FileQuestion,
+  Trophy,
   AlertCircle,
-  FileJson,
+  Eye,
+  EyeOff,
+  Check,
+  ImageIcon,
+  Save,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 
-// --- Types ---
-interface SubjectConfig {
+// --- TYPES ---
+interface Question {
+  Question: string
+  A: string
+  B: string
+  C: string
+  D: string
+  E?: string
+  Answer: string
+  Explanation?: string
+  image?: string | null
+}
+
+interface Attempt {
+  studentName: string
+  score: number
+  date: string
+  status: 'Passed' | 'Failed'
+}
+
+interface Quiz {
   id: string
-  name: string
-  quantity: number
-  poolSize: number
+  title: string
+  description: string
+  totalQuestions: number
+  timeLimit: number
+  questions: Question[]
+  url: string
+  createdAt: string
+  attempts: Attempt[]
 }
 
-interface StagedData {
-  config?: {
-    subject?: string
-    timeLimit?: number
-  }
-  questions?: any[]
-}
-
-export default function ExamBuilder() {
-  const [subjects, setSubjects] = useState<SubjectConfig[]>([
-    { id: '1', name: 'General English', quantity: 40, poolSize: 1240 },
-    { id: '2', name: 'Logic & Maths', quantity: 40, poolSize: 850 },
-  ])
-  const [stagedData, setStagedData] = useState<StagedData | null>(null)
+export default function MyQuizzes() {
+  const [view, setView] = useState<'builder' | 'list' | 'results'>('list')
+  const [quizzes, setQuizzes] = useState<Quiz[]>([])
+  const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [pendingQuestions, setPendingQuestions] = useState<Question[]>([])
+  const [editingId, setEditingId] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
-  const [deploymentResult, setDeploymentResult] = useState<{
-    id: string
-    url: string
-  } | null>(null)
-  const [isDeploying, setIsDeploying] = useState(false)
-  const [timeLimit, setTimeLimit] = useState(60)
+  const [copiedId, setCopiedId] = useState<string | null>(null)
 
-  // Listen for data from the QuestionBank
+  const [builderForm, setBuilderForm] = useState({
+    title: '',
+    description: '',
+    timeLimit: 30,
+  })
+  const [isDeploying, setIsDeploying] = useState(false)
+
+  // --- SYNC & LOAD ---
   useEffect(() => {
-    const raw = localStorage.getItem('staged_exam_data')
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw)
-        setStagedData(parsed)
-        if (parsed.config?.timeLimit) setTimeLimit(parsed.config.timeLimit)
-      } catch (error) {
-        console.error('Failed to parse staged data:', error)
+    const savedQuizzes = localStorage.getItem('my_quizzes')
+    if (savedQuizzes) setQuizzes(JSON.parse(savedQuizzes))
+
+    const checkPending = () => {
+      const pending = localStorage.getItem('pending_exam_questions')
+      if (pending) {
+        const parsed = JSON.parse(pending)
+        // Only update if questions actually changed to prevent state loops
+        if (JSON.stringify(parsed) !== JSON.stringify(pendingQuestions)) {
+          setPendingQuestions(parsed)
+          // If we aren't editing something specific, go to builder to show new import
+          if (!editingId && parsed.length > 0) setView('builder')
+        }
       }
     }
-  }, [])
 
-  const totalQuestions = useMemo(
-    () => subjects.reduce((acc, curr) => acc + (Number(curr.quantity) || 0), 0),
-    [subjects],
+    window.addEventListener('storage', checkPending)
+    window.addEventListener('storage-update', checkPending)
+    const interval = setInterval(checkPending, 1500)
+
+    return () => {
+      window.removeEventListener('storage', checkPending)
+      window.removeEventListener('storage-update', checkPending)
+      clearInterval(interval)
+    }
+  }, [editingId, pendingQuestions])
+
+  // --- DEPLOY & SAVE HANDLER ---
+  const handleDeploy = () => {
+    if (!builderForm.title) return alert('Please enter a quiz title')
+    if (pendingQuestions.length === 0)
+      return alert('No questions found to deploy.')
+
+    setIsDeploying(true)
+
+    // Simulation for UX feel
+    setTimeout(() => {
+      try {
+        const examId =
+          editingId ||
+          `QZ-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+
+        const newQuiz: Quiz = {
+          id: examId,
+          title: builderForm.title,
+          description: builderForm.description || 'No description provided.',
+          totalQuestions: pendingQuestions.length,
+          timeLimit: Number(builderForm.timeLimit),
+          questions: pendingQuestions,
+          url: `/take-exam/${examId}`,
+          createdAt: editingId
+            ? quizzes.find((q) => q.id === editingId)?.createdAt ||
+              new Date().toLocaleDateString()
+            : new Date().toLocaleDateString(),
+          attempts: editingId
+            ? quizzes.find((q) => q.id === editingId)?.attempts || []
+            : [],
+        }
+
+        let updatedQuizzes: Quiz[]
+        if (editingId) {
+          // Replace existing
+          updatedQuizzes = quizzes.map((q) =>
+            q.id === editingId ? newQuiz : q,
+          )
+        } else {
+          // Add new to start
+          updatedQuizzes = [newQuiz, ...quizzes]
+        }
+
+        localStorage.setItem('my_quizzes', JSON.stringify(updatedQuizzes))
+        setQuizzes(updatedQuizzes)
+
+        // Cleanup storage to prevent double-loading
+        localStorage.removeItem('pending_exam_questions')
+        localStorage.removeItem('draft_exam_builder')
+
+        setIsDeploying(false)
+        setEditingId(null)
+        setPendingQuestions([])
+        setBuilderForm({ title: '', description: '', timeLimit: 30 })
+        setView('list')
+
+        alert(
+          editingId ? '✅ Quiz Updated!' : '🚀 Exam Published Successfully!',
+        )
+      } catch (error) {
+        console.error('Deployment failed:', error)
+        alert(
+          'Storage Error: The file might be too large (images). Try smaller images.',
+        )
+        setIsDeploying(false)
+      }
+    }, 600)
+  }
+
+  const handleEdit = (quiz: Quiz) => {
+    setEditingId(quiz.id)
+    setBuilderForm({
+      title: quiz.title,
+      description: quiz.description,
+      timeLimit: quiz.timeLimit,
+    })
+    setPendingQuestions(quiz.questions)
+    // Synchronize the "pending" storage so the builder tab sees this data too
+    localStorage.setItem(
+      'pending_exam_questions',
+      JSON.stringify(quiz.questions),
+    )
+    setView('builder')
+  }
+
+  const handleDelete = (id: string) => {
+    if (confirm('Permanently delete this quiz and all student results?')) {
+      const updated = quizzes.filter((q) => q.id !== id)
+      setQuizzes(updated)
+      localStorage.setItem('my_quizzes', JSON.stringify(updated))
+    }
+  }
+
+  const handleShare = (relativeUrl: string, id: string) => {
+    const fullUrl = window.location.origin + relativeUrl
+    navigator.clipboard.writeText(fullUrl)
+    setCopiedId(id)
+    setTimeout(() => setCopiedId(null), 2000)
+  }
+
+  const filteredQuizzes = quizzes.filter(
+    (q) =>
+      q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.id.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
-  const handleDeploy = () => {
-    setIsDeploying(true)
-    setTimeout(() => {
-      const examId = `EXM-${Math.random().toString(36).substring(2, 7).toUpperCase()}`
-      setDeploymentResult({
-        id: examId,
-        url: `https://exam-portal.io/start/${examId}`,
-      })
-      setIsDeploying(false)
-    }, 2000)
-  }
-
-  // --- NEW: Download Quiz Function ---
-  const downloadQuizData = () => {
-    if (!stagedData) return
-
-    const exportData = {
-      metadata: {
-        exportedAt: new Date().toISOString(),
-        examTitle: stagedData.config?.subject || 'Exported Exam',
-        timeLimit: timeLimit,
-        totalQuestions: stagedData.questions?.length || 0,
-      },
-      ...stagedData,
-    }
-
-    const blob = new Blob([JSON.stringify(exportData, null, 2)], {
-      type: 'application/json',
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `${stagedData.config?.subject || 'exam'}-export.json`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
-  }
-
-  const handleImportMatrix = () => {
-    if (!stagedData) return
-    const subjectName = stagedData.config?.subject || 'Imported Subject'
-    const exists = subjects.find((s) => s.name === subjectName)
-
-    if (exists) {
-      alert('This subject matrix is already in your curriculum.')
-      return
-    }
-
-    const newSubject: SubjectConfig = {
-      id: crypto.randomUUID(),
-      name: subjectName,
-      quantity: stagedData.questions?.length || 0,
-      poolSize: stagedData.questions?.length || 0,
-    }
-    setSubjects((prev) => [...prev, newSubject])
-  }
-
-  const updateSubject = (id: string, updates: Partial<SubjectConfig>) => {
-    setSubjects((prev) =>
-      prev.map((s) => (s.id === id ? { ...s, ...updates } : s)),
-    )
-  }
-
   return (
-    <div className='max-w-6xl mx-auto p-6 md:p-10 font-sans text-slate-900 bg-[#F8FAFC] min-h-screen'>
-      {/* HEADER */}
-      <header className='flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6'>
+    <div className='max-w-7xl mx-auto p-4 md:p-8 font-sans text-slate-900 bg-[#F8FAFC] min-h-screen'>
+      <header className='flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4'>
         <div>
-          <div className='flex items-center gap-2 mb-1'>
-            <div className='w-8 h-8 bg-[#002EFF] rounded-lg flex items-center justify-center'>
-              <ShieldCheck className='text-white' size={18} />
-            </div>
-            <h1 className='text-2xl font-black tracking-tighter uppercase'>
-              Quiz360Pro <span className='text-[#002EFF]'>ARCHITECT</span>
-            </h1>
-          </div>
-          <p className='text-[10px] font-bold text-slate-400 uppercase tracking-[0.2em]'>
-            Pro-Level Assessment Engine • v2.6.0
+          <h1 className='text-2xl md:text-3xl font-black tracking-tight text-slate-900'>
+            Quiz<span className='text-[#002EFF]'>Manager</span>
+          </h1>
+          <p className='text-slate-500 text-xs font-bold uppercase tracking-widest mt-1'>
+            Control Center
           </p>
         </div>
 
-        <div className='flex items-center gap-3 w-full md:w-auto'>
-          {/* Download Button */}
-          {stagedData && (
-            <button
-              onClick={downloadQuizData}
-              className='flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 text-[10px] font-black uppercase text-slate-600 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm'
-            >
-              <Download size={16} /> Export JSON
-            </button>
-          )}
-
+        <div className='flex items-center gap-3 bg-white p-1 rounded-xl border border-slate-200 shadow-sm'>
           <button
-            onClick={() => setShowPreview(true)}
-            className='flex-1 md:flex-none flex items-center justify-center gap-2 px-5 py-3 text-[10px] font-black uppercase text-slate-600 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 transition-all shadow-sm'
+            onClick={() => {
+              setView('list')
+              setEditingId(null)
+            }}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${view !== 'builder' ? 'bg-slate-900 text-white' : 'text-slate-400 hover:text-slate-900'}`}
           >
-            <Eye size={16} /> Preview Pool
+            My Quizzes
           </button>
-
           <button
-            onClick={handleDeploy}
-            disabled={isDeploying || subjects.length === 0}
-            className='flex-1 md:flex-none flex items-center justify-center gap-2 px-7 py-3 text-[10px] font-black uppercase bg-[#002EFF] text-white rounded-2xl shadow-xl shadow-blue-200 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50 disabled:grayscale disabled:pointer-events-none'
+            onClick={() => {
+              setView('builder')
+              if (!editingId) {
+                setBuilderForm({ title: '', description: '', timeLimit: 30 })
+                setPendingQuestions([])
+              }
+            }}
+            className={`px-4 py-2 rounded-lg text-xs font-bold uppercase transition-all ${view === 'builder' ? 'bg-[#002EFF] text-white' : 'text-slate-400 hover:text-[#002EFF]'}`}
           >
-            {isDeploying ? (
-              <RefreshCcw size={16} className='animate-spin' />
-            ) : (
-              <Zap size={16} fill='#FFD700' color='#FFD700' />
-            )}
-            {isDeploying ? 'Deploying...' : 'Deploy Quiz'}
+            {editingId ? 'Editing Quiz' : '+ Create New'}
           </button>
         </div>
       </header>
 
-      <div className='grid grid-cols-1 lg:grid-cols-12 gap-8'>
-        <div className='lg:col-span-8 space-y-6'>
-          {/* IMPORT BANNER */}
-          {stagedData && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className='bg-white border-2 border-dashed border-[#002EFF]/30 rounded-3xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4'
-            >
-              <div className='flex items-center gap-4'>
-                <div className='w-12 h-12 bg-[#002EFF]/10 rounded-2xl flex items-center justify-center text-[#002EFF]'>
-                  <LayoutGrid size={24} />
-                </div>
-                <div>
-                  <p className='text-[10px] font-black text-[#002EFF] uppercase tracking-wider'>
-                    Matrix Detected in Cache
-                  </p>
-                  <p className='text-sm font-bold text-slate-600'>
-                    {stagedData.questions?.length || 0} items for{' '}
-                    <span className='text-slate-900'>
-                      {stagedData.config?.subject}
-                    </span>
-                  </p>
-                </div>
-              </div>
-              <div className='flex gap-2 w-full sm:w-auto'>
-                <button
-                  onClick={handleImportMatrix}
-                  className='flex-1 sm:flex-none px-6 py-3 bg-slate-900 text-[#FFD700] rounded-xl text-[10px] font-black uppercase hover:bg-[#002EFF] hover:text-white transition-all shadow-lg shadow-slate-200'
-                >
-                  Inject into Curriculum
-                </button>
-              </div>
-            </motion.div>
-          )}
+      {/* --- BUILDER VIEW --- */}
+      {view === 'builder' && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+        >
+          <div className='bg-white rounded-3xl p-8 border border-slate-200 shadow-xl max-w-2xl mx-auto'>
+            <div className='flex justify-between items-center mb-6'>
+              <h2 className='text-xl font-black flex items-center gap-2'>
+                <Zap className='text-[#002EFF]' fill='#002EFF' size={20} />
+                {editingId ? 'Modify Settings' : 'Deployment Setup'}
+              </h2>
+              {editingId && (
+                <span className='text-[10px] font-bold bg-amber-100 text-amber-700 px-2 py-1 rounded'>
+                  EDIT MODE
+                </span>
+              )}
+            </div>
 
-          {/* CURRICULUM UI */}
-          <section className='bg-white border border-slate-200 rounded-4xl overflow-hidden shadow-sm'>
-            <div className='px-8 py-6 border-b border-slate-100 flex justify-between items-center bg-white'>
-              <div>
-                <h3 className='text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-1'>
-                  Active Curriculum
-                </h3>
-                <p className='text-xs text-slate-500 font-medium'>
-                  Define subjects and question distribution
+            {pendingQuestions.length > 0 ? (
+              <div className='mb-6 space-y-2'>
+                <div className='p-4 bg-emerald-50 border border-emerald-100 rounded-2xl flex items-center justify-between shadow-sm'>
+                  <div className='flex items-center gap-3'>
+                    <CheckCircle2 className='text-emerald-500' size={20} />
+                    <p className='text-sm font-bold text-emerald-900'>
+                      {pendingQuestions.length} Questions Loaded
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => setShowPreview(!showPreview)}
+                    className='text-xs font-black uppercase text-emerald-600 hover:text-emerald-700 flex items-center gap-1'
+                  >
+                    {showPreview ? (
+                      <>
+                        <EyeOff size={14} /> Hide
+                      </>
+                    ) : (
+                      <>
+                        <Eye size={14} /> Preview
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <AnimatePresence>
+                  {showPreview && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      className='overflow-hidden border border-slate-100 rounded-xl bg-slate-50 p-2 max-h-64 overflow-y-auto'
+                    >
+                      {pendingQuestions.map((q, i) => (
+                        <div
+                          key={i}
+                          className='text-[11px] p-3 border-b border-slate-200 last:border-0 text-slate-600'
+                        >
+                          <div className='flex justify-between'>
+                            <span className='font-bold text-slate-700'>
+                              {i + 1}. {q.Question}
+                            </span>
+                            {q.image && (
+                              <ImageIcon size={12} className='text-blue-500' />
+                            )}
+                          </div>
+                          <div className='mt-2 flex flex-wrap gap-2 text-[10px]'>
+                            {['A', 'B', 'C', 'D', 'E'].map(
+                              (opt) =>
+                                q[opt as keyof Question] && (
+                                  <span
+                                    key={opt}
+                                    className={`px-1.5 py-0.5 rounded ${q.Answer === opt ? 'bg-emerald-100 text-emerald-700 font-bold' : 'bg-white border text-slate-400'}`}
+                                  >
+                                    {opt}:{' '}
+                                    {String(q[opt as keyof Question]).substring(
+                                      0,
+                                      15,
+                                    )}
+                                    ...
+                                  </span>
+                                ),
+                            )}
+                          </div>
+                        </div>
+                      ))}
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ) : (
+              <div className='mb-6 p-4 bg-amber-50 border border-amber-100 rounded-2xl flex items-center gap-3'>
+                <AlertCircle className='text-amber-500' size={20} />
+                <p className='text-sm font-bold text-amber-900'>
+                  Add questions in the <b>Exam Builder</b> to see them here.
                 </p>
               </div>
-              <button
-                onClick={() =>
-                  setSubjects([
-                    ...subjects,
-                    {
-                      id: crypto.randomUUID(),
-                      name: 'New Subject Stream',
-                      quantity: 10,
-                      poolSize: 100,
-                    },
-                  ])
-                }
-                className='group w-10 h-10 flex items-center justify-center bg-slate-50 text-[#002EFF] rounded-xl hover:bg-[#002EFF] hover:text-white transition-all'
-              >
-                <Plus
-                  size={20}
-                  strokeWidth={3}
-                  className='group-hover:rotate-90 transition-transform'
+            )}
+
+            <div className='space-y-5'>
+              <div>
+                <label className='block text-xs font-bold uppercase text-slate-500 mb-1 ml-1'>
+                  Quiz Title
+                </label>
+                <input
+                  value={builderForm.title}
+                  onChange={(e) =>
+                    setBuilderForm({ ...builderForm, title: e.target.value })
+                  }
+                  className='w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:border-[#002EFF] focus:bg-white transition-all'
+                  placeholder='Enter quiz title...'
                 />
+              </div>
+              <div className='grid grid-cols-2 gap-4'>
+                <div>
+                  <label className='block text-xs font-bold uppercase text-slate-500 mb-1 ml-1'>
+                    Time Limit (Minutes)
+                  </label>
+                  <div className='relative'>
+                    <Clock
+                      className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
+                      size={18}
+                    />
+                    <input
+                      type='number'
+                      value={builderForm.timeLimit}
+                      onChange={(e) =>
+                        setBuilderForm({
+                          ...builderForm,
+                          timeLimit: Number(e.target.value),
+                        })
+                      }
+                      className='w-full pl-12 p-4 bg-slate-50 border border-slate-200 rounded-2xl font-bold outline-none focus:border-[#002EFF]'
+                    />
+                  </div>
+                </div>
+                <div>
+                  <label className='block text-xs font-bold uppercase text-slate-500 mb-1 ml-1'>
+                    Questions
+                  </label>
+                  <div className='w-full p-4 bg-slate-100 border border-slate-200 rounded-2xl font-black text-slate-500 flex items-center justify-center gap-2'>
+                    <FileQuestion size={18} /> {pendingQuestions.length}
+                  </div>
+                </div>
+              </div>
+
+              <button
+                onClick={handleDeploy}
+                disabled={isDeploying || pendingQuestions.length === 0}
+                className={`w-full py-5 text-white font-black uppercase tracking-widest rounded-2xl transition-all shadow-lg flex items-center justify-center gap-3 ${
+                  pendingQuestions.length > 0
+                    ? 'bg-[#002EFF] hover:bg-blue-700 hover:shadow-blue-200 active:scale-[0.98]'
+                    : 'bg-slate-300 cursor-not-allowed'
+                }`}
+              >
+                {isDeploying ? (
+                  'Processing...'
+                ) : (
+                  <>
+                    {editingId ? (
+                      <Save size={20} />
+                    ) : (
+                      <Zap size={20} fill='white' />
+                    )}
+                    {editingId ? 'Update and Save' : 'Generate Student Link'}
+                  </>
+                )}
               </button>
             </div>
+          </div>
+        </motion.div>
+      )}
 
-            <div className='divide-y divide-slate-50'>
-              {subjects.map((sub) => (
-                <div
-                  key={sub.id}
-                  className='px-8 py-6 grid grid-cols-12 gap-4 items-center hover:bg-slate-50/50 transition-colors group'
+      {/* --- LIST VIEW --- */}
+      {view === 'list' && (
+        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+          <div className='mb-8 relative max-w-md'>
+            <Search
+              className='absolute left-4 top-1/2 -translate-y-1/2 text-slate-400'
+              size={18}
+            />
+            <input
+              type='text'
+              placeholder='Search by title or ID...'
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className='w-full pl-12 pr-4 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:shadow-md outline-none transition-all'
+            />
+          </div>
+
+          {filteredQuizzes.length === 0 ? (
+            <div className='text-center py-24 bg-white rounded-[40px] border-2 border-dashed border-slate-200'>
+              <LayoutGrid className='text-slate-200 mx-auto mb-4' size={48} />
+              <h3 className='text-slate-900 font-black text-xl'>
+                No exams found
+              </h3>
+              <button
+                onClick={() => setView('builder')}
+                className='mt-6 bg-slate-900 text-white px-8 py-3 rounded-full text-xs font-bold uppercase hover:bg-[#002EFF] transition-all'
+              >
+                + Create First Quiz
+              </button>
+            </div>
+          ) : (
+            <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6'>
+              {filteredQuizzes.map((quiz) => (
+                <motion.div
+                  layoutId={quiz.id}
+                  key={quiz.id}
+                  className='bg-white p-6 rounded-4xl border border-slate-100 hover:border-blue-100 hover:shadow-2xl transition-all group relative'
                 >
-                  <div className='col-span-12 md:col-span-7'>
-                    <input
-                      value={sub.name}
-                      onChange={(e) =>
-                        updateSubject(sub.id, { name: e.target.value })
-                      }
-                      className='bg-transparent font-bold text-base outline-none focus:text-[#002EFF] w-full transition-colors'
-                      placeholder='Subject Name...'
-                    />
-                    <div className='flex items-center gap-2 mt-1.5'>
-                      <p className='text-[10px] text-slate-400 font-bold uppercase tracking-tight'>
-                        Available Pool:{' '}
-                        <span className='text-slate-600'>
-                          {sub.poolSize} Questions
-                        </span>
-                      </p>
-                    </div>
-                  </div>
-                  <div className='col-span-8 md:col-span-3 flex items-center gap-3'>
-                    <span className='text-[10px] font-black text-slate-300 uppercase'>
-                      Draw
+                  <div className='flex justify-between items-start mb-6'>
+                    <span className='bg-blue-50 text-[#002EFF] px-3 py-1 rounded-full text-[10px] font-black uppercase'>
+                      {quiz.id}
                     </span>
-                    <div className='relative flex-1'>
-                      <input
-                        type='number'
-                        min='0'
-                        max={sub.poolSize}
-                        value={sub.quantity}
-                        onChange={(e) =>
-                          updateSubject(sub.id, {
-                            quantity: Math.min(
-                              parseInt(e.target.value) || 0,
-                              sub.poolSize,
-                            ),
-                          })
-                        }
-                        className='w-full h-11 px-4 bg-slate-50 border border-slate-200 rounded-xl font-black text-sm outline-none focus:border-[#002EFF] focus:ring-4 focus:ring-blue-50 transition-all'
-                      />
+                    <div className='flex items-center gap-1.5 text-slate-400 text-xs font-bold'>
+                      <Clock size={14} /> {quiz.timeLimit}m
                     </div>
                   </div>
-                  <div className='col-span-4 md:col-span-2 text-right'>
+                  <h3 className='text-xl font-black text-slate-800 mb-2 leading-tight group-hover:text-[#002EFF] transition-colors'>
+                    {quiz.title}
+                  </h3>
+                  <div className='flex gap-4 mb-8'>
+                    <div className='flex items-center gap-1.5'>
+                      <FileQuestion size={14} className='text-slate-400' />
+                      <span className='text-xs font-bold text-slate-600'>
+                        {quiz.totalQuestions} Qs
+                      </span>
+                    </div>
+                    <div className='flex items-center gap-1.5'>
+                      <User size={14} className='text-slate-400' />
+                      <span className='text-xs font-bold text-slate-600'>
+                        {quiz.attempts.length} Attempts
+                      </span>
+                    </div>
+                  </div>
+                  <div className='grid grid-cols-3 gap-3 mb-4'>
                     <button
-                      onClick={() =>
-                        setSubjects(subjects.filter((s) => s.id !== sub.id))
-                      }
-                      className='p-3 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all opacity-0 group-hover:opacity-100'
+                      onClick={() => {
+                        setSelectedQuiz(quiz)
+                        setView('results')
+                      }}
+                      className='flex flex-col items-center p-3 bg-slate-50 rounded-2xl hover:bg-blue-600 hover:text-white transition-all'
                     >
-                      <Trash2 size={18} />
+                      <BarChart3 size={18} />
+                      <span className='text-[9px] font-black uppercase mt-1.5'>
+                        Stats
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleEdit(quiz)}
+                      className='flex flex-col items-center p-3 bg-slate-50 rounded-2xl hover:bg-slate-900 hover:text-white transition-all'
+                    >
+                      <Edit3 size={18} />
+                      <span className='text-[9px] font-black uppercase mt-1.5'>
+                        Edit
+                      </span>
+                    </button>
+                    <button
+                      onClick={() => handleShare(quiz.url, quiz.id)}
+                      className={`flex flex-col items-center p-3 rounded-2xl transition-all ${copiedId === quiz.id ? 'bg-emerald-500 text-white' : 'bg-slate-50 hover:bg-emerald-500 hover:text-white'}`}
+                    >
+                      {copiedId === quiz.id ? (
+                        <Check size={18} />
+                      ) : (
+                        <Share2 size={18} />
+                      )}
+                      <span className='text-[9px] font-black uppercase mt-1.5'>
+                        {copiedId === quiz.id ? 'Copied' : 'Link'}
+                      </span>
                     </button>
                   </div>
-                </div>
+                  <button
+                    onClick={() => handleDelete(quiz.id)}
+                    className='w-full py-2 text-[10px] text-slate-300 hover:text-rose-500 font-bold uppercase transition-colors flex items-center justify-center gap-1'
+                  >
+                    <Trash2 size={10} /> Delete Permanently
+                  </button>
+                </motion.div>
               ))}
             </div>
-          </section>
-        </div>
+          )}
+        </motion.div>
+      )}
 
-        {/* SUMMARY ASIDE */}
-        <aside className='lg:col-span-4 space-y-6'>
-          <div className='bg-slate-900 rounded-[2.5rem] p-8 text-white relative overflow-hidden shadow-2xl'>
-            <div className='absolute -right-4 -top-4 w-32 h-32 bg-[#002EFF] rounded-full blur-[80px] opacity-40' />
-            <div className='relative z-10'>
-              <p className='text-[10px] font-black text-[#FFD700] uppercase tracking-[0.3em] mb-8'>
-                Configuration Summary
-              </p>
-
-              <div className='space-y-8'>
-                <div className='flex justify-between items-end border-b border-white/10 pb-4'>
-                  <div>
-                    <span className='text-[10px] font-bold text-slate-400 uppercase block mb-1'>
-                      Total Questions
-                    </span>
-                    <span className='text-4xl font-black leading-none italic'>
-                      {totalQuestions}
-                    </span>
-                  </div>
-                  <Target size={32} className='text-white/10' />
-                </div>
-
-                <div className='space-y-3'>
-                  <span className='text-[10px] font-bold text-slate-400 uppercase block'>
-                    Time Allocation (Min)
-                  </span>
-                  <div className='flex items-center gap-4'>
-                    <Clock className='text-[#002EFF]' size={24} />
-                    <input
-                      type='range'
-                      min='10'
-                      max='180'
-                      step='5'
-                      value={timeLimit}
-                      onChange={(e) => setTimeLimit(parseInt(e.target.value))}
-                      className='flex-1 h-1.5 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-[#002EFF]'
-                    />
-                    <span className='text-xl font-black text-white w-12'>
-                      {timeLimit}'
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </div>
+      {/* --- RESULTS VIEW --- */}
+      {view === 'results' && selectedQuiz && (
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+        >
+          <button
+            onClick={() => setView('list')}
+            className='mb-6 flex items-center gap-2 text-slate-400 hover:text-slate-800 text-xs font-black uppercase'
+          >
+            <ChevronLeft size={16} /> Back to Dashboard
+          </button>
+          <div className='bg-slate-900 text-white rounded-[40px] p-10 mb-8 relative overflow-hidden'>
+            <h2 className='text-4xl font-black mb-3'>{selectedQuiz.title}</h2>
+            <p className='text-blue-400 font-bold uppercase text-xs tracking-widest flex items-center gap-2'>
+              <Trophy size={16} className='text-yellow-400' /> Performance
+              Insights
+            </p>
           </div>
-        </aside>
-      </div>
-
-      {/* PREVIEW MODAL */}
-      <AnimatePresence>
-        {showPreview && (
-          <div className='fixed inset-0 z-100 flex items-center justify-center p-4 md:p-12 bg-slate-950/40 backdrop-blur-md'>
-            <motion.div
-              initial={{ opacity: 0, y: 40 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: 40 }}
-              className='bg-white w-full max-w-5xl h-full max-h-[85vh] rounded-[3rem] shadow-2xl overflow-hidden flex flex-col'
-            >
-              <div className='p-8 border-b border-slate-100 flex justify-between items-center bg-white sticky top-0 z-10'>
-                <div className='flex items-center gap-4'>
-                  <div className='w-12 h-12 bg-slate-900 rounded-2xl flex items-center justify-center text-[#FFD700]'>
-                    <ListChecks size={24} />
-                  </div>
-                  <div>
-                    <h2 className='font-black text-xl uppercase tracking-tighter'>
-                      Assessment Audit
-                    </h2>
-                    <p className='text-[10px] font-bold text-slate-400 uppercase tracking-widest'>
-                      Reviewing {stagedData?.questions?.length || 0} items
-                    </p>
-                  </div>
-                </div>
-                <div className='flex items-center gap-3'>
-                  <button
-                    onClick={downloadQuizData}
-                    className='hidden md:flex items-center gap-2 px-6 py-3 bg-blue-50 text-[#002EFF] rounded-xl text-[10px] font-black uppercase hover:bg-[#002EFF] hover:text-white transition-all'
-                  >
-                    <FileJson size={16} /> Download Source
-                  </button>
-                  <button
-                    onClick={() => setShowPreview(false)}
-                    className='w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 rounded-2xl hover:bg-rose-50 hover:text-rose-600 transition-all'
-                  >
-                    <X size={24} />
-                  </button>
-                </div>
-              </div>
-
-              <div className='flex-1 overflow-y-auto p-8 md:p-12 space-y-12 bg-[#FBFBFE]'>
-                {stagedData?.questions && stagedData.questions.length > 0 ? (
-                  stagedData.questions.map((q: any, idx: number) => (
-                    <div key={q.id || idx} className='relative pl-16 group'>
-                      <div className='absolute left-0 top-0 w-10 h-10 bg-white border-2 border-slate-100 text-slate-900 rounded-2xl flex items-center justify-center text-xs font-black shadow-sm group-hover:border-[#002EFF] group-hover:text-[#002EFF] transition-colors'>
-                        {idx + 1}
-                      </div>
-                      <div className='space-y-6'>
-                        <div>
-                          <span className='px-3 py-1 bg-[#002EFF]/10 text-[#002EFF] text-[10px] font-black uppercase rounded-lg mb-3 inline-block'>
-                            {q.topic || 'General Knowledge'}
-                          </span>
-                          <h4 className='text-lg font-bold text-slate-800 leading-snug'>
-                            {q.body}
-                          </h4>
-                        </div>
-                        <div className='grid grid-cols-1 md:grid-cols-2 gap-4'>
-                          {q.options &&
-                            Object.entries(q.options).map(([key, val]) => {
-                              const isCorrect = q.correctOption === key
-                              if (!val) return null
-                              return (
-                                <div
-                                  key={key}
-                                  className={`flex items-center gap-4 p-4 rounded-3xl border-2 transition-all ${isCorrect ? 'bg-blue-50/50 border-[#002EFF]' : 'bg-white border-slate-100'}`}
-                                >
-                                  <span
-                                    className={`w-9 h-9 flex items-center justify-center rounded-xl text-sm font-black ${isCorrect ? 'bg-[#002EFF] text-white' : 'bg-slate-100 text-slate-400'}`}
-                                  >
-                                    {key}
-                                  </span>
-                                  <span
-                                    className={`text-sm font-bold ${isCorrect ? 'text-slate-900' : 'text-slate-500'}`}
-                                  >
-                                    {val as string}
-                                  </span>
-                                </div>
-                              )
-                            })}
-                        </div>
-                      </div>
-                    </div>
-                  ))
+          <div className='bg-white rounded-4xl border border-slate-200 overflow-hidden shadow-sm'>
+            <table className='w-full text-left border-collapse'>
+              <thead className='bg-slate-50 text-[11px] font-black uppercase text-slate-400'>
+                <tr>
+                  <th className='px-8 py-5'>Student Name</th>
+                  <th className='px-8 py-5'>Date Attempted</th>
+                  <th className='px-8 py-5 text-center'>Score</th>
+                  <th className='px-8 py-5'>Status</th>
+                </tr>
+              </thead>
+              <tbody className='divide-y divide-slate-100'>
+                {selectedQuiz.attempts.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={4}
+                      className='px-8 py-20 text-center text-slate-400 font-bold'
+                    >
+                      No student data available yet. Share the link to start
+                      collecting results!
+                    </td>
+                  </tr>
                 ) : (
-                  <div className='h-full flex flex-col items-center justify-center py-20 opacity-40'>
-                    <LayoutGrid size={64} className='text-slate-300 mb-6' />
-                    <p className='text-xl font-black text-slate-400 uppercase tracking-tighter'>
-                      Bank is Empty
-                    </p>
-                  </div>
+                  selectedQuiz.attempts.map((att, i) => (
+                    <tr
+                      key={i}
+                      className='hover:bg-slate-50/50 transition-colors'
+                    >
+                      <td className='px-8 py-5 font-bold text-slate-700'>
+                        {att.studentName}
+                      </td>
+                      <td className='px-8 py-5 text-slate-500'>{att.date}</td>
+                      <td className='px-8 py-5 font-black text-lg text-center text-slate-900'>
+                        {att.score}%
+                      </td>
+                      <td className='px-8 py-5'>
+                        <span
+                          className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${att.status === 'Passed' ? 'bg-emerald-100 text-emerald-600' : 'bg-rose-100 text-rose-600'}`}
+                        >
+                          {att.status}
+                        </span>
+                      </td>
+                    </tr>
+                  ))
                 )}
-              </div>
-
-              <div className='p-8 bg-white border-t border-slate-100 flex justify-end'>
-                <button
-                  onClick={() => setShowPreview(false)}
-                  className='px-10 py-4 bg-slate-900 text-[#FFD700] text-[11px] font-black uppercase rounded-2xl hover:scale-[1.02] active:scale-95 transition-all shadow-xl shadow-slate-200'
-                >
-                  Return to Architect
-                </button>
-              </div>
-            </motion.div>
+              </tbody>
+            </table>
           </div>
-        )}
-      </AnimatePresence>
+        </motion.div>
+      )}
     </div>
   )
 }

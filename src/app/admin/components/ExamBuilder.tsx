@@ -1,568 +1,55 @@
-// 'use client'
-
-// import React, { useState, useRef, ChangeEvent } from 'react'
-// import {
-//   Plus,
-//   UploadCloud,
-//   ImageIcon as ImageIconLucide,
-//   Trash2,
-//   Loader2,
-//   Settings2,
-//   Edit3,
-//   Rocket,
-//   X,
-//   Camera,
-//   Info,
-// } from 'lucide-react'
-// import * as XLSX from 'xlsx'
-
-// // --- Types ---
-// type Question = {
-//   id: string
-//   qNumber: number
-//   subject: string
-//   topic: string
-//   body: string
-//   options: { [key: string]: string }
-//   correctOption: string
-//   explanation: string // NEW: Field for correction logic
-//   difficulty: string // NEW: Dropdown categorized
-//   image: string | null
-// }
-
-// type GlobalContext = {
-//   subject: string
-//   topic: string
-//   description: string
-//   timeLimit: string
-//   instructions: string
-// }
-
-// export default function QuestionBank() {
-//   const [mode, setMode] = useState<'individual' | 'bulk'>('individual')
-//   const [isDeploying, setIsDeploying] = useState(false)
-//   const [isUploading, setIsUploading] = useState(false)
-//   const [editingId, setEditingId] = useState<string | null>(null)
-
-//   const [context, setContext] = useState<GlobalContext>({
-//     subject: '',
-//     topic: '',
-//     description: '',
-//     timeLimit: '30',
-//     instructions: 'Select the best answer.',
-//   })
-
-//   const [manualQueue, setManualQueue] = useState<Question[]>([])
-//   const [formData, setFormData] = useState<Partial<Question>>({
-//     body: '',
-//     options: { A: '', B: '', C: '', D: '', E: '' },
-//     correctOption: '',
-//     explanation: '', // Init explanation
-//     difficulty: 'Simple', // Default difficulty
-//   })
-
-//   const [selectedImage, setSelectedImage] = useState<string | null>(null)
-//   const fileInputRef = useRef<HTMLInputElement>(null)
-//   const bulkFileRef = useRef<HTMLInputElement>(null)
-
-//   // --- Image Handling ---
-//   const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0]
-//     if (file) {
-//       const reader = new FileReader()
-//       reader.onloadend = () => {
-//         setSelectedImage(reader.result as string)
-//       }
-//       reader.readAsDataURL(file)
-//     }
-//   }
-
-//   // --- Deploy Logic ---
-//   const handleDeploy = () => {
-//     if (manualQueue.length === 0) {
-//       alert('Add some questions to the queue before deploying!')
-//       return
-//     }
-//     setIsDeploying(true)
-//     setTimeout(() => {
-//       const payload = {
-//         config: context,
-//         questions: manualQueue.sort((a, b) => a.qNumber - b.qNumber),
-//         deployedAt: new Date().toISOString(),
-//       }
-//       localStorage.setItem('staged_exam_data', JSON.stringify(payload))
-//       setIsDeploying(false)
-//       alert('🚀 Exam Deployed with Explanations!')
-//     }, 1500)
-//   }
-
-//   // --- Handlers ---
-//   const handleSaveQuestion = () => {
-//     if (!formData.body || !formData.correctOption) {
-//       alert('Question body and correct answer are required.')
-//       return
-//     }
-
-//     if (editingId) {
-//       setManualQueue(
-//         manualQueue.map((q) =>
-//           q.id === editingId
-//             ? {
-//                 ...q,
-//                 body: formData.body!,
-//                 options: formData.options as any,
-//                 correctOption: formData.correctOption!,
-//                 explanation: formData.explanation || '',
-//                 difficulty: formData.difficulty || 'Simple',
-//                 image: selectedImage,
-//                 subject: context.subject || q.subject,
-//                 topic: context.topic || q.topic,
-//               }
-//             : q,
-//         ),
-//       )
-//       setEditingId(null)
-//     } else {
-//       const newQuestion: Question = {
-//         id: Date.now().toString(),
-//         qNumber: manualQueue.length + 1,
-//         subject: context.subject || 'Uncategorized',
-//         topic: context.topic || 'General',
-//         body: formData.body || '',
-//         options: formData.options as { [key: string]: string },
-//         correctOption: formData.correctOption || 'A',
-//         explanation: formData.explanation || '',
-//         difficulty: formData.difficulty || 'Simple',
-//         image: selectedImage,
-//       }
-//       setManualQueue([...manualQueue, newQuestion])
-//     }
-
-//     setFormData({
-//       body: '',
-//       options: { A: '', B: '', C: '', D: '', E: '' },
-//       correctOption: '',
-//       explanation: '',
-//       difficulty: 'Simple',
-//     })
-//     setSelectedImage(null)
-//   }
-
-//   const editQuestion = (q: Question) => {
-//     setEditingId(q.id)
-//     setFormData({
-//       body: q.body,
-//       options: { ...q.options },
-//       correctOption: q.correctOption,
-//       explanation: q.explanation,
-//       difficulty: q.difficulty,
-//     })
-//     setSelectedImage(q.image)
-//     window.scrollTo({ top: 0, behavior: 'smooth' })
-//   }
-
-//   const deleteQuestion = (id: string) => {
-//     const filtered = manualQueue.filter((q) => q.id !== id)
-//     const reIndexed = filtered.map((q, idx) => ({ ...q, qNumber: idx + 1 }))
-//     setManualQueue(reIndexed)
-//   }
-
-//   const handleBulkUpload = async (e: ChangeEvent<HTMLInputElement>) => {
-//     const file = e.target.files?.[0]
-//     if (!file) return
-//     setIsUploading(true)
-//     const reader = new FileReader()
-//     reader.onload = (evt) => {
-//       try {
-//         const bstr = evt.target?.result
-//         const wb = XLSX.read(bstr, { type: 'binary' })
-//         const ws = wb.Sheets[wb.SheetNames[0]]
-//         const data = XLSX.utils.sheet_to_json(ws) as any[]
-//         const parsed: Question[] = data.map((row, i) => ({
-//           id: `bulk-${Date.now()}-${i}`,
-//           qNumber: manualQueue.length + i + 1,
-//           subject: context.subject || row.Subject || 'Uncategorized',
-//           topic: context.topic || row.Topic || 'General',
-//           body: row.Question || row.body || '',
-//           options: {
-//             A: String(row.A || ''),
-//             B: String(row.B || ''),
-//             C: String(row.C || ''),
-//             D: String(row.D || ''),
-//             E: String(row.E || ''),
-//           },
-//           correctOption: String(row.Correct || 'A').toUpperCase(),
-//           explanation: row.Explanation || '',
-//           difficulty: row.Difficulty || 'Simple',
-//           image: null,
-//         }))
-//         setManualQueue((prev) => [...prev, ...parsed])
-//         setMode('individual')
-//       } catch (err) {
-//         alert('Parse error.')
-//       } finally {
-//         setIsUploading(false)
-//       }
-//     }
-//     reader.readAsBinaryString(file)
-//   }
-
-//   return (
-//     <div className='max-w-[1400px] mx-auto min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900'>
-//       <div className='p-6 grid grid-cols-1 lg:grid-cols-12 gap-6'>
-//         {/* SIDEBAR */}
-//         <div className='lg:col-span-4 space-y-4'>
-//           <div className='bg-white rounded-2xl border border-slate-200 p-5 shadow-sm sticky top-24'>
-//             <h3 className='text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2'>
-//               <Settings2 size={12} className='text-[#002EFF]' /> Global Context
-//             </h3>
-
-//             <div className='space-y-4'>
-//               <div>
-//                 <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-//                   Subject
-//                 </label>
-//                 <input
-//                   value={context.subject}
-//                   onChange={(e) =>
-//                     setContext({ ...context, subject: e.target.value })
-//                   }
-//                   className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-//                 />
-//               </div>
-
-//               <div className='grid grid-cols-2 gap-3'>
-//                 <div>
-//                   <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-//                     Topic
-//                   </label>
-//                   <input
-//                     value={context.topic}
-//                     onChange={(e) =>
-//                       setContext({ ...context, topic: e.target.value })
-//                     }
-//                     className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-//                   />
-//                 </div>
-//                 <div>
-//                   <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-//                     Time (Min)
-//                   </label>
-//                   <input
-//                     type='number'
-//                     value={context.timeLimit}
-//                     onChange={(e) =>
-//                       setContext({ ...context, timeLimit: e.target.value })
-//                     }
-//                     className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-//                   />
-//                 </div>
-//               </div>
-
-//               <div className='pt-6 border-t border-slate-100 mt-6'>
-//                 <button
-//                   onClick={handleDeploy}
-//                   disabled={isDeploying || manualQueue.length === 0}
-//                   className={`w-full py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-blue-100
-//                     ${manualQueue.length === 0 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#002EFF] text-white hover:bg-blue-700 active:scale-95'}`}
-//                 >
-//                   {isDeploying ? (
-//                     <Loader2 size={18} className='animate-spin' />
-//                   ) : (
-//                     <Rocket size={18} />
-//                   )}
-//                   {isDeploying
-//                     ? 'Deploying...'
-//                     : `Deploy ${manualQueue.length} Questions`}
-//                 </button>
-//               </div>
-//             </div>
-//           </div>
-//         </div>
-
-//         {/* MAIN AREA */}
-//         <div className='lg:col-span-8 space-y-6'>
-//           <div className='bg-white rounded-3xl border border-slate-200 p-6 shadow-sm'>
-//             <div className='flex justify-between items-center mb-6'>
-//               <h2 className='text-sm font-black uppercase tracking-tight flex items-center gap-2'>
-//                 {editingId ? (
-//                   <Edit3 size={16} className='text-[#002EFF]' />
-//                 ) : (
-//                   <Plus size={16} />
-//                 )}
-//                 {editingId
-//                   ? `Editing Question #${manualQueue.find((q) => q.id === editingId)?.qNumber}`
-//                   : `New Entry (#${manualQueue.length + 1})`}
-//               </h2>
-//               <div className='flex bg-slate-100 p-1 rounded-xl'>
-//                 {['individual', 'bulk'].map((m) => (
-//                   <button
-//                     key={m}
-//                     onClick={() => setMode(m as any)}
-//                     className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${mode === m ? 'bg-white shadow-sm' : 'text-slate-400'}`}
-//                   >
-//                     {m}
-//                   </button>
-//                 ))}
-//               </div>
-//             </div>
-
-//             {mode === 'individual' ? (
-//               <div className='space-y-4'>
-//                 <div className='flex items-center justify-between gap-4 mb-4'>
-//                   <div className='flex items-center gap-4'>
-//                     {selectedImage ? (
-//                       <div className='relative w-32 h-24 rounded-xl overflow-hidden border-2 border-[#002EFF]'>
-//                         <img
-//                           src={selectedImage}
-//                           alt='preview'
-//                           className='w-full h-full object-cover'
-//                         />
-//                         <button
-//                           onClick={() => setSelectedImage(null)}
-//                           className='absolute top-1 right-1 bg-white rounded-full p-1 text-rose-500 shadow-md'
-//                         >
-//                           <X size={12} />
-//                         </button>
-//                       </div>
-//                     ) : (
-//                       <button
-//                         onClick={() => fileInputRef.current?.click()}
-//                         className='w-32 h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-[#002EFF] hover:border-[#002EFF] transition-colors'
-//                       >
-//                         <Camera size={20} />
-//                         <span className='text-[8px] font-black mt-1'>
-//                           ADD IMAGE
-//                         </span>
-//                       </button>
-//                     )}
-//                     <input
-//                       type='file'
-//                       ref={fileInputRef}
-//                       hidden
-//                       accept='image/*'
-//                       onChange={handleImageChange}
-//                     />
-//                   </div>
-
-//                   {/* DIFFICULTY DROP DOWN */}
-//                   <div className='flex-1 max-w-[200px]'>
-//                     <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-//                       Difficulty Level
-//                     </label>
-//                     <select
-//                       value={formData.difficulty}
-//                       onChange={(e) =>
-//                         setFormData({ ...formData, difficulty: e.target.value })
-//                       }
-//                       className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-[#002EFF]'
-//                     >
-//                       <option value='Simple'>Simple</option>
-//                       <option value='Standard'>Standard</option>
-//                       <option value='Hard'>Hard</option>
-//                       <option value='Complex'>Complex</option>
-//                     </select>
-//                   </div>
-//                 </div>
-
-//                 <textarea
-//                   value={formData.body}
-//                   onChange={(e) =>
-//                     setFormData({ ...formData, body: e.target.value })
-//                   }
-//                   className='w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-[#002EFF]'
-//                   placeholder='Type question here...'
-//                   rows={3}
-//                 />
-
-//                 <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-//                   {['A', 'B', 'C', 'D', 'E'].map((char) => (
-//                     <div
-//                       key={char}
-//                       className={`flex items-center gap-3 p-3 rounded-xl border-2 ${formData.correctOption === char ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-50 bg-slate-50'}`}
-//                     >
-//                       <button
-//                         onClick={() =>
-//                           setFormData({ ...formData, correctOption: char })
-//                         }
-//                         className={`w-8 h-8 rounded-lg font-black text-xs ${formData.correctOption === char ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400'}`}
-//                       >
-//                         {char}
-//                       </button>
-//                       <input
-//                         value={formData.options?.[char] || ''}
-//                         onChange={(e) =>
-//                           setFormData({
-//                             ...formData,
-//                             options: {
-//                               ...formData.options,
-//                               [char]: e.target.value,
-//                             },
-//                           })
-//                         }
-//                         className='bg-transparent outline-none text-xs font-bold w-full'
-//                         placeholder={`Option ${char}`}
-//                       />
-//                     </div>
-//                   ))}
-//                 </div>
-
-//                 {/* EXPLANATION / RATIONALE SPACE */}
-//                 <div className='mt-4'>
-//                   <label className='text-[9px] font-black text-[#002EFF] uppercase ml-1 mb-1 flex items-center gap-1'>
-//                     <Info size={10} /> Correct Answer Explanation (For Student
-//                     Review)
-//                   </label>
-//                   <textarea
-//                     value={formData.explanation}
-//                     onChange={(e) =>
-//                       setFormData({ ...formData, explanation: e.target.value })
-//                     }
-//                     className='w-full p-4 bg-blue-50/30 border border-blue-100 rounded-2xl text-xs font-medium outline-none focus:border-[#002EFF]'
-//                     placeholder='Explain why the selected answer is correct...'
-//                     rows={2}
-//                   />
-//                 </div>
-
-//                 <div className='flex justify-end mt-6'>
-//                   <button
-//                     onClick={handleSaveQuestion}
-//                     className='px-8 py-3 bg-slate-900 text-[#FFD700] rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg hover:bg-[#002EFF] transition-all'
-//                   >
-//                     {editingId ? 'Update Question' : 'Stage Question'}
-//                   </button>
-//                 </div>
-//               </div>
-//             ) : (
-//               <div
-//                 className='py-16 text-center border-4 border-dashed border-slate-100 rounded-4xl cursor-pointer'
-//                 onClick={() => bulkFileRef.current?.click()}
-//               >
-//                 <input
-//                   type='file'
-//                   ref={bulkFileRef}
-//                   hidden
-//                   onChange={handleBulkUpload}
-//                 />
-//                 <UploadCloud
-//                   size={40}
-//                   className='mx-auto text-slate-200 mb-4'
-//                 />
-//                 <p className='text-[10px] font-black uppercase text-slate-400'>
-//                   Click to upload CSV / XLSX
-//                 </p>
-//               </div>
-//             )}
-//           </div>
-
-//           {/* TABLE */}
-//           <div className='bg-white rounded-3xl border border-slate-200 overflow-hidden'>
-//             <table className='w-full text-left'>
-//               <thead className='bg-slate-50 border-b border-slate-100'>
-//                 <tr>
-//                   <th className='p-4 text-[9px] font-black uppercase text-slate-400 pl-6 w-16'>
-//                     #
-//                   </th>
-//                   <th className='p-4 text-[9px] font-black uppercase text-slate-400'>
-//                     Question Detail
-//                   </th>
-//                   <th className='p-4 text-[9px] font-black uppercase text-slate-400 text-right pr-6'>
-//                     Manage
-//                   </th>
-//                 </tr>
-//               </thead>
-//               <tbody>
-//                 {manualQueue
-//                   .slice()
-//                   .reverse()
-//                   .map((q) => (
-//                     <tr
-//                       key={q.id}
-//                       className='hover:bg-slate-50/50 border-b border-slate-50'
-//                     >
-//                       <td className='p-4 pl-6 text-xs font-black text-slate-300'>
-//                         {q.qNumber}
-//                       </td>
-//                       <td className='p-4'>
-//                         <div className='flex items-start gap-3'>
-//                           {q.image && (
-//                             <img
-//                               src={q.image}
-//                               className='w-10 h-10 rounded shadow-sm object-cover border border-slate-100'
-//                             />
-//                           )}
-//                           <div>
-//                             <p className='text-xs font-bold line-clamp-1'>
-//                               {q.body}
-//                             </p>
-//                             <div className='flex items-center gap-2 mt-1'>
-//                               <span
-//                                 className={`text-[8px] font-black px-2 py-0.5 rounded uppercase ${
-//                                   q.difficulty === 'Simple'
-//                                     ? 'bg-emerald-100 text-emerald-600'
-//                                     : q.difficulty === 'Hard'
-//                                       ? 'bg-orange-100 text-orange-600'
-//                                       : q.difficulty === 'Complex'
-//                                         ? 'bg-rose-100 text-rose-600'
-//                                         : 'bg-slate-100 text-slate-600'
-//                                 }`}
-//                               >
-//                                 {q.difficulty}
-//                               </span>
-//                               <p className='text-[9px] font-black text-[#002EFF] uppercase'>
-//                                 {q.subject} • {q.topic} • Ans: {q.correctOption}
-//                               </p>
-//                             </div>
-//                           </div>
-//                         </div>
-//                       </td>
-//                       <td className='p-4 pr-6 text-right'>
-//                         <div className='flex justify-end gap-2'>
-//                           <button
-//                             onClick={() => editQuestion(q)}
-//                             className='p-2 text-slate-400 hover:text-slate-900'
-//                           >
-//                             <Edit3 size={14} />
-//                           </button>
-//                           <button
-//                             onClick={() => deleteQuestion(q.id)}
-//                             className='p-2 text-slate-400 hover:text-rose-500'
-//                           >
-//                             <Trash2 size={14} />
-//                           </button>
-//                         </div>
-//                       </td>
-//                     </tr>
-//                   ))}
-//               </tbody>
-//             </table>
-//           </div>
-//         </div>
-//       </div>
-//     </div>
-//   )
-// }
-
+//src/app/admin/components/ExamBuilder.tsx
 'use client'
 
-import React, { useState, useRef, ChangeEvent } from 'react'
+import React, { useState, useRef, ChangeEvent, useEffect, useMemo } from 'react'
 import {
-  Plus,
+  BookOpen,
+  ArrowRight,
+  ChevronRight,
   UploadCloud,
-  ImageIcon as ImageIconLucide,
+  Plus,
   Trash2,
-  Loader2,
-  Settings2,
   Edit3,
-  Rocket,
+  Image as ImageIcon,
+  CheckCircle2,
+  Settings,
+  Clock,
+  Trophy,
+  Shuffle,
+  Save,
   X,
-  Camera,
+  FileSpreadsheet,
+  ArrowLeft,
+  AlertTriangle,
   Info,
+  Zap,
+  Search,
+  Filter,
 } from 'lucide-react'
 import * as XLSX from 'xlsx'
 
-// --- Types ---
+// --- CONSTANTS ---
+const JAMB_SUBJECTS = [
+  'Mathematics',
+  'English Language',
+  'Physics',
+  'Chemistry',
+  'Biology',
+  'Literature in English',
+  'Government',
+  'Economics',
+  'Commerce',
+  'CRK',
+  'IRK',
+  'Geography',
+  'History',
+  'Agricultural Science',
+  'Accounting',
+]
+
+// --- TYPES ---
 type Question = {
+  imageUrl: string | null
   id: string
   qNumber: number
   subject: string
@@ -571,554 +58,832 @@ type Question = {
   options: { [key: string]: string }
   correctOption: string
   explanation: string
-  difficulty: string
   image: string | null
+  mark: number
 }
 
-type GlobalContext = {
-  quizTitle: string // NEW
-  quizDescription: string // NEW
-  subject: string
-  topic: string
-  timeLimit: string
-  instructions: string
+type QuizConfig = {
+  title: string
+  description: string
+  timeLimit: number
+  shuffleQuestions: boolean
+  showLeaderboard: boolean
+  accessCode: string
 }
 
-export default function QuestionBank() {
-  const [mode, setMode] = useState<'individual' | 'bulk'>('individual')
-  const [isDeploying, setIsDeploying] = useState(false)
-  const [isUploading, setIsUploading] = useState(false)
-  const [editingId, setEditingId] = useState<string | null>(null)
-
-  const [context, setContext] = useState<GlobalContext>({
-    quizTitle: '', // Init
-    quizDescription: '', // Init
-    subject: '',
-    topic: '',
-    timeLimit: '30',
-    instructions: 'Select the best answer.',
+export default function ExamBuilder() {
+  // --- STATE ---
+  const [step, setStep] = useState<1 | 2 | 3>(1)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [config, setConfig] = useState<QuizConfig>({
+    title: '',
+    description: '',
+    timeLimit: 30,
+    shuffleQuestions: false,
+    showLeaderboard: true,
+    accessCode: '',
   })
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [isBulkUploading, setIsBulkUploading] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [showConfirmModal, setShowConfirmModal] = useState(false)
+  const [globalMark, setGlobalMark] = useState<number>(1)
 
-  const [manualQueue, setManualQueue] = useState<Question[]>([])
-  const [formData, setFormData] = useState<Partial<Question>>({
+  const [form, setForm] = useState<Partial<Question>>({
+    subject: JAMB_SUBJECTS[0],
+    topic: '',
     body: '',
     options: { A: '', B: '', C: '', D: '', E: '' },
-    correctOption: '',
+    correctOption: 'A',
     explanation: '',
-    difficulty: 'Simple',
+    mark: 1,
+    image: null,
   })
 
-  const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const fileInputRef = useRef<HTMLInputElement>(null)
-  const bulkFileRef = useRef<HTMLInputElement>(null)
+  const bulkInputRef = useRef<HTMLInputElement>(null)
 
-  // --- Image Handling ---
-  const handleImageChange = (e: ChangeEvent<HTMLInputElement>) => {
+  // --- PERSISTENCE ---
+  useEffect(() => {
+    const savedData = localStorage.getItem('draft_exam_builder')
+    if (savedData) {
+      try {
+        const {
+          config: sConf,
+          questions: sQuest,
+          step: sStep,
+        } = JSON.parse(savedData)
+        if (sConf) setConfig(sConf)
+        if (sQuest) setQuestions(sQuest)
+        if (sStep) setStep(sStep)
+      } catch (e) {
+        console.error('Failed to parse draft', e)
+      }
+    }
+  }, [])
+
+  useEffect(() => {
+    localStorage.setItem(
+      'draft_exam_builder',
+      JSON.stringify({ config, questions, step }),
+    )
+  }, [config, questions, step])
+
+  // --- DERIVED STATE ---
+  const filteredQuestions = useMemo(() => {
+    return questions.filter(
+      (q) =>
+        q.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        q.topic.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
+  }, [questions, searchQuery])
+
+  // --- HANDLERS ---
+  const applyGlobalMark = () => {
+    if (
+      confirm(`Set all ${questions.length} questions to ${globalMark} marks?`)
+    ) {
+      setQuestions(questions.map((q) => ({ ...q, mark: globalMark })))
+    }
+  }
+
+  const handleNext = () => {
+    if (step === 1 && !config.title.trim())
+      return alert('Exam Title is required.')
+    if (step === 2 && questions.length === 0)
+      return alert('Add at least one question.')
+    setStep((prev) => (prev + 1) as 1 | 2 | 3)
+    window.scrollTo(0, 0)
+  }
+
+  const handleBack = () => setStep((prev) => (prev - 1) as 1 | 2 | 3)
+
+  const handleImageUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
+      if (file.size > 1024 * 1024)
+        return alert('Image too large (max 1MB for performance)')
       const reader = new FileReader()
-      reader.onloadend = () => {
-        setSelectedImage(reader.result as string)
-      }
+      reader.onloadend = () =>
+        setForm({ ...form, image: reader.result as string })
       reader.readAsDataURL(file)
     }
   }
 
-  // --- Deploy Logic ---
-  const handleDeploy = () => {
-    if (manualQueue.length === 0) {
-      alert('Add some questions to the queue before deploying!')
-      return
-    }
-    setIsDeploying(true)
-    setTimeout(() => {
-      const payload = {
-        config: context,
-        questions: manualQueue.sort((a, b) => a.qNumber - b.qNumber),
-        deployedAt: new Date().toISOString(),
-      }
-      localStorage.setItem('staged_exam_data', JSON.stringify(payload))
-      setIsDeploying(false)
-      alert('🚀 Exam Deployed with Explanations!')
-    }, 1500)
-  }
-
-  // --- Handlers ---
-  const handleSaveQuestion = () => {
-    if (!formData.body || !formData.correctOption) {
-      alert('Question body and correct answer are required.')
-      return
-    }
-
-    if (editingId) {
-      setManualQueue(
-        manualQueue.map((q) =>
-          q.id === editingId
-            ? {
-                ...q,
-                body: formData.body!,
-                options: formData.options as any,
-                correctOption: formData.correctOption!,
-                explanation: formData.explanation || '',
-                difficulty: formData.difficulty || 'Simple',
-                image: selectedImage,
-                subject: context.subject || q.subject,
-                topic: context.topic || q.topic,
-              }
-            : q,
-        ),
-      )
-      setEditingId(null)
-    } else {
-      const newQuestion: Question = {
-        id: Date.now().toString(),
-        qNumber: manualQueue.length + 1,
-        subject: context.subject || 'Uncategorized',
-        topic: context.topic || 'General',
-        body: formData.body || '',
-        options: formData.options as { [key: string]: string },
-        correctOption: formData.correctOption || 'A',
-        explanation: formData.explanation || '',
-        difficulty: formData.difficulty || 'Simple',
-        image: selectedImage,
-      }
-      setManualQueue([...manualQueue, newQuestion])
-    }
-
-    setFormData({
-      body: '',
-      options: { A: '', B: '', C: '', D: '', E: '' },
-      correctOption: '',
-      explanation: '',
-      difficulty: 'Simple',
-    })
-    setSelectedImage(null)
-  }
-
-  const editQuestion = (q: Question) => {
-    setEditingId(q.id)
-    setFormData({
-      body: q.body,
-      options: { ...q.options },
-      correctOption: q.correctOption,
-      explanation: q.explanation,
-      difficulty: q.difficulty,
-    })
-    setSelectedImage(q.image)
-    window.scrollTo({ top: 0, behavior: 'smooth' })
-  }
-
-  const deleteQuestion = (id: string) => {
-    const filtered = manualQueue.filter((q) => q.id !== id)
-    const reIndexed = filtered.map((q, idx) => ({ ...q, qNumber: idx + 1 }))
-    setManualQueue(reIndexed)
-  }
-
-  const handleBulkUpload = async (e: ChangeEvent<HTMLInputElement>) => {
+  const handleBulkUpload = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
-    setIsUploading(true)
+
+    setIsBulkUploading(true)
     const reader = new FileReader()
     reader.onload = (evt) => {
       try {
-        const bstr = evt.target?.result
-        const wb = XLSX.read(bstr, { type: 'binary' })
-        const ws = wb.Sheets[wb.SheetNames[0]]
-        const data = XLSX.utils.sheet_to_json(ws) as any[]
-        const parsed: Question[] = data.map((row, i) => ({
+        const data = new Uint8Array(evt.target?.result as ArrayBuffer)
+        const workbook = XLSX.read(data, { type: 'array' })
+        const sheet = workbook.Sheets[workbook.SheetNames[0]]
+        const rows = XLSX.utils.sheet_to_json(sheet) as any[]
+
+        const parsed: Question[] = rows.map((row, i) => ({
           id: `bulk-${Date.now()}-${i}`,
-          qNumber: manualQueue.length + i + 1,
-          subject: context.subject || row.Subject || 'Uncategorized',
-          topic: context.topic || row.Topic || 'General',
-          body: row.Question || row.body || '',
+          qNumber: questions.length + i + 1,
+          subject: row.Subject || row.subject || config.title || 'General',
+          topic: row.Topic || row.topic || 'General',
+          body: row.Question || row.Body || row.body || '',
           options: {
-            A: String(row.A || ''),
-            B: String(row.B || ''),
-            C: String(row.C || ''),
-            D: String(row.D || ''),
-            E: String(row.E || ''),
+            A: String(row.A || row.a || ''),
+            B: String(row.B || row.b || ''),
+            C: String(row.C || row.c || ''),
+            D: String(row.D || row.d || ''),
+            E: String(row.E || row.e || ''),
           },
-          correctOption: String(row.Correct || 'A').toUpperCase(),
-          explanation: row.Explanation || '',
-          difficulty: row.Difficulty || 'Simple',
+          correctOption: String(
+            row.Answer || row.Correct || row.correct || 'A',
+          ).toUpperCase(),
+          explanation: row.Explanation || row.explanation || '',
           image: null,
+          imageUrl: null,
+          mark: Number(row.Mark || row.mark) || 1,
         }))
-        setManualQueue((prev) => [...prev, ...parsed])
-        setMode('individual')
+
+        setQuestions((prev) => [...prev, ...parsed])
       } catch (err) {
-        alert('Parse error.')
+        alert('File error. Ensure columns are: Question, A, B, C, D, Answer')
       } finally {
-        setIsUploading(false)
+        setIsBulkUploading(false)
+        if (bulkInputRef.current) bulkInputRef.current.value = ''
       }
     }
-    reader.readAsBinaryString(file)
+    reader.readAsArrayBuffer(file)
+  }
+
+  const handleSaveQuestion = () => {
+    if (!form.body?.trim() || !form.options?.A || !form.options?.B) {
+      return alert('Question body and at least options A & B are required.')
+    }
+
+    const newQuestion: Question = {
+      id: editingId || crypto.randomUUID(),
+      qNumber: editingId
+        ? questions.find((q) => q.id === editingId)?.qNumber || questions.length
+        : questions.length + 1,
+      subject: form.subject || JAMB_SUBJECTS[0],
+      topic: form.topic || 'General',
+      body: form.body || '',
+      options: form.options as { [key: string]: string} ,
+      correctOption: form.correctOption || 'A',
+      explanation: form.explanation || '',
+      image: form.image || null,
+      mark: form.mark || 1,
+      imageUrl: null
+    }
+
+    if (editingId) {
+      setQuestions(questions.map((q) => (q.id === editingId ? newQuestion : q)))
+      setEditingId(null)
+    } else {
+      setQuestions([...questions, newQuestion])
+    }
+
+    setForm({
+      subject: form.subject,
+      topic: '',
+      body: '',
+      options: { A: '', B: '', C: '', D: '', E: '' },
+      correctOption: 'A',
+      explanation: '',
+      image: null,
+      mark: form.mark,
+    })
+  }
+
+  const handleDeploy = () => {
+    // 1. Strict Validation
+    if (!config.title) return alert('Please provide an exam title in Step 1.')
+    if (questions.length === 0)
+      return alert('Please add at least one question.')
+
+    // 2. Advanced Mapping
+    // This ensures every field (Timer, Options, Images, Explanations) is preserved
+    const formattedQuestions = questions.map((q) => ({
+      id: q.id,
+      Question: q.body,
+      A: q.options.A || '',
+      B: q.options.B || '',
+      C: q.options.C || '',
+      D: q.options.D || '',
+      E: q.options.E || '', // Explicitly include E even if empty to maintain structure
+      Answer: q.correctOption,
+      Explanation: q.explanation || 'No explanation provided.',
+      image: q.image || q.imageUrl || null, // Capture both base64 and URLs
+      mark: q.mark || 1,
+      subject: q.subject,
+      topic: q.topic,
+    }))
+
+    const examId = `QZ-${Math.random().toString(36).substring(2, 6).toUpperCase()}`
+
+    // 3. Final Data Package
+    const finalData = {
+      id: examId,
+      title: config.title,
+      description: config.description || '',
+      totalQuestions: questions.length,
+      timeLimit: Number(config.timeLimit) || 30, // Ensures timer is a valid number
+      shuffle: config.shuffleQuestions,
+      showLeaderboard: config.showLeaderboard,
+      accessCode: config.accessCode,
+      questions: formattedQuestions,
+      url: `/take-exam/${examId}`,
+      createdAt: new Date().toISOString(),
+      attempts: [],
+    }
+
+    try {
+      // 4. Atomic Save
+      const existing = JSON.parse(localStorage.getItem('my_quizzes') || '[]')
+
+      // Check for duplicate IDs just in case
+      const updatedQuizzes = [
+        finalData,
+        ...existing.filter((q: any) => q.id !== examId),
+      ]
+
+      const serializedData = JSON.stringify(updatedQuizzes)
+
+      // Safety Check: LocalStorage is usually 5MB.
+      // Images can bloat this.
+      localStorage.setItem('my_quizzes', serializedData)
+
+      // 5. Cleanup and Broadcast
+      localStorage.removeItem('draft_exam_builder')
+      window.dispatchEvent(new Event('storage-update'))
+
+      alert(
+        '🚀 Exam Published Successfully! All data, including images and explanations, are now live.',
+      )
+
+      // 6. Reset State
+      setQuestions([])
+      setConfig({
+        title: '',
+        description: '',
+        timeLimit: 30,
+        shuffleQuestions: false,
+        showLeaderboard: true,
+        accessCode: '',
+      })
+      setStep(1)
+      setShowConfirmModal(false)
+    } catch (error) {
+      console.error('Deployment failed:', error)
+      alert(
+        'CRITICAL ERROR: Storage Full. You likely have too many large images. Try removing some images or reducing their size before publishing.',
+      )
+    }
   }
 
   return (
-    <div className='max-w-[1400px] mx-auto min-h-screen bg-[#F8FAFC] pb-20 font-sans text-slate-900'>
-      <div className='p-6 grid grid-cols-1 lg:grid-cols-12 gap-6'>
-        {/* SIDEBAR */}
-        <div className='lg:col-span-4 space-y-4'>
-          <div className='bg-white rounded-2xl border border-slate-200 p-5 shadow-sm sticky top-24'>
-            <h3 className='text-[10px] font-black uppercase tracking-widest text-slate-400 mb-6 flex items-center gap-2'>
-              <Settings2 size={12} className='text-[#002EFF]' /> Global Context
-            </h3>
+    <div className='min-h-screen bg-[#F8FAFC] text-slate-900 flex flex-col text-[13px] font-sans selection:bg-indigo-100'>
+      {/* HEADER */}
+      <header className='bg-white/90 backdrop-blur-md border-b border-slate-200 px-6 py-3 sticky top-0 z-40'>
+        <div className='max-w-7xl mx-auto flex justify-between items-center'>
+          <div className='flex items-center gap-3'>
+            <div className='bg-indigo-600 p-2 rounded-xl text-white shadow-lg shadow-indigo-100'>
+              <BookOpen size={18} />
+            </div>
+            <div className='hidden sm:block'>
+              <h1 className='text-sm font-black text-slate-800 leading-tight tracking-tight'>
+                ExamBuilder <span className='text-indigo-600'>Pro</span>
+              </h1>
+              <p className='text-[9px] font-bold text-slate-400 uppercase tracking-widest'>
+                {config.title || 'Draft Assessment'}
+              </p>
+            </div>
+          </div>
 
-            <div className='space-y-4'>
-              {/* QUIZ TITLE */}
-              <div>
-                <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                  Quiz Title
-                </label>
-                <input
-                  value={context.quizTitle}
-                  placeholder='Final Semester Exam...'
-                  onChange={(e) =>
-                    setContext({ ...context, quizTitle: e.target.value })
-                  }
-                  className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-                />
-              </div>
-
-              {/* QUIZ DESCRIPTION */}
-              <div>
-                <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                  Quiz Description
-                </label>
-                <textarea
-                  value={context.quizDescription}
-                  placeholder='Provide context for this assessment...'
-                  onChange={(e) =>
-                    setContext({ ...context, quizDescription: e.target.value })
-                  }
-                  rows={2}
-                  className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none resize-none'
-                />
-              </div>
-
-              <div>
-                <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                  Subject
-                </label>
-                <input
-                  placeholder='e.g. Mathematics'
-                  value={context.subject}
-                  onChange={(e) =>
-                    setContext({ ...context, subject: e.target.value })
-                  }
-                  className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-                />
-              </div>
-
-              <div className='grid grid-cols-2 gap-3'>
-                <div>
-                  <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                    Topic
-                  </label>
-                  <input
-                    placeholder='e.g. Algebra'
-                    value={context.topic}
-                    onChange={(e) =>
-                      setContext({ ...context, topic: e.target.value })
-                    }
-                    className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-                  />
-                </div>
-                <div>
-                  <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                    Time (Min)
-                  </label>
-                  <input
-                    type='number'
-                    value={context.timeLimit}
-                    onChange={(e) =>
-                      setContext({ ...context, timeLimit: e.target.value })
-                    }
-                    className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold focus:border-[#002EFF] outline-none'
-                  />
-                </div>
-              </div>
-
-              <div className='pt-6 border-t border-slate-100 mt-6'>
-                <button
-                  onClick={handleDeploy}
-                  disabled={isDeploying || manualQueue.length === 0}
-                  className={`w-full py-4 rounded-2xl font-black uppercase text-xs tracking-widest flex items-center justify-center gap-3 transition-all shadow-xl shadow-blue-100 
-                    ${manualQueue.length === 0 ? 'bg-slate-100 text-slate-400 cursor-not-allowed' : 'bg-[#002EFF] text-white hover:bg-blue-700 active:scale-95'}`}
-                >
-                  {isDeploying ? (
-                    <Loader2 size={18} className='animate-spin' />
-                  ) : (
-                    <Rocket size={18} />
+          <div className='flex items-center gap-4'>
+            <div className='flex items-center bg-slate-100 p-1 rounded-full px-2 gap-4'>
+              {[1, 2, 3].map((n) => (
+                <div key={n} className='flex items-center gap-2'>
+                  <div
+                    className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-black transition-all ${
+                      step === n
+                        ? 'bg-indigo-600 text-white shadow-md'
+                        : step > n
+                          ? 'bg-emerald-500 text-white'
+                          : 'text-slate-400'
+                    }`}
+                  >
+                    {step > n ? <CheckCircle2 size={12} /> : n}
+                  </div>
+                  {step === n && (
+                    <span className='text-[10px] font-black text-slate-700 uppercase pr-2'>
+                      {n === 1 ? 'Setup' : n === 2 ? 'Questions' : 'Finalize'}
+                    </span>
                   )}
-                  {isDeploying
-                    ? 'Deploying...'
-                    : `Deploy ${manualQueue.length} Questions`}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <main className='flex-1 max-w-7xl mx-auto w-full p-6'>
+        {step === 1 && (
+          <div className='max-w-xl mx-auto mt-8 bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden'>
+            <div className='p-10'>
+              <h2 className='text-2xl font-black text-slate-800 mb-2'>
+                Assessment Details
+              </h2>
+              <p className='text-slate-500 mb-8 font-medium'>
+                Define the basic rules and identity of your examination.
+              </p>
+
+              <div className='space-y-6'>
+                <div>
+                  <label className='block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest'>
+                    Exam Name
+                  </label>
+                  <input
+                    value={config.title}
+                    onChange={(e) =>
+                      setConfig({ ...config, title: e.target.value })
+                    }
+                    className='w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-bold focus:border-indigo-500 outline-none transition-all'
+                    placeholder='e.g. 2026 Unified Tertiary Matriculation'
+                  />
+                </div>
+                <div>
+                  <label className='block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest'>
+                    Candidate Instructions
+                  </label>
+                  <textarea
+                    value={config.description}
+                    onChange={(e) =>
+                      setConfig({ ...config, description: e.target.value })
+                    }
+                    rows={4}
+                    className='w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:border-indigo-500 outline-none transition-all resize-none font-medium'
+                    placeholder='Describe how students should approach this test...'
+                  />
+                </div>
+                <button
+                  onClick={handleNext}
+                  className='w-full py-4 bg-slate-900 text-white rounded-2xl font-black uppercase text-[12px] tracking-widest hover:bg-indigo-600 transition-all flex justify-center items-center gap-2 shadow-xl shadow-slate-200'
+                >
+                  Start Building Questions <ArrowRight size={16} />
                 </button>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* MAIN AREA */}
-        <div className='lg:col-span-8 space-y-6'>
-          <div className='bg-white rounded-3xl border border-slate-200 p-6 shadow-sm'>
-            <div className='flex justify-between items-center mb-6'>
-              <h2 className='text-sm font-black uppercase tracking-tight flex items-center gap-2'>
-                {editingId ? (
-                  <Edit3 size={16} className='text-[#002EFF]' />
-                ) : (
-                  <Plus size={16} />
-                )}
-                {editingId
-                  ? `Editing Question #${manualQueue.find((q) => q.id === editingId)?.qNumber}`
-                  : `New Entry (#${manualQueue.length + 1})`}
-              </h2>
-              <div className='flex bg-slate-100 p-1 rounded-xl'>
-                {['individual', 'bulk'].map((m) => (
-                  <button
-                    key={m}
-                    onClick={() => setMode(m as any)}
-                    className={`px-4 py-2 rounded-lg text-[10px] font-black uppercase ${mode === m ? 'bg-white shadow-sm' : 'text-slate-400'}`}
-                  >
-                    {m}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {mode === 'individual' ? (
-              <div className='space-y-4'>
-                <div className='flex items-center justify-between gap-4 mb-4'>
-                  <div className='flex items-center gap-4'>
-                    {selectedImage ? (
-                      <div className='relative w-32 h-24 rounded-xl overflow-hidden border-2 border-[#002EFF]'>
-                        <img
-                          src={selectedImage}
-                          alt='preview'
-                          className='w-full h-full object-cover'
-                        />
-                        <button
-                          onClick={() => setSelectedImage(null)}
-                          className='absolute top-1 right-1 bg-white rounded-full p-1 text-rose-500 shadow-md'
-                        >
-                          <X size={12} />
-                        </button>
-                      </div>
+        {step === 2 && (
+          <div className='grid grid-cols-1 lg:grid-cols-12 gap-8'>
+            {/* LEFT: Editor */}
+            <div className='lg:col-span-5'>
+              <div className='bg-white p-6 rounded-3xl shadow-sm border border-slate-200 sticky top-24'>
+                <div className='flex justify-between items-center mb-6'>
+                  <h3 className='font-black text-slate-800 text-[12px] flex items-center gap-2 uppercase tracking-widest'>
+                    {editingId ? (
+                      <Zap size={16} className='text-amber-500' />
                     ) : (
-                      <button
-                        onClick={() => fileInputRef.current?.click()}
-                        className='w-32 h-24 border-2 border-dashed border-slate-200 rounded-xl flex flex-col items-center justify-center text-slate-400 hover:text-[#002EFF] hover:border-[#002EFF] transition-colors'
-                      >
-                        <Camera size={20} />
-                        <span className='text-[8px] font-black mt-1'>
-                          ADD IMAGE
-                        </span>
-                      </button>
+                      <Plus size={16} className='text-indigo-600' />
                     )}
-                    <input
-                      type='file'
-                      ref={fileInputRef}
-                      hidden
-                      accept='image/*'
-                      onChange={handleImageChange}
-                    />
-                  </div>
-
-                  {/* DIFFICULTY DROP DOWN */}
-                  <div className='flex-1 max-w-[200px]'>
-                    <label className='text-[9px] font-black text-slate-400 uppercase ml-1 mb-1 block'>
-                      Difficulty Level
-                    </label>
-                    <select
-                      value={formData.difficulty}
-                      onChange={(e) =>
-                        setFormData({ ...formData, difficulty: e.target.value })
-                      }
-                      className='w-full p-2.5 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold outline-none focus:border-[#002EFF]'
-                    >
-                      <option value='Simple'>Simple</option>
-                      <option value='Standard'>Standard</option>
-                      <option value='Hard'>Hard</option>
-                      <option value='Complex'>Complex</option>
-                    </select>
-                  </div>
-                </div>
-
-                <textarea
-                  value={formData.body}
-                  onChange={(e) =>
-                    setFormData({ ...formData, body: e.target.value })
-                  }
-                  className='w-full p-5 bg-slate-50 border border-slate-200 rounded-2xl text-sm font-medium outline-none focus:border-[#002EFF]'
-                  placeholder='Type question here...'
-                  rows={3}
-                />
-
-                <div className='grid grid-cols-1 md:grid-cols-2 gap-3'>
-                  {['A', 'B', 'C', 'D', 'E'].map((char) => (
-                    <div
-                      key={char}
-                      className={`flex items-center gap-3 p-3 rounded-xl border-2 ${formData.correctOption === char ? 'border-emerald-500 bg-emerald-50/30' : 'border-slate-50 bg-slate-50'}`}
-                    >
-                      <button
-                        onClick={() =>
-                          setFormData({ ...formData, correctOption: char })
-                        }
-                        className={`w-8 h-8 rounded-lg font-black text-xs ${formData.correctOption === char ? 'bg-emerald-500 text-white' : 'bg-white text-slate-400'}`}
-                      >
-                        {char}
-                      </button>
-                      <input
-                        value={formData.options?.[char] || ''}
-                        onChange={(e) =>
-                          setFormData({
-                            ...formData,
-                            options: {
-                              ...formData.options,
-                              [char]: e.target.value,
-                            },
-                          })
-                        }
-                        className='bg-transparent outline-none text-xs font-bold w-full'
-                        placeholder={`Option ${char}`}
-                      />
-                    </div>
-                  ))}
-                </div>
-
-                {/* EXPLANATION / RATIONALE SPACE */}
-                <div className='mt-4'>
-                  <label className='text-[9px] font-black text-[#002EFF] uppercase ml-1 mb-1 flex items-center gap-1'>
-                    <Info size={10} /> Correct Answer Explanation (For Student
-                    Review)
-                  </label>
-                  <textarea
-                    value={formData.explanation}
-                    onChange={(e) =>
-                      setFormData({ ...formData, explanation: e.target.value })
-                    }
-                    className='w-full p-4 bg-blue-50/30 border border-blue-100 rounded-2xl text-xs font-medium outline-none focus:border-[#002EFF]'
-                    placeholder='Explain why the selected answer is correct...'
-                    rows={2}
+                    {editingId ? 'Modify Question' : 'New Question'}
+                  </h3>
+                  <button
+                    onClick={() => bulkInputRef.current?.click()}
+                    className='text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl hover:bg-emerald-100 flex items-center gap-2 transition-all'
+                  >
+                    <FileSpreadsheet size={14} /> Import Excel
+                  </button>
+                  <input
+                    type='file'
+                    ref={bulkInputRef}
+                    hidden
+                    onChange={handleBulkUpload}
+                    accept='.xlsx, .xls'
                   />
                 </div>
 
-                <div className='flex justify-end mt-6'>
+                <div className='space-y-4'>
+                  <div className='grid grid-cols-2 gap-3'>
+                    <select
+                      value={form.subject}
+                      onChange={(e) =>
+                        setForm({ ...form, subject: e.target.value })
+                      }
+                      className='p-3 bg-slate-50 border border-slate-200 rounded-xl text-[12px] font-bold outline-none focus:ring-2 focus:ring-indigo-500/20'
+                    >
+                      {JAMB_SUBJECTS.map((s) => (
+                        <option key={s} value={s}>
+                          {s}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      placeholder='Topic (e.g. Algebra)'
+                      value={form.topic}
+                      onChange={(e) =>
+                        setForm({ ...form, topic: e.target.value })
+                      }
+                      className='p-3 bg-slate-50 border border-slate-200 rounded-xl text-[12px] font-bold outline-none'
+                    />
+                  </div>
+
+                  <div className='grid grid-cols-2 gap-3'>
+                    <div className='flex flex-col gap-1'>
+                      <span className='text-[9px] font-black text-slate-400 uppercase ml-1'>
+                        Marks
+                      </span>
+                      <input
+                        type='number'
+                        value={form.mark}
+                        onChange={(e) =>
+                          setForm({ ...form, mark: Number(e.target.value) })
+                        }
+                        className='p-3 bg-slate-50 border border-slate-200 rounded-xl text-[12px] font-bold outline-none'
+                      />
+                    </div>
+                    <div className='flex items-end'>
+                      <button
+                        onClick={() => fileInputRef.current?.click()}
+                        className={`w-full py-3 border-2 border-dashed rounded-xl text-[10px] font-black uppercase transition-all flex items-center justify-center gap-2 ${form.image ? 'border-indigo-500 text-indigo-600 bg-indigo-50' : 'border-slate-200 text-slate-400 hover:border-indigo-200'}`}
+                      >
+                        <ImageIcon size={14} />{' '}
+                        {form.image ? 'Attached' : 'Add Image'}
+                      </button>
+                      <input
+                        type='file'
+                        ref={fileInputRef}
+                        hidden
+                        onChange={handleImageUpload}
+                        accept='image/*'
+                      />
+                    </div>
+                  </div>
+
+                  <textarea
+                    placeholder='Write the question body here...'
+                    value={form.body}
+                    onChange={(e) => setForm({ ...form, body: e.target.value })}
+                    className='w-full p-4 bg-slate-50 border border-slate-200 rounded-2xl text-[13px] font-medium min-h-25 outline-none focus:border-indigo-500'
+                  />
+
+                  <div className='space-y-2'>
+                    {['A', 'B', 'C', 'D', 'E'].map((opt) => (
+                      <div
+                        key={opt}
+                        className={`flex items-center gap-3 p-2 rounded-xl border-2 transition-all ${form.correctOption === opt ? 'border-emerald-500 bg-emerald-50' : 'border-slate-50 bg-white'}`}
+                      >
+                        <button
+                          onClick={() =>
+                            setForm({ ...form, correctOption: opt })
+                          }
+                          className={`w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-black shadow-sm ${form.correctOption === opt ? 'bg-emerald-500 text-white' : 'bg-slate-100 text-slate-400'}`}
+                        >
+                          {opt}
+                        </button>
+                        <input
+                          placeholder={`Option ${opt}`}
+                          value={form.options?.[opt] || ''}
+                          onChange={(e) =>
+                            setForm({
+                              ...form,
+                              options: {
+                                ...form.options,
+                                [opt]: e.target.value,
+                              } as any,
+                            })
+                          }
+                          className='flex-1 bg-transparent text-[12px] font-bold outline-none'
+                        />
+                      </div>
+                    ))}
+                  </div>
+
+                  <textarea
+                    placeholder='Explanation (shown after the exam)...'
+                    value={form.explanation}
+                    onChange={(e) =>
+                      setForm({ ...form, explanation: e.target.value })
+                    }
+                    className='w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-[12px] italic min-h-15 outline-none'
+                  />
+
+                  <div className='flex gap-2 pt-2'>
+                    <button
+                      onClick={handleSaveQuestion}
+                      className='flex-1 py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-100'
+                    >
+                      {editingId ? 'Save Changes' : 'Add to Pool'}
+                    </button>
+                    {editingId && (
+                      <button
+                        onClick={() => {
+                          setEditingId(null)
+                          setForm({
+                            subject: JAMB_SUBJECTS[0],
+                            topic: '',
+                            body: '',
+                            options: { A: '', B: '', C: '', D: '', E: '' },
+                            correctOption: 'A',
+                            explanation: '',
+                            image: null,
+                            mark: 1,
+                          })
+                        }}
+                        className='p-4 bg-slate-100 text-slate-500 rounded-2xl'
+                      >
+                        <X size={20} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* RIGHT: Question Pool */}
+            <div className='lg:col-span-7 space-y-5'>
+              <div className='bg-white p-5 rounded-3xl border border-slate-200'>
+                <div className='flex flex-col md:flex-row justify-between items-center gap-4'>
+                  <div className='relative w-full md:w-64'>
+                    <Search
+                      className='absolute left-3 top-1/2 -translate-y-1/2 text-slate-400'
+                      size={14}
+                    />
+                    <input
+                      placeholder='Search questions...'
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className='w-full pl-9 pr-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-[11px] font-bold outline-none'
+                    />
+                  </div>
+
+                  <div className='flex items-center gap-2 bg-indigo-50/50 p-1.5 rounded-2xl border border-indigo-100 w-full md:w-auto'>
+                    <div className='flex items-center gap-2 px-3 border-r border-indigo-100'>
+                      <Zap size={14} className='text-amber-500' />
+                      <span className='text-[10px] font-black text-indigo-900 uppercase'>
+                        Quick Mark:
+                      </span>
+                      <input
+                        type='number'
+                        value={globalMark}
+                        onChange={(e) => setGlobalMark(Number(e.target.value))}
+                        className='w-8 bg-transparent text-[11px] font-black text-center outline-none'
+                      />
+                    </div>
+                    <button
+                      onClick={applyGlobalMark}
+                      className='px-4 py-2 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase hover:bg-indigo-700 transition-all'
+                    >
+                      Apply All
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className='space-y-4'>
+                {filteredQuestions.length === 0 ? (
+                  <div className='bg-white border-2 border-dashed border-slate-200 rounded-3xl p-20 flex flex-col items-center text-slate-400'>
+                    <div className='bg-slate-50 p-6 rounded-full mb-4'>
+                      <UploadCloud size={48} className='opacity-20' />
+                    </div>
+                    <p className='text-[12px] font-black uppercase tracking-widest'>
+                      Question Pool is Empty
+                    </p>
+                    <p className='text-[10px] font-medium mt-1'>
+                      Start adding or import from Excel
+                    </p>
+                  </div>
+                ) : (
+                  filteredQuestions.map((q, idx) => (
+                    <div
+                      key={q.id}
+                      className='bg-white p-5 rounded-2xl border border-slate-200 hover:border-indigo-400 transition-all group relative shadow-sm'
+                    >
+                      <div className='flex justify-between items-start mb-4'>
+                        <div className='flex flex-wrap gap-2'>
+                          <span className='bg-slate-900 text-white px-2 py-1 rounded-lg text-[10px] font-black'>
+                            #{idx + 1}
+                          </span>
+                          <span className='px-3 py-1 bg-indigo-50 text-indigo-600 rounded-lg text-[10px] font-black uppercase'>
+                            {q.subject}
+                          </span>
+                          <span className='px-3 py-1 bg-slate-100 text-slate-500 rounded-lg text-[10px] font-black uppercase'>
+                            {q.topic}
+                          </span>
+                          <span className='px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-black uppercase'>
+                            {q.mark} Points
+                          </span>
+                        </div>
+                        <div className='flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity'>
+                          <button
+                            onClick={() => {
+                              setEditingId(q.id)
+                              setForm(q)
+                              window.scrollTo({ top: 0, behavior: 'smooth' })
+                            }}
+                            className='p-2 text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100'
+                          >
+                            <Edit3 size={16} />
+                          </button>
+                          <button
+                            onClick={() =>
+                              setQuestions(
+                                questions.filter((i) => i.id !== q.id),
+                              )
+                            }
+                            className='p-2 text-red-600 bg-red-50 rounded-lg hover:bg-red-100'
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                      <p className='text-[14px] font-bold text-slate-800 leading-relaxed mb-4'>
+                        {q.body}
+                      </p>
+
+                      <div className='grid grid-cols-1 md:grid-cols-2 gap-2'>
+                        {Object.entries(q.options).map(
+                          ([k, v]) =>
+                            v && (
+                              <div
+                                key={k}
+                                className={`text-[11px] p-3 rounded-xl border-2 ${q.correctOption === k ? 'border-emerald-200 bg-emerald-50 text-emerald-700 font-bold' : 'border-slate-50 bg-slate-50/50 text-slate-500'}`}
+                              >
+                                <span className='mr-2 opacity-60'>{k}.</span>{' '}
+                                {v}
+                              </div>
+                            ),
+                        )}
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+
+              {questions.length > 0 && (
+                <button
+                  onClick={handleNext}
+                  className='w-full py-5 bg-slate-900 text-white rounded-2xl text-[12px] font-black uppercase tracking-widest flex items-center justify-center gap-3 hover:bg-indigo-600 transition-all shadow-xl shadow-slate-200'
+                >
+                  Configure Exam Logistics <Settings size={18} />
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+
+        {step === 3 && (
+          <div className='max-w-md mx-auto mt-4'>
+            <div className='bg-white rounded-4xl shadow-2xl border border-slate-200 overflow-hidden'>
+              <div className='bg-indigo-600 p-8 text-white text-center'>
+                <div className='w-16 h-16 bg-white/20 rounded-3xl flex items-center justify-center mx-auto mb-4 backdrop-blur-md'>
+                  <Trophy className='text-yellow-300' size={32} />
+                </div>
+                <h2 className='text-xl font-black uppercase tracking-tighter'>
+                  Ready for Deployment
+                </h2>
+                <p className='text-indigo-100 text-[10px] uppercase font-bold tracking-[0.2em] mt-1'>
+                  Review Logistics & Publish
+                </p>
+              </div>
+
+              <div className='p-8 space-y-6'>
+                <div className='flex items-center justify-between p-4 bg-slate-50 rounded-2xl border-2 border-slate-100'>
+                  <div className='flex items-center gap-4'>
+                    <div className='bg-orange-100 p-3 rounded-xl text-orange-600'>
+                      <Clock size={20} />
+                    </div>
+                    <div>
+                      <p className='font-black text-slate-800 text-[11px] uppercase'>
+                        Duration
+                      </p>
+                      <p className='text-[10px] text-slate-400 font-bold'>
+                        Total Minutes
+                      </p>
+                    </div>
+                  </div>
+                  <input
+                    type='number'
+                    value={config.timeLimit}
+                    onChange={(e) =>
+                      setConfig({
+                        ...config,
+                        timeLimit: Number(e.target.value),
+                      })
+                    }
+                    className='w-16 p-3 text-center font-black bg-white border-2 border-slate-200 rounded-xl text-sm outline-none focus:border-indigo-500'
+                  />
+                </div>
+
+                <div className='grid grid-cols-2 gap-4'>
+                  {[
+                    {
+                      label: 'Randomize Pool',
+                      icon: <Shuffle size={18} />,
+                      key: 'shuffleQuestions' as const,
+                    },
+                    {
+                      label: 'Live Leaderboard',
+                      icon: <Trophy size={18} />,
+                      key: 'showLeaderboard' as const,
+                    },
+                  ].map((item) => (
+                    <button
+                      key={item.key}
+                      onClick={() =>
+                        setConfig({ ...config, [item.key]: !config[item.key] })
+                      }
+                      className={`p-5 rounded-3xl border-2 transition-all text-left ${config[item.key] ? 'border-indigo-500 bg-indigo-50' : 'border-slate-100 bg-slate-50/50'}`}
+                    >
+                      <div
+                        className={`mb-3 ${config[item.key] ? 'text-indigo-600' : 'text-slate-400'}`}
+                      >
+                        {item.icon}
+                      </div>
+                      <p className='text-[10px] font-black uppercase text-slate-800'>
+                        {item.label}
+                      </p>
+                      <p className='text-[9px] font-bold text-slate-400 uppercase mt-1'>
+                        {config[item.key] ? 'Enabled' : 'Disabled'}
+                      </p>
+                    </button>
+                  ))}
+                </div>
+
+                <div>
+                  <label className='block text-[10px] font-black uppercase text-slate-400 mb-2 ml-1 tracking-widest'>
+                    Security Access Code
+                  </label>
+                  <input
+                    placeholder='Leave empty for public'
+                    value={config.accessCode}
+                    onChange={(e) =>
+                      setConfig({ ...config, accessCode: e.target.value })
+                    }
+                    className='w-full p-4 bg-slate-50 border-2 border-slate-100 rounded-2xl font-black text-center text-sm tracking-[0.5em] outline-none focus:border-indigo-500'
+                  />
+                </div>
+
+                <div className='pt-4 space-y-3'>
                   <button
-                    onClick={handleSaveQuestion}
-                    className='px-8 py-3 bg-slate-900 text-[#FFD700] rounded-xl font-black uppercase text-[10px] tracking-widest shadow-lg hover:bg-[#002EFF] transition-all'
+                    onClick={() => setShowConfirmModal(true)}
+                    className='w-full py-4 bg-emerald-600 text-white rounded-2xl font-black uppercase text-[12px] tracking-widest hover:bg-emerald-700 shadow-xl shadow-emerald-100 transition-all flex justify-center items-center gap-3'
                   >
-                    {editingId ? 'Update Question' : 'Stage Question'}
+                    <Save size={18} /> Launch Examination
+                  </button>
+                  <button
+                    onClick={handleBack}
+                    className='w-full py-2 text-slate-400 font-black uppercase text-[10px] flex justify-center items-center gap-2 hover:text-slate-600'
+                  >
+                    <ArrowLeft size={14} /> Adjust Questions
                   </button>
                 </div>
               </div>
-            ) : (
-              <div
-                className='py-16 text-center border-4 border-dashed border-slate-100 rounded-4xl cursor-pointer'
-                onClick={() => bulkFileRef.current?.click()}
-              >
-                <input
-                  type='file'
-                  ref={bulkFileRef}
-                  hidden
-                  onChange={handleBulkUpload}
-                />
-                <UploadCloud
-                  size={40}
-                  className='mx-auto text-slate-200 mb-4'
-                />
-                <p className='text-[10px] font-black uppercase text-slate-400'>
-                  Click to upload CSV / XLSX
-                </p>
-              </div>
-            )}
+            </div>
           </div>
+        )}
+      </main>
 
-          {/* TABLE */}
-          <div className='bg-white rounded-3xl border border-slate-200 overflow-hidden'>
-            <table className='w-full text-left'>
-              <thead className='bg-slate-50 border-b border-slate-100'>
-                <tr>
-                  <th className='p-4 text-[9px] font-black uppercase text-slate-400 pl-6 w-16'>
-                    #
-                  </th>
-                  <th className='p-4 text-[9px] font-black uppercase text-slate-400'>
-                    Question Detail
-                  </th>
-                  <th className='p-4 text-[9px] font-black uppercase text-slate-400 text-right pr-6'>
-                    Manage
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {manualQueue
-                  .slice()
-                  .reverse()
-                  .map((q) => (
-                    <tr
-                      key={q.id}
-                      className='hover:bg-slate-50/50 border-b border-slate-50'
-                    >
-                      <td className='p-4 pl-6 text-xs font-black text-slate-300'>
-                        {q.qNumber}
-                      </td>
-                      <td className='p-4'>
-                        <div className='flex items-start gap-3'>
-                          {q.image && (
-                            <img
-                              src={q.image}
-                              className='w-10 h-10 rounded shadow-sm object-cover border border-slate-100'
-                            />
-                          )}
-                          <div>
-                            <p className='text-xs font-bold line-clamp-1'>
-                              {q.body}
-                            </p>
-                            <div className='flex items-center gap-2 mt-1'>
-                              <span
-                                className={`text-[8px] font-black px-2 py-0.5 rounded uppercase ${
-                                  q.difficulty === 'Simple'
-                                    ? 'bg-emerald-100 text-emerald-600'
-                                    : q.difficulty === 'Hard'
-                                      ? 'bg-orange-100 text-orange-600'
-                                      : q.difficulty === 'Complex'
-                                        ? 'bg-rose-100 text-rose-600'
-                                        : 'bg-slate-100 text-slate-600'
-                                }`}
-                              >
-                                {q.difficulty}
-                              </span>
-                              <p className='text-[9px] font-black text-[#002EFF] uppercase'>
-                                {q.subject} • {q.topic} • Ans: {q.correctOption}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className='p-4 pr-6 text-right'>
-                        <div className='flex justify-end gap-2'>
-                          <button
-                            onClick={() => editQuestion(q)}
-                            className='p-2 text-slate-400 hover:text-slate-900'
-                          >
-                            <Edit3 size={14} />
-                          </button>
-                          <button
-                            onClick={() => deleteQuestion(q.id)}
-                            className='p-2 text-slate-400 hover:text-rose-500'
-                          >
-                            <Trash2 size={14} />
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-              </tbody>
-            </table>
+      {/* CONFIRMATION MODAL */}
+      {showConfirmModal && (
+        <div className='fixed inset-0 z-100 flex items-center justify-center p-6 bg-slate-900/40 backdrop-blur-sm'>
+          <div className='bg-white rounded-3xl max-w-sm w-full p-8 shadow-2xl text-center border border-slate-200'>
+            <div className='w-20 h-20 bg-amber-50 text-amber-500 rounded-full flex items-center justify-center mx-auto mb-6'>
+              <AlertTriangle size={40} />
+            </div>
+            <h3 className='text-xl font-black text-slate-800 mb-2'>
+              Final Confirmation
+            </h3>
+            <p className='text-slate-500 text-[13px] leading-relaxed mb-8'>
+              You are about to publish{' '}
+              <span className='font-bold text-slate-800'>"{config.title}"</span>{' '}
+              with{' '}
+              <span className='font-bold text-slate-800'>
+                {questions.length} questions
+              </span>
+              . This will be available for candidates immediately.
+            </p>
+            <div className='flex flex-col gap-3'>
+              <button
+                onClick={handleDeploy}
+                className='w-full py-4 bg-indigo-600 text-white rounded-2xl font-black uppercase text-[11px] tracking-widest hover:bg-indigo-700'
+              >
+                Confirm & Publish
+              </button>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className='w-full py-4 bg-slate-100 text-slate-500 rounded-2xl font-black uppercase text-[11px] tracking-widest'
+              >
+                Cancel
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }
