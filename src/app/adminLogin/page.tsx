@@ -12,6 +12,9 @@ import {
   Loader2,
   ChevronLeft,
   CheckCircle2,
+  Eye,
+  EyeOff,
+  HelpCircle,
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Link from 'next/link'
@@ -22,6 +25,7 @@ interface InputFieldProps {
   type: string
   placeholder: string
   onChange: (val: string) => void
+  isPassword?: boolean
 }
 
 export default function AdminLogin() {
@@ -40,7 +44,6 @@ export default function AdminLogin() {
     setLoading(true)
     setError('')
 
-    // Simulating secure validation delay
     await new Promise((resolve) => setTimeout(resolve, 1500))
 
     if (
@@ -48,13 +51,8 @@ export default function AdminLogin() {
       values.email === 'admin@dsa.com' &&
       values.password === 'dsaadminpass'
     ) {
-      // 1. Sync Client-side state
       localStorage.setItem('user_role', 'super_admin')
-
-      // 2. Set Cookie for Middleware Security
-      // SameSite=Lax ensures the cookie is sent on top-level navigations
       document.cookie = 'admin_token=true; path=/; max-age=3600; SameSite=Lax'
-
       setIsSuccess(true)
 
       setTimeout(() => {
@@ -68,7 +66,7 @@ export default function AdminLogin() {
 
   return (
     <div className='min-h-screen bg-slate-950 flex items-center justify-center p-6 relative overflow-hidden transition-colors duration-1000'>
-      {/* Dynamic Background Glow */}
+      {/* Background elements */}
       <div className='absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none'>
         <motion.div
           animate={{
@@ -94,13 +92,13 @@ export default function AdminLogin() {
               <ShieldCheck size={40} className='text-blue-500' />
             )}
           </motion.div>
-          <h1 className='text-2xl font-black text-white tracking-tight italic uppercase'>
-            {isSuccess ? 'Access Granted' : 'Central Command'}
+          <h1 className='text-2xl font-bold text-white tracking-tight uppercase'>
+            {isSuccess ? 'Authentication Verified' : 'Administrative Portal'}
           </h1>
           <p className='text-slate-500 text-[10px] font-bold uppercase tracking-[0.2em] mt-2'>
             {isSuccess
-              ? 'Redirecting to secure terminal...'
-              : 'Authorized Personnel Only'}
+              ? 'Establishing secure session...'
+              : 'Secure Management System Access'}
           </p>
         </div>
 
@@ -114,23 +112,41 @@ export default function AdminLogin() {
               label='Username'
               icon={User}
               type='text'
-              placeholder='admin'
+              placeholder='Enter username'
               onChange={(val) => setValues({ ...values, username: val })}
             />
             <InputField
-              label='Admin Email'
+              label='Email Address'
               icon={Mail}
               type='email'
-              placeholder='admin@dsa.com'
+              placeholder='admin@example.com'
               onChange={(val) => setValues({ ...values, email: val })}
             />
-            <InputField
-              label='Security Key'
-              icon={Lock}
-              type='password'
-              placeholder='••••••••••••'
-              onChange={(val) => setValues({ ...values, password: val })}
-            />
+
+            <div className='space-y-1'>
+              <InputField
+                label='Access Key'
+                icon={Lock}
+                type='password'
+                isPassword={true}
+                placeholder='••••••••••••'
+                onChange={(val) => setValues({ ...values, password: val })}
+              />
+
+              {/* Forgot Password Link */}
+              <div className='flex justify-end px-1'>
+                <Link
+                  href='/adminForgetPassword'
+                  className='text-[10px] font-bold text-slate-500 hover:text-blue-400 uppercase tracking-wider transition-colors flex items-center gap-1.5 group'
+                >
+                  <HelpCircle
+                    size={12}
+                    className='text-slate-600 group-hover:text-blue-400 transition-colors'
+                  />
+                  Forgot Access Key?
+                </Link>
+              </div>
+            </div>
 
             <AnimatePresence mode='wait'>
               {error && <ErrorBox key='error' message={error} />}
@@ -144,10 +160,10 @@ export default function AdminLogin() {
               {loading ? (
                 <Loader2 className='animate-spin' size={18} />
               ) : isSuccess ? (
-                'System Initialized'
+                'Access Granted'
               ) : (
                 <>
-                  Validate Access <ArrowRight size={16} />
+                  Sign In to Console <ArrowRight size={16} />
                 </>
               )}
             </button>
@@ -168,7 +184,7 @@ export default function AdminLogin() {
               size={14}
               className='group-hover:-translate-x-1 transition-transform'
             />
-            Back to DSA Homepage
+            Return to Dashboard
           </Link>
         </motion.div>
       </motion.div>
@@ -184,7 +200,11 @@ function InputField({
   type,
   placeholder,
   onChange,
+  isPassword = false,
 }: InputFieldProps) {
+  const [showPassword, setShowPassword] = useState(false)
+  const inputType = isPassword ? (showPassword ? 'text' : 'password') : type
+
   return (
     <div className='space-y-2'>
       <label className='text-[10px] font-black text-slate-500 uppercase ml-1'>
@@ -196,12 +216,22 @@ function InputField({
           size={16}
         />
         <input
-          type={type}
+          type={inputType}
           required
           placeholder={placeholder}
           className='w-full bg-slate-950 border border-slate-800 rounded-2xl px-11 py-3.5 text-sm text-white outline-none focus:ring-2 focus:ring-blue-500/20 placeholder:text-slate-700 transition-all focus:border-blue-500/50'
           onChange={(e) => onChange(e.target.value)}
         />
+
+        {isPassword && (
+          <button
+            type='button'
+            onClick={() => setShowPassword(!showPassword)}
+            className='absolute right-4 top-1/2 -translate-y-1/2 text-slate-600 hover:text-slate-400 transition-colors'
+          >
+            {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+          </button>
+        )}
       </div>
     </div>
   )

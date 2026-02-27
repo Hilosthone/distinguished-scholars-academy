@@ -384,7 +384,7 @@ import { Badge } from '@/components/ui/badge'
 
 // --- FEATURE IMPORTS ---
 import AdminGuide from './components/AdminGuide'
-import ExamBuilder from './components/ExamBuilder'
+import ExamBuilder from './components/examBuilder/index'
 import MyQuizzes from './components/myQuizzes'
 import Library from './components/Library'
 import Analytics from './components/Analytics'
