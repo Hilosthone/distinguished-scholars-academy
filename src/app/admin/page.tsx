@@ -385,7 +385,7 @@ import { Badge } from '@/components/ui/badge'
 // --- FEATURE IMPORTS ---
 import AdminGuide from './components/AdminGuide'
 import ExamBuilder from './components/examBuilder/index'
-import MyQuizzes from './components/myQuizzes'
+import MyQuizzes from '../admin/components/myQuizzes/page'
 import Library from './components/Library'
 import Analytics from './components/Analytics'
 import StudentManagement from './components/StudentManagement'
@@ -500,7 +500,7 @@ export default function AdminAdmin() {
       case 'dashboard':
         return <AdminGuide onNavigate={(tab: AdminTab) => setActiveTab(tab)} />
       case 'exam-builder':
-        return <ExamBuilder />
+        return <ExamBuilder onBack={() => setActiveTab('my-quizzes')} />
       case 'my-quizzes':
         return <MyQuizzes />
       case 'library':
