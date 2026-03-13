@@ -405,7 +405,7 @@ export default function Quiz360Pro() {
         >
           {/* Direct Link to Login - No Modal */}
           <Link
-            href='/signin'
+            href='/auth/signin'
             className='group px-12 py-5 bg-[#FCB900] text-black font-black rounded-2xl shadow-xl shadow-yellow-100 hover:bg-[#002EFF] hover:text-white transition-all duration-300 flex items-center gap-4 active:scale-95'
           >
             START QUIZ NOW

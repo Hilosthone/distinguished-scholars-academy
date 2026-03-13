@@ -6,8 +6,16 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
-import { Mail, ArrowLeft, Loader2, CheckCircle2, ShieldCheck } from 'lucide-react'
+import {
+  Mail,
+  ArrowLeft,
+  Loader2,
+  CheckCircle2,
+  ShieldCheck,
+  AlertCircle,
+} from 'lucide-react'
 
+import { dsaApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -18,25 +26,34 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+} from '@/components/ui/card'
+import { Alert, AlertDescription } from '@/components/ui/alert'
 import {
   InputOTP,
   InputOTPGroup,
   InputOTPSlot,
-} from '@/components/ui/input-otp' 
+} from '@/components/ui/input-otp'
 
 const emailSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
 
 const otpSchema = z.object({
-  otp: z.string().min(6, 'OTP must be 6 digits'),
+  otp: z.string().length(6, 'OTP must be 6 digits'),
 })
 
 export default function ForgotPassword() {
   const [step, setStep] = useState<'email' | 'otp' | 'success'>('email')
   const [loading, setLoading] = useState(false)
   const [userEmail, setUserEmail] = useState('')
+  const [error, setError] = useState('')
+  const [resetToken, setResetToken] = useState('')
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
@@ -48,25 +65,43 @@ export default function ForgotPassword() {
     defaultValues: { otp: '' },
   })
 
+  // STEP 1: Request OTP via dsaApi.auth.forgotPassword
   async function onEmailSubmit(values: z.infer<typeof emailSchema>) {
     setLoading(true)
-    // Simulate sending OTP
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setUserEmail(values.email)
-    setLoading(false)
-    setStep('otp')
+    setError('')
+    try {
+      await dsaApi.auth.forgotPassword(values.email)
+      setUserEmail(values.email)
+      setStep('otp')
+    } catch (err: any) {
+      setError(err.message || 'Something went wrong')
+    } finally {
+      setLoading(false)
+    }
   }
 
+  // STEP 2: Verify OTP via dsaApi.auth.verifyOtp
   async function onOtpSubmit(values: z.infer<typeof otpSchema>) {
     setLoading(true)
-    // Simulate verifying OTP
-    await new Promise((resolve) => setTimeout(resolve, 1500))
-    setLoading(false)
-    setStep('success')
+    setError('')
+    try {
+      const response = await dsaApi.auth.verifyOtp(userEmail, values.otp)
+
+      // Capturing token from response to pass to the Reset Password page
+      if (response.token) {
+        setResetToken(response.token)
+      }
+
+      setStep('success')
+    } catch (err: any) {
+      setError(err.message || 'Invalid or expired code.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   return (
-    <div className='min-h-screen bg-[#F8FAFF] flex items-center justify-center p-6'>
+    <div className='min-h-screen bg-[#F8FAFF] flex items-center justify-center p-6 font-sans'>
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -76,7 +111,6 @@ export default function ForgotPassword() {
           <div className='h-2 bg-[#002EFF]' />
 
           <AnimatePresence mode='wait'>
-            {/* STEP 1: EMAIL INPUT */}
             {step === 'email' && (
               <motion.div
                 key='email-step'
@@ -119,7 +153,7 @@ export default function ForgotPassword() {
                                 <Input
                                   placeholder='name@example.com'
                                   {...field}
-                                  className='pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
+                                  className='h-14 pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
                                 />
                               </div>
                             </FormControl>
@@ -127,13 +161,26 @@ export default function ForgotPassword() {
                           </FormItem>
                         )}
                       />
+
+                      {error && (
+                        <Alert
+                          variant='destructive'
+                          className='rounded-2xl bg-rose-50 border-none text-rose-600'
+                        >
+                          <AlertCircle className='h-4 w-4' />
+                          <AlertDescription className='text-xs font-bold uppercase'>
+                            {error}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
                       <Button
                         type='submit'
                         disabled={loading}
                         className='w-full py-7 bg-[#002EFF] text-white font-black rounded-2xl hover:bg-blue-700 transition-all shadow-xl shadow-blue-100'
                       >
                         {loading ? (
-                          <Loader2 className='animate-spin' />
+                          <Loader2 className='animate-spin' size={20} />
                         ) : (
                           'SEND OTP'
                         )}
@@ -142,8 +189,8 @@ export default function ForgotPassword() {
                   </Form>
                   <div className='mt-8 text-center'>
                     <Link
-                      href='/signin'
-                      className='inline-flex items-center gap-2 text-gray-400 hover:text-[#002EFF] font-bold text-xs uppercase'
+                      href='/auth/login'
+                      className='inline-flex items-center gap-2 text-gray-400 hover:text-[#002EFF] font-bold text-xs uppercase transition-colors'
                     >
                       <ArrowLeft size={14} /> Back to Login
                     </Link>
@@ -152,7 +199,6 @@ export default function ForgotPassword() {
               </motion.div>
             )}
 
-            {/* STEP 2: OTP VERIFICATION */}
             {step === 'otp' && (
               <motion.div
                 key='otp-step'
@@ -183,34 +229,17 @@ export default function ForgotPassword() {
                         control={otpForm.control}
                         name='otp'
                         render={({ field }) => (
-                          <FormItem>
+                          <FormItem className='flex flex-col items-center'>
                             <FormControl>
                               <InputOTP maxLength={6} {...field}>
-                                <InputOTPGroup className='gap-2'>
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={0}
-                                  />
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={1}
-                                  />
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={2}
-                                  />
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={3}
-                                  />
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={4}
-                                  />
-                                  <InputOTPSlot
-                                    className='rounded-xl border-none bg-gray-100 w-10 h-14 font-black text-lg text-[#002EFF]'
-                                    index={5}
-                                  />
+                                <InputOTPGroup className='gap-2 md:gap-3'>
+                                  {[0, 1, 2, 3, 4, 5].map((index) => (
+                                    <InputOTPSlot
+                                      key={index}
+                                      index={index}
+                                      className='rounded-xl border-none bg-gray-100 w-10 h-14 md:w-12 md:h-16 font-black text-xl text-[#002EFF] shadow-inner'
+                                    />
+                                  ))}
                                 </InputOTPGroup>
                               </InputOTP>
                             </FormControl>
@@ -218,15 +247,28 @@ export default function ForgotPassword() {
                           </FormItem>
                         )}
                       />
+
+                      {error && (
+                        <Alert
+                          variant='destructive'
+                          className='w-full rounded-2xl bg-rose-50 border-none text-rose-600'
+                        >
+                          <AlertCircle className='h-4 w-4' />
+                          <AlertDescription className='text-xs font-bold uppercase'>
+                            {error}
+                          </AlertDescription>
+                        </Alert>
+                      )}
+
                       <Button
                         type='submit'
                         disabled={loading}
                         className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
                       >
                         {loading ? (
-                          <Loader2 className='animate-spin' />
+                          <Loader2 className='animate-spin' size={20} />
                         ) : (
-                          'VERIFY & PROCEED'
+                          'VERIFY CODE'
                         )}
                       </Button>
                     </form>
@@ -234,7 +276,7 @@ export default function ForgotPassword() {
                   <div className='mt-8 text-center'>
                     <button
                       onClick={() => setStep('email')}
-                      className='text-gray-400 hover:text-[#002EFF] font-bold text-xs uppercase'
+                      className='text-gray-400 hover:text-[#002EFF] font-bold text-xs uppercase transition-colors'
                     >
                       Resend Code
                     </button>
@@ -243,7 +285,6 @@ export default function ForgotPassword() {
               </motion.div>
             )}
 
-            {/* STEP 3: SUCCESS */}
             {step === 'success' && (
               <motion.div
                 key='success-step'
@@ -251,18 +292,23 @@ export default function ForgotPassword() {
                 animate={{ opacity: 1, scale: 1 }}
                 className='p-12 text-center'
               >
-                <div className='bg-green-50 text-green-500 w-16 h-16 rounded-3xl flex items-center justify-center mx-auto mb-6'>
-                  <CheckCircle2 size={32} />
+                <div className='bg-green-50 text-green-500 w-20 h-20 rounded-[30px] flex items-center justify-center mx-auto mb-6 shadow-sm'>
+                  <CheckCircle2 size={40} />
                 </div>
-                <h2 className='text-2xl font-black text-zinc-900 uppercase mb-2'>
+                <h2 className='text-2xl font-black text-zinc-900 uppercase mb-3'>
                   Verified!
                 </h2>
-                <p className='text-gray-500 text-sm font-medium mb-8'>
+                <p className='text-gray-500 text-sm font-medium mb-10 px-4'>
                   Your identity has been confirmed. You can now set your new
                   password.
                 </p>
-                <Button asChild className='...'>
-                  <Link href='/reset-password'>CREATE NEW PASSWORD</Link>
+                <Button
+                  asChild
+                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
+                >
+                  <Link href={`/auth/reset-password/${resetToken}`}>
+                    SET NEW PASSWORD
+                  </Link>
                 </Button>
               </motion.div>
             )}
