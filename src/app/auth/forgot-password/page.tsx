@@ -15,7 +15,6 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-import { dsaApi } from '@/lib/api'
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -34,67 +33,43 @@ import {
   CardDescription,
 } from '@/components/ui/card'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from '@/components/ui/input-otp'
 
 const emailSchema = z.object({
   email: z.string().email('Please enter a valid email address'),
 })
 
-const otpSchema = z.object({
-  otp: z.string().length(6, 'OTP must be 6 digits'),
-})
-
 export default function ForgotPassword() {
-  const [step, setStep] = useState<'email' | 'otp' | 'success'>('email')
+  const [step, setStep] = useState<'email' | 'success'>('email')
   const [loading, setLoading] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [error, setError] = useState('')
-  const [resetToken, setResetToken] = useState('')
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: '' },
   })
 
-  const otpForm = useForm<z.infer<typeof otpSchema>>({
-    resolver: zodResolver(otpSchema),
-    defaultValues: { otp: '' },
-  })
-
-  // STEP 1: Request OTP via dsaApi.auth.forgotPassword
+  // STEP 1: Request Reset Link via /api/auth/forgot-password
   async function onEmailSubmit(values: z.infer<typeof emailSchema>) {
     setLoading(true)
     setError('')
     try {
-      await dsaApi.auth.forgotPassword(values.email)
-      setUserEmail(values.email)
-      setStep('otp')
-    } catch (err: any) {
-      setError(err.message || 'Something went wrong')
-    } finally {
-      setLoading(false)
-    }
-  }
+      const response = await fetch('https://api.distinguishedscholarsacademy.com/api/auth/forgot-password', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: values.email }),
+      })
 
-  // STEP 2: Verify OTP via dsaApi.auth.verifyOtp
-  async function onOtpSubmit(values: z.infer<typeof otpSchema>) {
-    setLoading(true)
-    setError('')
-    try {
-      const response = await dsaApi.auth.verifyOtp(userEmail, values.otp)
+      const data = await response.json()
 
-      // Capturing token from response to pass to the Reset Password page
-      if (response.token) {
-        setResetToken(response.token)
+      if (!response.ok) {
+        throw new Error(data.message || 'We could not find an account with that email.')
       }
 
+      setUserEmail(values.email)
       setStep('success')
     } catch (err: any) {
-      setError(err.message || 'Invalid or expired code.')
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -126,7 +101,8 @@ export default function ForgotPassword() {
                     Reset Password
                   </CardTitle>
                   <CardDescription className='font-medium text-xs text-gray-500'>
-                    Enter your email to receive a 6-digit OTP code.
+                    Enter your email. If an account exists, we'll send a reset
+                    link.
                   </CardDescription>
                 </CardHeader>
 
@@ -182,7 +158,7 @@ export default function ForgotPassword() {
                         {loading ? (
                           <Loader2 className='animate-spin' size={20} />
                         ) : (
-                          'SEND OTP'
+                          'SEND RESET LINK'
                         )}
                       </Button>
                     </form>
@@ -199,92 +175,6 @@ export default function ForgotPassword() {
               </motion.div>
             )}
 
-            {step === 'otp' && (
-              <motion.div
-                key='otp-step'
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                exit={{ opacity: 0, x: 20 }}
-              >
-                <CardHeader className='text-center pt-10 pb-2'>
-                  <div className='bg-blue-50 text-[#002EFF] w-12 h-12 rounded-2xl flex items-center justify-center mx-auto mb-4'>
-                    <ShieldCheck size={24} />
-                  </div>
-                  <CardTitle className='text-2xl font-black text-zinc-900 tracking-tight uppercase'>
-                    Verify OTP
-                  </CardTitle>
-                  <CardDescription className='font-medium text-xs text-gray-500'>
-                    We sent a code to{' '}
-                    <span className='text-zinc-900 font-bold'>{userEmail}</span>
-                  </CardDescription>
-                </CardHeader>
-
-                <CardContent className='p-8'>
-                  <Form {...otpForm}>
-                    <form
-                      onSubmit={otpForm.handleSubmit(onOtpSubmit)}
-                      className='space-y-8 flex flex-col items-center'
-                    >
-                      <FormField
-                        control={otpForm.control}
-                        name='otp'
-                        render={({ field }) => (
-                          <FormItem className='flex flex-col items-center'>
-                            <FormControl>
-                              <InputOTP maxLength={6} {...field}>
-                                <InputOTPGroup className='gap-2 md:gap-3'>
-                                  {[0, 1, 2, 3, 4, 5].map((index) => (
-                                    <InputOTPSlot
-                                      key={index}
-                                      index={index}
-                                      className='rounded-xl border-none bg-gray-100 w-10 h-14 md:w-12 md:h-16 font-black text-xl text-[#002EFF] shadow-inner'
-                                    />
-                                  ))}
-                                </InputOTPGroup>
-                              </InputOTP>
-                            </FormControl>
-                            <FormMessage className='text-[10px] text-center' />
-                          </FormItem>
-                        )}
-                      />
-
-                      {error && (
-                        <Alert
-                          variant='destructive'
-                          className='w-full rounded-2xl bg-rose-50 border-none text-rose-600'
-                        >
-                          <AlertCircle className='h-4 w-4' />
-                          <AlertDescription className='text-xs font-bold uppercase'>
-                            {error}
-                          </AlertDescription>
-                        </Alert>
-                      )}
-
-                      <Button
-                        type='submit'
-                        disabled={loading}
-                        className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
-                      >
-                        {loading ? (
-                          <Loader2 className='animate-spin' size={20} />
-                        ) : (
-                          'VERIFY CODE'
-                        )}
-                      </Button>
-                    </form>
-                  </Form>
-                  <div className='mt-8 text-center'>
-                    <button
-                      onClick={() => setStep('email')}
-                      className='text-gray-400 hover:text-[#002EFF] font-bold text-xs uppercase transition-colors'
-                    >
-                      Resend Code
-                    </button>
-                  </div>
-                </CardContent>
-              </motion.div>
-            )}
-
             {step === 'success' && (
               <motion.div
                 key='success-step'
@@ -296,19 +186,20 @@ export default function ForgotPassword() {
                   <CheckCircle2 size={40} />
                 </div>
                 <h2 className='text-2xl font-black text-zinc-900 uppercase mb-3'>
-                  Verified!
+                  Email Sent!
                 </h2>
                 <p className='text-gray-500 text-sm font-medium mb-10 px-4'>
-                  Your identity has been confirmed. You can now set your new
-                  password.
+                  We've sent a password reset link to <br />
+                  <span className='text-[#002EFF] font-bold'>
+                    {userEmail}
+                  </span>. <br />
+                  Please check your inbox and spam folder.
                 </p>
                 <Button
                   asChild
                   className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
                 >
-                  <Link href={`/auth/reset-password/${resetToken}`}>
-                    SET NEW PASSWORD
-                  </Link>
+                  <Link href='/auth/login'>RETURN TO LOGIN</Link>
                 </Button>
               </motion.div>
             )}

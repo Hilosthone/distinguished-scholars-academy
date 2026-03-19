@@ -15,9 +15,6 @@ import {
   AlertCircle,
 } from 'lucide-react'
 
-// API Utility
-import { dsaApi } from '@/lib/api'
-
 import { Button } from '@/components/ui/button'
 import {
   Form,
@@ -57,7 +54,6 @@ export default function SetNewPassword() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-  // params.token corresponds to the folder [token] in your file structure
   const params = useParams()
   const token = params?.token as string
 
@@ -67,7 +63,6 @@ export default function SetNewPassword() {
     mode: 'onChange',
   })
 
-  // Live validation helpers for UI feedback
   const passwordValue = form.watch('password') || ''
   const hasMinLength = passwordValue.length >= 8
   const hasUppercase = /[A-Z]/.test(passwordValue)
@@ -83,22 +78,38 @@ export default function SetNewPassword() {
     setError('')
 
     try {
-      // Matches: resetPassword: (payload: { newPassword: string; token: string })
-      await dsaApi.auth.resetPassword({
-        newPassword: values.password,
-        token: token,
-      })
+      // --- API CALL TO RESET PASSWORD ---
+      // Matches: POST /api/auth/reset-password/{token}
+      const response = await fetch(
+        `https://api.distinguishedscholarsacademy.com/api/auth/reset-password/${token}`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+          },
+          body: JSON.stringify({
+            newPassword: values.password, // Matches "newPassword" key in your schema
+          }),
+        },
+      )
 
-      // Brief delay for UX feel
-      await new Promise((resolve) => setTimeout(resolve, 1000))
+      const data = await response.json()
 
-      // Redirecting to login with a success flag
+      if (!response.ok) {
+        throw new Error(
+          data.message ||
+            'Failed to reset password. The link may have expired.',
+        )
+      }
+
+      // Briefly wait for UX transition
+      await new Promise((resolve) => setTimeout(resolve, 800))
+
+      // Redirect to login with success flag for the alert
       router.push('/auth/login?reset=success')
     } catch (err: any) {
-      // handleResponse in api.ts throws standard Errors
-      setError(
-        err.message || 'Failed to update password. Link might be expired.',
-      )
+      setError(err.message)
     } finally {
       setLoading(false)
     }
@@ -132,7 +143,6 @@ export default function SetNewPassword() {
                 onSubmit={form.handleSubmit(onSubmit)}
                 className='space-y-5'
               >
-                {/* New Password */}
                 <FormField
                   control={form.control}
                   name='password'
@@ -151,12 +161,12 @@ export default function SetNewPassword() {
                             type={showPassword ? 'text' : 'password'}
                             placeholder='••••••••'
                             {...field}
-                            className='h-14 pl-12 pr-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none'
+                            className='h-14 pl-12 pr-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
                           />
                           <button
                             type='button'
                             onClick={() => setShowPassword(!showPassword)}
-                            className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#002EFF] transition-colors'
+                            className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#002EFF]'
                           >
                             {showPassword ? (
                               <EyeOff size={18} />
@@ -171,7 +181,6 @@ export default function SetNewPassword() {
                   )}
                 />
 
-                {/* Confirm Password */}
                 <FormField
                   control={form.control}
                   name='confirmPassword'
@@ -190,7 +199,7 @@ export default function SetNewPassword() {
                             type='password'
                             placeholder='••••••••'
                             {...field}
-                            className='h-14 pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none'
+                            className='h-14 pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
                           />
                         </div>
                       </FormControl>
@@ -199,7 +208,6 @@ export default function SetNewPassword() {
                   )}
                 />
 
-                {/* Requirement Checklist */}
                 <div className='bg-blue-50/50 p-4 rounded-2xl space-y-2 border border-blue-50'>
                   <p className='text-[9px] font-black uppercase text-blue-400 tracking-wider'>
                     Security Requirements
@@ -207,31 +215,25 @@ export default function SetNewPassword() {
                   <ul className='text-[11px] font-bold text-zinc-500 space-y-1.5'>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span
-                        className={`transition-colors ${hasMinLength ? 'text-zinc-900' : ''}`}
-                      >
+                      <span className={hasMinLength ? 'text-zinc-900' : ''}>
                         At least 8 characters
                       </span>
                     </li>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasUppercase ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full ${hasUppercase ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span
-                        className={`transition-colors ${hasUppercase ? 'text-zinc-900' : ''}`}
-                      >
+                      <span className={hasUppercase ? 'text-zinc-900' : ''}>
                         One uppercase letter
                       </span>
                     </li>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasNumber ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full ${hasNumber ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span
-                        className={`transition-colors ${hasNumber ? 'text-zinc-900' : ''}`}
-                      >
+                      <span className={hasNumber ? 'text-zinc-900' : ''}>
                         One number
                       </span>
                     </li>
@@ -253,7 +255,7 @@ export default function SetNewPassword() {
                 <Button
                   type='submit'
                   disabled={loading}
-                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-100 disabled:opacity-70 active:scale-[0.98]'
+                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all flex items-center justify-center gap-2 shadow-xl'
                 >
                   {loading ? (
                     <Loader2 className='animate-spin' size={20} />
