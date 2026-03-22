@@ -11,7 +11,6 @@ import {
   ArrowLeft,
   Loader2,
   CheckCircle2,
-  ShieldCheck,
   AlertCircle,
 } from 'lucide-react'
 
@@ -43,35 +42,68 @@ export default function ForgotPassword() {
   const [loading, setLoading] = useState(false)
   const [userEmail, setUserEmail] = useState('')
   const [error, setError] = useState('')
+  const [resendStatus, setResendStatus] = useState<'idle' | 'sending' | 'sent'>(
+    'idle',
+  )
 
   const emailForm = useForm<z.infer<typeof emailSchema>>({
     resolver: zodResolver(emailSchema),
     defaultValues: { email: '' },
   })
 
-  // STEP 1: Request Reset Link via /api/auth/forgot-password
+  // Core function to call the API
+  const sendResetLink = async (email: string) => {
+    const response = await fetch(
+      'https://api.distinguishedscholarsacademy.com/api/auth/forgot-password',
+      {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email }),
+      },
+    )
+
+    // Check if the response is actually JSON before parsing
+    const contentType = response.headers.get('content-type')
+    if (contentType && contentType.indexOf('application/json') !== -1) {
+      const data = await response.json()
+      if (!response.ok) throw new Error(data.message || 'Something went wrong')
+      return data
+    } else {
+      // If server returns HTML (like a 404 or 500), handle it gracefully
+      if (!response.ok)
+        throw new Error(
+          `Server Error: ${response.status}. Please try again later.`,
+        )
+      return {}
+    }
+  }
+
+  // STEP 1: Initial Submission
   async function onEmailSubmit(values: z.infer<typeof emailSchema>) {
     setLoading(true)
     setError('')
     try {
-      const response = await fetch('https://api.distinguishedscholarsacademy.com/api/auth/forgot-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: values.email }),
-      })
-
-      const data = await response.json()
-
-      if (!response.ok) {
-        throw new Error(data.message || 'We could not find an account with that email.')
-      }
-
+      await sendResetLink(values.email)
       setUserEmail(values.email)
       setStep('success')
     } catch (err: any) {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  // Helper for "Resend" button on the success screen
+  async function handleResend() {
+    setResendStatus('sending')
+    setError('')
+    try {
+      await sendResetLink(userEmail)
+      setResendStatus('sent')
+      setTimeout(() => setResendStatus('idle'), 3000) // Reset button text after 3s
+    } catch (err: any) {
+      setError(err.message)
+      setResendStatus('idle')
     }
   }
 
@@ -101,8 +133,7 @@ export default function ForgotPassword() {
                     Reset Password
                   </CardTitle>
                   <CardDescription className='font-medium text-xs text-gray-500'>
-                    Enter your email. If an account exists, we'll send a reset
-                    link.
+                    Enter your email to receive a password reset link.
                   </CardDescription>
                 </CardHeader>
 
@@ -188,19 +219,37 @@ export default function ForgotPassword() {
                 <h2 className='text-2xl font-black text-zinc-900 uppercase mb-3'>
                   Email Sent!
                 </h2>
-                <p className='text-gray-500 text-sm font-medium mb-10 px-4'>
-                  We've sent a password reset link to <br />
-                  <span className='text-[#002EFF] font-bold'>
-                    {userEmail}
-                  </span>. <br />
-                  Please check your inbox and spam folder.
+                <p className='text-gray-500 text-sm font-medium mb-6 px-4'>
+                  We've sent a link to{' '}
+                  <span className='text-[#002EFF] font-bold'>{userEmail}</span>.
                 </p>
-                <Button
-                  asChild
-                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
-                >
-                  <Link href='/auth/login'>RETURN TO LOGIN</Link>
-                </Button>
+
+                <div className='space-y-4 mb-10'>
+                  <Button
+                    asChild
+                    className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all shadow-xl'
+                  >
+                    <Link href='/auth/login'>RETURN TO LOGIN</Link>
+                  </Button>
+
+                  <button
+                    onClick={handleResend}
+                    disabled={resendStatus !== 'idle'}
+                    className='text-[10px] font-black uppercase text-gray-400 hover:text-[#002EFF] transition-colors disabled:opacity-50'
+                  >
+                    {resendStatus === 'sending'
+                      ? 'Sending...'
+                      : resendStatus === 'sent'
+                        ? 'Link Sent Again!'
+                        : 'Resend Link'}
+                  </button>
+                </div>
+
+                {error && (
+                  <p className='text-rose-500 text-[10px] font-bold uppercase'>
+                    {error}
+                  </p>
+                )}
               </motion.div>
             )}
           </AnimatePresence>

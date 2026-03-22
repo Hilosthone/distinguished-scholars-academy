@@ -78,8 +78,6 @@ export default function SetNewPassword() {
     setError('')
 
     try {
-      // --- API CALL TO RESET PASSWORD ---
-      // Matches: POST /api/auth/reset-password/{token}
       const response = await fetch(
         `https://api.distinguishedscholarsacademy.com/api/auth/reset-password/${token}`,
         {
@@ -89,12 +87,23 @@ export default function SetNewPassword() {
             Accept: 'application/json',
           },
           body: JSON.stringify({
-            newPassword: values.password, // Matches "newPassword" key in your schema
+            newPassword: values.password,
           }),
         },
       )
 
-      const data = await response.json()
+      // --- ROBUST JSON CHECK ---
+      const contentType = response.headers.get('content-type')
+      let data
+
+      if (contentType && contentType.includes('application/json')) {
+        data = await response.json()
+      } else {
+        // Handle non-JSON responses (like HTML 404/500 pages)
+        throw new Error(
+          `Server returned an unexpected error (${response.status}). Please try again later.`,
+        )
+      }
 
       if (!response.ok) {
         throw new Error(
@@ -103,13 +112,10 @@ export default function SetNewPassword() {
         )
       }
 
-      // Briefly wait for UX transition
       await new Promise((resolve) => setTimeout(resolve, 800))
-
-      // Redirect to login with success flag for the alert
       router.push('/auth/login?reset=success')
     } catch (err: any) {
-      setError(err.message)
+      setError(err.message || 'An unexpected error occurred.')
     } finally {
       setLoading(false)
     }
@@ -161,12 +167,12 @@ export default function SetNewPassword() {
                             type={showPassword ? 'text' : 'password'}
                             placeholder='••••••••'
                             {...field}
-                            className='h-14 pl-12 pr-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
+                            className='h-14 pl-12 pr-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none'
                           />
                           <button
                             type='button'
                             onClick={() => setShowPassword(!showPassword)}
-                            className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#002EFF]'
+                            className='absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-[#002EFF] transition-colors'
                           >
                             {showPassword ? (
                               <EyeOff size={18} />
@@ -199,7 +205,7 @@ export default function SetNewPassword() {
                             type='password'
                             placeholder='••••••••'
                             {...field}
-                            className='h-14 pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800'
+                            className='h-14 pl-12 py-6 rounded-2xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-[#002EFF] font-bold text-gray-800 transition-all outline-none'
                           />
                         </div>
                       </FormControl>
@@ -208,6 +214,7 @@ export default function SetNewPassword() {
                   )}
                 />
 
+                {/* Requirement Checklist */}
                 <div className='bg-blue-50/50 p-4 rounded-2xl space-y-2 border border-blue-50'>
                   <p className='text-[9px] font-black uppercase text-blue-400 tracking-wider'>
                     Security Requirements
@@ -215,25 +222,31 @@ export default function SetNewPassword() {
                   <ul className='text-[11px] font-bold text-zinc-500 space-y-1.5'>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${hasMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasMinLength ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span className={hasMinLength ? 'text-zinc-900' : ''}>
+                      <span
+                        className={`transition-colors ${hasMinLength ? 'text-zinc-900' : ''}`}
+                      >
                         At least 8 characters
                       </span>
                     </li>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${hasUppercase ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasUppercase ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span className={hasUppercase ? 'text-zinc-900' : ''}>
+                      <span
+                        className={`transition-colors ${hasUppercase ? 'text-zinc-900' : ''}`}
+                      >
                         One uppercase letter
                       </span>
                     </li>
                     <li className='flex items-center gap-2'>
                       <div
-                        className={`w-1.5 h-1.5 rounded-full ${hasNumber ? 'bg-green-500' : 'bg-gray-300'}`}
+                        className={`w-1.5 h-1.5 rounded-full transition-colors duration-300 ${hasNumber ? 'bg-green-500' : 'bg-gray-300'}`}
                       />
-                      <span className={hasNumber ? 'text-zinc-900' : ''}>
+                      <span
+                        className={`transition-colors ${hasNumber ? 'text-zinc-900' : ''}`}
+                      >
                         One number
                       </span>
                     </li>
@@ -255,7 +268,7 @@ export default function SetNewPassword() {
                 <Button
                   type='submit'
                   disabled={loading}
-                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all flex items-center justify-center gap-2 shadow-xl'
+                  className='w-full py-7 bg-black text-white font-black rounded-2xl hover:bg-[#002EFF] transition-all flex items-center justify-center gap-2 shadow-xl shadow-blue-100 disabled:opacity-70 active:scale-[0.98]'
                 >
                   {loading ? (
                     <Loader2 className='animate-spin' size={20} />
