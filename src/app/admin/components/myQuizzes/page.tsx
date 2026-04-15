@@ -621,14 +621,11 @@ import {
   CheckCircle2,
   Share2,
   BarChart3,
-  User,
   Trash2,
   Search,
   Plus,
-  Clock,
   FileQuestion,
   Trophy,
-  EyeOff,
   Check,
   Save,
   X,
@@ -641,9 +638,10 @@ import {
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { toast, Toaster } from 'react-hot-toast'
 
+// Base URL for the DSA API
 const API_BASE_URL = 'https://api.distinguishedscholarsacademy.com/api'
 
-// --- UPDATED TYPES BASED ON DSA API ---
+// --- DSA API ALIGNED TYPES ---
 interface Question {
   _id?: string
   text: string
@@ -668,9 +666,8 @@ interface Quiz {
   accessCode?: string
   subjects: Subject[]
   status: 'active' | 'inactive'
-  link?: string
+  link: string // The unique slug for students
   createdAt: string
-  attempts?: any[] 
 }
 
 export default function MyQuizzes() {
@@ -683,6 +680,7 @@ export default function MyQuizzes() {
   const [copiedId, setCopiedId] = useState<string | null>(null)
   const [isEditingMetadata, setIsEditingMetadata] = useState(false)
   const [editBuffer, setEditBuffer] = useState<Partial<Quiz>>({})
+  const [isUpdating, setIsUpdating] = useState(false)
 
   useEffect(() => {
     fetchQuizzes()
@@ -692,60 +690,56 @@ export default function MyQuizzes() {
     setLoading(true)
     try {
       const token = localStorage.getItem('admin_token')
+      // GET /api/quizzes (Admin Only)
       const { data } = await axios.get(`${API_BASE_URL}/quizzes`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      setQuizzes(data.data || data) // Adjust based on your API response wrapper
+      // The API returns the array directly or inside a data property
+      setQuizzes(Array.isArray(data) ? data : data.data || [])
     } catch (error) {
-      toast.error('Failed to load quizzes from the vault')
+      toast.error('Failed to sync with DSA Vault')
     } finally {
       setLoading(false)
     }
   }
 
-  const handleCreateNew = () => {
-    router.push('/admin/builder')
-  }
-
   const handleUpdateQuiz = async () => {
     if (!selectedQuiz) return
-    const loadingToast = toast.loading('Syncing changes to DSA servers...')
+    setIsUpdating(true)
+    const loadingToast = toast.loading('Updating DSA database...')
 
     try {
       const token = localStorage.getItem('admin_token')
+      // PUT /api/quizzes/{id}
       await axios.put(
         `${API_BASE_URL}/quizzes/${selectedQuiz._id}`,
         editBuffer,
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       )
 
-      toast.success('Quiz updated successfully', { id: loadingToast })
-      fetchQuizzes()
-      setSelectedQuiz({ ...selectedQuiz, ...editBuffer } as Quiz)
+      toast.success('Module updated successfully', { id: loadingToast })
       setIsEditingMetadata(false)
+      fetchQuizzes() // Refresh list
+      setSelectedQuiz({ ...selectedQuiz, ...editBuffer } as Quiz)
     } catch (error) {
-      toast.error('Update failed. Please check your connection.', {
+      toast.error('Update failed. Ensure all fields are valid.', {
         id: loadingToast,
       })
+    } finally {
+      setIsUpdating(false)
     }
   }
 
   const handleDelete = async (id: string) => {
-    if (
-      !confirm(
-        'This action will permanently remove this assessment from the DSA database. Proceed?',
-      )
-    )
-      return
+    if (!confirm('Permanently delete this assessment from DSA?')) return
 
     try {
       const token = localStorage.getItem('admin_token')
+      // DELETE /api/quizzes/{id}
       await axios.delete(`${API_BASE_URL}/quizzes/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
-      toast.success('Assessment purged successfully')
+      toast.success('Assessment purged')
       setQuizzes(quizzes.filter((q) => q._id !== id))
       if (selectedQuiz?._id === id) setSelectedQuiz(null)
     } catch (error) {
@@ -756,6 +750,7 @@ export default function MyQuizzes() {
   const handleToggleStatus = async (id: string) => {
     try {
       const token = localStorage.getItem('admin_token')
+      // PATCH /api/quizzes/{id}/status
       await axios.patch(
         `${API_BASE_URL}/quizzes/${id}/status`,
         {},
@@ -763,32 +758,33 @@ export default function MyQuizzes() {
           headers: { Authorization: `Bearer ${token}` },
         },
       )
+      toast.success('Visibility status toggled')
       fetchQuizzes()
-      toast.success('Visibility status updated')
     } catch (error) {
-      toast.error('Failed to toggle status')
+      toast.error('Status change failed')
     }
   }
 
-  const handleShare = (link?: string, id?: string) => {
-    if (!link || !id) return
+  const handleShare = (link: string, id: string) => {
+    // Uses the 'link' slug from your API
     const fullUrl = `https://distinguishedscholarsacademy.com/quiz/${link}`
     navigator.clipboard.writeText(fullUrl)
     setCopiedId(id)
-    toast.success('Link copied to clipboard')
+    toast.success('Student link copied!')
     setTimeout(() => setCopiedId(null), 2000)
   }
 
   const filteredQuizzes = quizzes.filter(
     (q) =>
-      (q.title || '').toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (q._id || '').toLowerCase().includes(searchQuery.toLowerCase()),
+      q.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      q.link.toLowerCase().includes(searchQuery.toLowerCase()),
   )
 
   return (
-    <div className='max-w-[1600px] mx-auto p-4 md:p-10 font-sans text-slate-900 bg-[#F8FAFC] min-h-screen'>
-      <Toaster position='top-right' />
+    <div className='max-w-7xl mx-auto p-4 md:p-10 font-sans text-slate-900 bg-[#F8FAFC] min-h-screen'>
+      <Toaster position='top-center' reverseOrder={false} />
 
+      {/* HEADER */}
       <header className='flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6'>
         <motion.div
           initial={{ x: -20, opacity: 0 }}
@@ -804,15 +800,15 @@ export default function MyQuizzes() {
           </div>
           <p className='text-slate-400 text-[10px] font-bold uppercase tracking-[0.3em] ml-12'>
             DSA Global Administration{' '}
-            <span className='text-blue-200 mx-2'>|</span> Management Console
+            <span className='text-blue-200 mx-2'>|</span> Management
           </p>
         </motion.div>
 
         <motion.button
           whileHover={{ scale: 1.02 }}
           whileTap={{ scale: 0.98 }}
-          onClick={handleCreateNew}
-          className='flex items-center gap-3 bg-[#002EFF] hover:bg-blue-700 text-white px-8 py-4 rounded-[22px] font-black uppercase text-[11px] tracking-[0.1em] transition-all shadow-xl shadow-blue-100'
+          onClick={() => router.push('/admin/builder')}
+          className='flex items-center gap-3 bg-[#002EFF] text-white px-8 py-4 rounded-[22px] font-black uppercase text-[11px] tracking-widest shadow-xl shadow-blue-100'
         >
           <Plus size={20} strokeWidth={3} /> Create New Quiz
         </motion.button>
@@ -822,25 +818,25 @@ export default function MyQuizzes() {
         <div className='flex flex-col items-center justify-center py-40 gap-4'>
           <Loader2 className='animate-spin text-[#002EFF]' size={48} />
           <p className='text-slate-400 font-black uppercase text-[10px] tracking-widest'>
-            Accessing DSA Secure Database...
+            Syncing with DSA Servers...
           </p>
         </div>
       ) : (
         <LayoutGroup>
           <div className='flex flex-col lg:flex-row gap-8 items-start'>
-            {/* LEFT COLUMN: LIST */}
+            {/* LIST SECTION */}
             <motion.div
               layout
-              className={`w-full transition-all duration-500 ease-in-out ${selectedQuiz ? 'lg:w-[55%]' : 'lg:w-full'}`}
+              className={`w-full ${selectedQuiz ? 'lg:w-[55%]' : 'lg:w-full'}`}
             >
-              <div className='mb-8 relative group'>
+              <div className='mb-8 relative'>
                 <Search
-                  className='absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-[#002EFF] transition-colors'
+                  className='absolute left-5 top-1/2 -translate-y-1/2 text-slate-400'
                   size={20}
                 />
                 <input
                   type='text'
-                  placeholder='Search assessment vault...'
+                  placeholder='Search by title or access link...'
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className='w-full pl-14 pr-6 py-5 bg-white border-none rounded-[28px] text-sm font-bold shadow-sm focus:shadow-2xl focus:ring-4 focus:ring-blue-50 outline-none transition-all'
@@ -848,56 +844,49 @@ export default function MyQuizzes() {
               </div>
 
               {filteredQuizzes.length === 0 ? (
-                <EmptyState onAction={handleCreateNew} />
+                <EmptyState onAction={() => router.push('/admin/builder')} />
               ) : (
                 <div
-                  className={`grid gap-6 ${selectedQuiz ? 'grid-cols-1 md:grid-cols-2' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}
+                  className={`grid gap-6 ${selectedQuiz ? 'grid-cols-1' : 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3'}`}
                 >
-                  <AnimatePresence mode='popLayout'>
-                    {filteredQuizzes.map((quiz) => (
-                      <QuizCard
-                        key={quiz._id}
-                        quiz={quiz}
-                        isSelected={selectedQuiz?._id === quiz._id}
-                        onSelect={() => {
-                          setSelectedQuiz(quiz)
-                          setEditBuffer(quiz)
-                          setIsEditingMetadata(false)
-                        }}
-                        onDelete={() => handleDelete(quiz._id)}
-                        onShare={() => handleShare(quiz.link, quiz._id)}
-                        onToggle={() => handleToggleStatus(quiz._id)}
-                        copied={copiedId === quiz._id}
-                      />
-                    ))}
-                  </AnimatePresence>
+                  {filteredQuizzes.map((quiz) => (
+                    <QuizCard
+                      key={quiz._id}
+                      quiz={quiz}
+                      isSelected={selectedQuiz?._id === quiz._id}
+                      onSelect={() => {
+                        setSelectedQuiz(quiz)
+                        setEditBuffer(quiz)
+                        setIsEditingMetadata(false)
+                      }}
+                      onDelete={() => handleDelete(quiz._id)}
+                      onShare={() => handleShare(quiz.link, quiz._id)}
+                      onToggle={() => handleToggleStatus(quiz._id)}
+                      copied={copiedId === quiz._id}
+                    />
+                  ))}
                 </div>
               )}
             </motion.div>
 
-            {/* RIGHT COLUMN: LIVE PREVIEW */}
+            {/* PREVIEW PANEL */}
             <AnimatePresence>
               {selectedQuiz && (
                 <motion.aside
-                  initial={{ opacity: 0, x: 40, scale: 0.95 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: 40, scale: 0.95 }}
+                  initial={{ opacity: 0, x: 20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 20 }}
                   className='w-full lg:w-[45%] lg:sticky lg:top-8'
                 >
-                  <div className='bg-white rounded-[40px] shadow-2xl shadow-blue-100/50 border border-white overflow-hidden flex flex-col max-h-[85vh]'>
-                    <div className='p-8 bg-slate-900 text-white flex justify-between items-center shrink-0'>
+                  <div className='bg-white rounded-[40px] shadow-2xl border border-white overflow-hidden flex flex-col max-h-[85vh]'>
+                    <div className='p-8 bg-slate-900 text-white flex justify-between items-center'>
                       <div className='flex items-center gap-3'>
                         <div className='bg-blue-500 p-2 rounded-lg'>
                           <Zap size={18} />
                         </div>
-                        <div>
-                          <h3 className='font-black uppercase text-xs tracking-widest'>
-                            Live Preview
-                          </h3>
-                          <p className='text-[10px] text-blue-300 font-bold uppercase'>
-                            {selectedQuiz._id}
-                          </p>
-                        </div>
+                        <h3 className='font-black uppercase text-xs tracking-widest'>
+                          Module Details
+                        </h3>
                       </div>
                       <button
                         onClick={() => setSelectedQuiz(null)}
@@ -907,7 +896,8 @@ export default function MyQuizzes() {
                       </button>
                     </div>
 
-                    <div className='p-8 space-y-8 overflow-y-auto custom-scrollbar'>
+                    <div className='p-8 space-y-8 overflow-y-auto'>
+                      {/* Configuration Section */}
                       <section className='space-y-4'>
                         <div className='flex justify-between items-center'>
                           <h4 className='text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2'>
@@ -919,23 +909,21 @@ export default function MyQuizzes() {
                                 onClick={() => setIsEditingMetadata(true)}
                                 className='text-[#002EFF] text-[10px] font-black uppercase'
                               >
-                                Edit Data
+                                Edit
                               </button>
                             ) : (
-                              <>
-                                <button
-                                  onClick={handleUpdateQuiz}
-                                  className='text-emerald-500 text-[10px] font-black uppercase flex items-center gap-1'
-                                >
-                                  <Save size={12} /> Save
-                                </button>
-                                <button
-                                  onClick={() => setIsEditingMetadata(false)}
-                                  className='text-slate-400 text-[10px] font-black uppercase'
-                                >
-                                  Cancel
-                                </button>
-                              </>
+                              <button
+                                onClick={handleUpdateQuiz}
+                                disabled={isUpdating}
+                                className='text-emerald-500 text-[10px] font-black uppercase flex items-center gap-1'
+                              >
+                                {isUpdating ? (
+                                  <Loader2 className='animate-spin' size={12} />
+                                ) : (
+                                  <Save size={12} />
+                                )}{' '}
+                                Save
+                              </button>
                             )}
                           </div>
                         </div>
@@ -943,12 +931,12 @@ export default function MyQuizzes() {
                         <div className='bg-slate-50 p-6 rounded-[24px] space-y-4 border border-slate-100'>
                           <div className='space-y-1'>
                             <label className='text-[8px] font-black text-slate-400 uppercase'>
-                              Quiz Title
+                              Title
                             </label>
                             {isEditingMetadata ? (
                               <input
-                                className='w-full bg-white border-2 border-blue-100 rounded-xl p-3 text-sm font-bold focus:border-[#002EFF] outline-none'
-                                value={editBuffer.title || ''}
+                                className='w-full bg-white border-2 border-blue-100 rounded-xl p-3 text-sm font-bold outline-none'
+                                value={editBuffer.title}
                                 onChange={(e) =>
                                   setEditBuffer({
                                     ...editBuffer,
@@ -957,92 +945,65 @@ export default function MyQuizzes() {
                                 }
                               />
                             ) : (
-                              <p className='text-lg font-black text-slate-800 leading-tight'>
+                              <p className='text-lg font-black text-slate-800'>
                                 {selectedQuiz.title}
                               </p>
                             )}
                           </div>
-                          <div className='space-y-1'>
-                            <label className='text-[8px] font-black text-slate-400 uppercase'>
-                              Description
-                            </label>
-                            {isEditingMetadata ? (
-                              <textarea
-                                className='w-full bg-white border-2 border-blue-100 rounded-xl p-3 text-sm font-bold h-24 focus:border-[#002EFF] outline-none'
-                                value={editBuffer.description || ''}
-                                onChange={(e) =>
-                                  setEditBuffer({
-                                    ...editBuffer,
-                                    description: e.target.value,
-                                  })
-                                }
-                              />
-                            ) : (
-                              <p className='text-xs font-medium text-slate-500 leading-relaxed'>
-                                {selectedQuiz.description}
-                              </p>
-                            )}
-                          </div>
+
                           <div className='flex gap-4'>
                             <div className='flex-1'>
                               <label className='text-[8px] font-black text-slate-400 uppercase'>
-                                Access Code
+                                Slug (Access Link)
                               </label>
-                              <p className='text-xs font-bold text-[#002EFF]'>
-                                {selectedQuiz.accessCode || 'OPEN ACCESS'}
+                              <p className='text-xs font-bold text-blue-600'>
+                                {selectedQuiz.link}
                               </p>
                             </div>
                             <div className='flex-1'>
                               <label className='text-[8px] font-black text-slate-400 uppercase'>
-                                Price
+                                Status
                               </label>
-                              <p className='text-xs font-bold text-emerald-600'>
-                                {selectedQuiz.isPaid
-                                  ? `₦${selectedQuiz.amount}`
-                                  : 'FREE'}
+                              <p
+                                className={`text-xs font-bold uppercase ${selectedQuiz.status === 'active' ? 'text-emerald-600' : 'text-slate-400'}`}
+                              >
+                                {selectedQuiz.status}
                               </p>
                             </div>
                           </div>
                         </div>
                       </section>
 
-                      {/* QUESTION STACK PREVIEW */}
+                      {/* Content Section */}
                       <section className='space-y-4'>
                         <h4 className='text-[10px] font-black text-slate-400 uppercase tracking-widest flex items-center gap-2'>
-                          <FileQuestion size={14} /> Subject Breakdown (
-                          {selectedQuiz.subjects.length})
+                          <FileQuestion size={14} /> Subject Inventory
                         </h4>
-                        <div className='space-y-6'>
-                          {selectedQuiz.subjects.map((subject, sIdx) => (
-                            <div
-                              key={subject._id || sIdx}
-                              className='space-y-3'
-                            >
-                              <h5 className='text-[9px] font-black text-[#002EFF] uppercase tracking-widest'>
-                                {subject.name}
-                              </h5>
-                              {subject.questions.map((q, qIdx) => (
-                                <div
-                                  key={q._id || qIdx}
-                                  className='p-4 bg-white border border-slate-100 rounded-2xl flex gap-4'
-                                >
-                                  <span className='w-6 h-6 rounded-lg bg-blue-50 text-[#002EFF] flex items-center justify-center text-[10px] font-black shrink-0'>
-                                    {qIdx + 1}
-                                  </span>
-                                  <div className='space-y-2'>
-                                    <p className='text-xs font-bold text-slate-700 leading-snug'>
-                                      {q.text}
-                                    </p>
-                                    <div className='flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase'>
-                                      <CheckCircle2 size={12} />{' '}
-                                      {q.correctAnswer}
-                                    </div>
+                        {selectedQuiz.subjects.map((subject, sIdx) => (
+                          <div key={sIdx} className='space-y-3'>
+                            <h5 className='text-[9px] font-black text-[#002EFF] uppercase tracking-widest'>
+                              {subject.name}
+                            </h5>
+                            {subject.questions.map((q, qIdx) => (
+                              <div
+                                key={qIdx}
+                                className='p-4 bg-white border border-slate-100 rounded-2xl flex gap-4'
+                              >
+                                <span className='w-6 h-6 rounded-lg bg-blue-50 text-[#002EFF] flex items-center justify-center text-[10px] font-black shrink-0'>
+                                  {qIdx + 1}
+                                </span>
+                                <div className='space-y-2'>
+                                  <p className='text-xs font-bold text-slate-700'>
+                                    {q.text}
+                                  </p>
+                                  <div className='flex items-center gap-2 text-[10px] font-black text-emerald-500 uppercase'>
+                                    <CheckCircle2 size={12} /> {q.correctAnswer}
                                   </div>
                                 </div>
-                              ))}
-                            </div>
-                          ))}
-                        </div>
+                              </div>
+                            ))}
+                          </div>
+                        ))}
                       </section>
                     </div>
 
@@ -1059,7 +1020,8 @@ export default function MyQuizzes() {
                         }
                         className='flex-1 bg-white border-2 border-slate-100 py-4 rounded-2xl font-black uppercase text-[10px] tracking-widest flex items-center justify-center gap-2'
                       >
-                        <Share2 size={16} /> Share
+                        <Share2 size={16} />{' '}
+                        {copiedId === selectedQuiz._id ? 'Copied' : 'Share'}
                       </button>
                     </div>
                   </div>
@@ -1069,46 +1031,6 @@ export default function MyQuizzes() {
           </div>
         </LayoutGroup>
       )}
-
-      {/* --- RESULTS OVERLAY (Placeholder for actual submission data) --- */}
-      <AnimatePresence>
-        {view === 'results' && selectedQuiz && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: 20 }}
-            className='fixed inset-0 z-50 bg-[#F8FAFC] p-4 md:p-10 overflow-y-auto'
-          >
-            <div className='max-w-6xl mx-auto'>
-              <button
-                onClick={() => setView('list')}
-                className='mb-8 flex items-center gap-2 text-slate-400 hover:text-slate-800 text-xs font-black uppercase tracking-widest'
-              >
-                <ArrowLeft size={18} /> Back to Dashboard
-              </button>
-              <div className='bg-slate-900 text-white rounded-[40px] p-10 mb-8 flex flex-col md:flex-row justify-between items-start md:items-end gap-6 relative overflow-hidden'>
-                <Sparkles
-                  className='absolute top-[-20px] right-[-20px] text-blue-500/10'
-                  size={300}
-                />
-                <div className='relative z-10'>
-                  <p className='text-blue-400 font-black uppercase text-[10px] tracking-[0.4em] mb-3'>
-                    Performance Intelligence
-                  </p>
-                  <h2 className='text-4xl md:text-5xl font-black tracking-tighter'>
-                    {selectedQuiz.title}
-                  </h2>
-                </div>
-              </div>
-              <div className='bg-white rounded-[32px] border border-slate-200 overflow-hidden shadow-2xl p-20 text-center'>
-                <p className='text-slate-400 font-bold italic'>
-                  Integration with Leaderboard API pending submission data.
-                </p>
-              </div>
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
@@ -1122,43 +1044,37 @@ function QuizCard({
   onToggle,
   copied,
 }: any) {
-  const totalQuestions = quiz.subjects.reduce(
-    (acc: number, sub: any) => acc + sub.questions.length,
-    0,
-  )
+  const totalQuestions =
+    quiz.subjects?.reduce(
+      (acc: number, sub: any) => acc + (sub.questions?.length || 0),
+      0,
+    ) || 0
 
   return (
     <motion.div
       layout
       whileHover={{ y: -5 }}
-      className={`relative group bg-white p-7 rounded-[32px] border-2 transition-all cursor-pointer flex flex-col h-full ${isSelected ? 'border-[#002EFF] shadow-2xl' : 'border-white shadow-sm hover:border-blue-100'}`}
       onClick={onSelect}
+      className={`relative bg-white p-7 rounded-[32px] border-2 cursor-pointer flex flex-col h-full transition-all ${isSelected ? 'border-[#002EFF] shadow-2xl scale-[1.02]' : 'border-white shadow-sm hover:border-blue-100'}`}
     >
       <div className='flex justify-between items-start mb-6'>
-        <div className='flex gap-2'>
-          <span
-            className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${quiz.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
-          >
-            {quiz.status}
-          </span>
-          {quiz.isPaid && (
-            <div className='bg-orange-50 text-orange-500 p-1.5 rounded-lg'>
-              <Zap size={12} fill='currentColor' />
-            </div>
-          )}
-        </div>
+        <span
+          className={`px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-wider ${quiz.status === 'active' ? 'bg-emerald-50 text-emerald-600' : 'bg-slate-100 text-slate-400'}`}
+        >
+          {quiz.status}
+        </span>
         <button
           onClick={(e) => {
             e.stopPropagation()
             onToggle()
           }}
-          className='text-slate-300 hover:text-[#002EFF] transition-colors'
+          className='text-slate-300 hover:text-[#002EFF]'
         >
           <Settings size={14} />
         </button>
       </div>
 
-      <h3 className='text-xl font-black text-slate-800 mb-2 leading-tight group-hover:text-[#002EFF] transition-colors'>
+      <h3 className='text-xl font-black text-slate-800 mb-2 leading-tight'>
         {quiz.title}
       </h3>
       <p className='text-slate-400 text-xs font-medium line-clamp-2 mb-8'>
@@ -1167,16 +1083,16 @@ function QuizCard({
 
       <div className='flex gap-4 mb-8 bg-slate-50/50 p-4 rounded-2xl border border-slate-50 mt-auto'>
         <div className='flex-1 flex flex-col items-center border-r border-slate-100'>
-          <span className='text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-1'>
-            Questions
+          <span className='text-[8px] font-black text-slate-400 uppercase mb-1'>
+            Items
           </span>
           <span className='text-sm font-black text-slate-700 flex items-center gap-1'>
             <FileQuestion size={12} /> {totalQuestions}
           </span>
         </div>
         <div className='flex-1 flex flex-col items-center'>
-          <span className='text-[8px] font-black text-slate-400 uppercase tracking-tighter mb-1'>
-            Type
+          <span className='text-[8px] font-black text-slate-400 uppercase mb-1'>
+            Category
           </span>
           <span className='text-[10px] font-black text-slate-700 uppercase'>
             {quiz.type}
@@ -1190,7 +1106,7 @@ function QuizCard({
             e.stopPropagation()
             onDelete()
           }}
-          className='p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all'
+          className='p-2 text-slate-300 hover:text-rose-500 transition-all'
         >
           <Trash2 size={16} />
         </button>
@@ -1200,12 +1116,12 @@ function QuizCard({
               e.stopPropagation()
               onShare()
             }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-500 hover:bg-[#002EFF] hover:text-white'}`}
+            className={`px-4 py-2 rounded-xl text-[9px] font-black uppercase transition-all ${copied ? 'bg-emerald-500 text-white' : 'bg-slate-50 text-slate-500 hover:bg-[#002EFF] hover:text-white'}`}
           >
             {copied ? <Check size={14} /> : <Share2 size={14} />}{' '}
             {copied ? 'Copied' : 'Link'}
           </button>
-          <div className='bg-blue-50 text-[#002EFF] p-2 rounded-xl group-hover:bg-[#002EFF] group-hover:text-white transition-all'>
+          <div className='bg-blue-50 text-[#002EFF] p-2 rounded-xl'>
             <ChevronRight size={16} strokeWidth={3} />
           </div>
         </div>
@@ -1220,18 +1136,12 @@ function EmptyState({ onAction }: { onAction: () => void }) {
       <div className='bg-blue-50 w-24 h-24 rounded-full flex items-center justify-center mx-auto mb-6'>
         <LayoutGrid className='text-[#002EFF]' size={40} />
       </div>
-      <h3 className='text-slate-900 font-black text-2xl mb-2'>
-        Assessment Vault Empty
-      </h3>
-      <p className='text-slate-400 text-sm mb-10 max-w-xs mx-auto font-medium'>
-        Your global control center is ready. Start by deploying your first
-        assessment module.
-      </p>
+      <h3 className='text-slate-900 font-black text-2xl mb-2'>Vault Empty</h3>
       <button
         onClick={onAction}
-        className='bg-slate-900 text-white px-10 py-4 rounded-[20px] text-[11px] font-black uppercase tracking-widest hover:bg-[#002EFF] transition-all shadow-xl shadow-blue-100'
+        className='bg-slate-900 text-white px-10 py-4 rounded-[20px] text-[11px] font-black uppercase tracking-widest hover:bg-[#002EFF] transition-all'
       >
-        Launch Builder Module
+        Deploy First Module
       </button>
     </div>
   )
